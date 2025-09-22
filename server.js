@@ -303,7 +303,9 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
-
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'stemfantasy.html'));
+});
 // Serve static files
 app.use(express.static('.'));
 

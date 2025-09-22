@@ -1915,10 +1915,10 @@
 
         // Save game data to server
         async function saveGameDataToServer() {
-            if (!authToken) {
-                saveGameData(); // Fallback to localStorage
-                return;
-            }
+if (!authToken) {
+    localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
+    return;
+}
 
             try {
                 const response = await fetch(`${API_BASE_URL}/game-data`, {
@@ -2298,44 +2298,48 @@
             closeFormationSelectionModal();
         }
 
-        function showCaptainModal() {
-            const userTeam = gameData.userTeams[currentUser];
-            const container = document.getElementById('captain-players');
-            container.innerHTML = '';
+      function showCaptainModal() {
+    const userTeam = gameData.userTeams[currentUser];
+    // ADD THIS LINE:
+    const effectivePlayers = { ...(userTeam.players || {}) };
+    Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+        effectivePlayers[pos] = pid;
+    });
 
-            // Only starters (exclude subs) - dynamically generate based on current formation
-            const currentFormationDetails = gameData.formations[gameData.currentFormation];
-            let starterPositions = ['gk'];
-            for (let i = 1; i <= currentFormationDetails.def; i++) starterPositions.push(`def${i}`);
-            for (let i = 1; i <= currentFormationDetails.mid; i++) starterPositions.push(`mid${i}`);
-            for (let i = 1; i <= currentFormationDetails.fwd; i++) starterPositions.push(`fwd${i}`);
+    const container = document.getElementById('captain-players');
+    container.innerHTML = '';
 
-            const starterIds = starterPositions
-                .map(pos => effectivePlayers[pos])
-                .filter(Boolean);
-            const uniquePlayerIds = Array.from(new Set(starterIds));
+    const currentFormationDetails = gameData.formations[gameData.currentFormation];
+    let starterPositions = ['gk'];
+    for (let i = 1; i <= currentFormationDetails.def; i++) starterPositions.push(`def${i}`);
+    for (let i = 1; i <= currentFormationDetails.mid; i++) starterPositions.push(`mid${i}`);
+    for (let i = 1; i <= currentFormationDetails.fwd; i++) starterPositions.push(`fwd${i}`);
 
-            if (uniquePlayerIds.length === 0) {
-                container.innerHTML = '<p style="text-align:center;color:#bbb;">No players selected yet</p>';
-            } else {
-                uniquePlayerIds.forEach(playerId => {
-                    const player = gameData.players.find(p => p.id === playerId);
-                    if (!player) return;
-                    const card = document.createElement('div');
-                    card.className = 'player-card captain-option';
-                    card.innerHTML = `
-                        <div class="player-name">${player.name}</div>
-                        <div class="player-team">${player.team}</div>
-                        <div class="player-price" style="color:#ffd700;">Price: ${player.price} م</div>
-                    `;
-                    card.onclick = () => setCaptain(player.id);
-                    container.appendChild(card);
-                });
-            }
+    const starterIds = starterPositions
+        .map(pos => effectivePlayers[pos])
+        .filter(Boolean);
+    const uniquePlayerIds = Array.from(new Set(starterIds));
 
-            document.getElementById('captain-selection-modal').classList.add('active');
-        }
+    if (uniquePlayerIds.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#bbb;">No players selected yet</p>';
+    } else {
+        uniquePlayerIds.forEach(playerId => {
+            const player = gameData.players.find(p => p.id === playerId);
+            if (!player) return;
+            const card = document.createElement('div');
+            card.className = 'player-card captain-option';
+            card.innerHTML = `
+                <div class="player-name">${player.name}</div>
+                <div class="player-team">${player.team}</div>
+                <div class="player-price" style="color:#ffd700;">Price: ${player.price} م</div>
+            `;
+            card.onclick = () => setCaptain(player.id);
+            container.appendChild(card);
+        });
+    }
 
+    document.getElementById('captain-selection-modal').classList.add('active');
+}
         function closeCaptainModal() {
             document.getElementById('captain-selection-modal').classList.remove('active');
         }
@@ -2536,114 +2540,118 @@
         }
 
         // Save team changes
-        function saveTeamChanges() {
-            if (Object.keys(teamChanges).length === 0) {
-                alert('No changes to save!');
+       function saveTeamChanges() {
+    const userTeam = gameData.userTeams[currentUser];
+    // Combine original team and pending changes:
+    const pendingPlayers = { ...(userTeam.players || {}), ...teamChanges };
+    const exceededTeam = validateTeamLimit(pendingPlayers, 2);
+    if (exceededTeam) {
+        alert('لا يمكنك حفظ التشكيلة مع أكثر من لاعبين من نفس الفريق: ' + exceededTeam);
+        return;
+    }
+
+    // TEAM VALUE VALIDATION
+    let pendingTeamValue = 0;
+    Object.values(pendingPlayers).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p) pendingTeamValue += Number(p.price) || 0;
+    });
+    if (pendingTeamValue > TOTAL_BUDGET) {
+        alert('قيمة الفريق تجاوزت الحد الأقصى المسموح: 45 مليون');
+        return;
+    }
+
+    if (Object.keys(teamChanges).length === 0) {
+        alert('No changes to save!');
+        return;
+    }
+
+    if (isInitialFormationMode) {
+        // Initial formation - unlimited changes, no transfer count
+        Object.entries(teamChanges).forEach(([position, playerId]) => {
+            userTeam.players[position] = playerId;
+        });
+        // Recalculate and persist budget based on new team value
+        userTeam.budget = Math.max(0, TOTAL_BUDGET - pendingTeamValue);
+
+        teamChanges = {};
+        isTeamSaved = true;
+        isInitialFormationMode = false;
+
+        // Update button states
+        const initialBtn = document.getElementById('initial-formation-btn');
+        const saveBtn = document.getElementById('save-team-btn');
+        const cancelBtn = document.getElementById('cancel-changes-btn');
+
+        initialBtn.textContent = 'Select Initial Formation';
+        initialBtn.classList.remove('btn-danger');
+        initialBtn.classList.add('btn-primary');
+        initialBtn.disabled = true;
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+
+        saveGameData();
+        updateUI();
+
+        alert('Initial formation saved successfully!');
+    } else if (isTransfersMode) {
+        // Allow free transfers if before round starts, otherwise use limited transfers
+        if (canMakeTransfers()) {
+            Object.entries(teamChanges).forEach(([position, playerId]) => {
+                userTeam.players[position] = playerId;
+            });
+        } else {
+            // Limited transfers during active round
+            const transfersUsed = gameData.transfersUsed[currentUser] || 0;
+            const currentRoundDetails = gameData.rounds.find(r => r.id === gameData.currentRound);
+            const transfersAllowed = currentRoundDetails ? currentRoundDetails.transfersAllowed : 2;
+
+            const numChanges = Object.entries(teamChanges).reduce((count, [position, playerId]) => {
+                return count + (userTeam.players[position] !== playerId ? 1 : 0);
+            }, 0);
+
+            if (numChanges === 0) {
+                alert('No effective changes to save!');
                 return;
             }
-            
-            const userTeam = gameData.userTeams[currentUser];
-            
-            if (isInitialFormationMode) {
-                // Initial formation - unlimited changes, no transfer count
-                Object.entries(teamChanges).forEach(([position, playerId]) => {
-                    userTeam.players[position] = playerId;
-                });
-                // Recalculate and persist budget based on new team value
-                let newTeamValue = 0;
-                Object.values(userTeam.players).forEach(pid => {
-                    const p = gameData.players.find(pp => pp.id === pid);
-                    if (p) newTeamValue += Number(p.price) || 0;
-                });
-                userTeam.budget = Math.max(0, TOTAL_BUDGET - newTeamValue);
-                
-                teamChanges = {};
-                isTeamSaved = true;
-                isInitialFormationMode = false;
-                
-                // Update button states
-                const initialBtn = document.getElementById('initial-formation-btn');
-                const saveBtn = document.getElementById('save-team-btn');
-                const cancelBtn = document.getElementById('cancel-changes-btn');
-                
-                initialBtn.textContent = 'Select Initial Formation';
-                initialBtn.classList.remove('btn-danger');
-                initialBtn.classList.add('btn-primary');
-                initialBtn.disabled = true;
-                saveBtn.classList.add('hidden');
-                cancelBtn.classList.add('hidden');
-                
-                saveGameData();
-                updateUI();
-                
-                alert('Initial formation saved successfully!');
-            } else if (isTransfersMode) {
-                // Allow free transfers if before round starts, otherwise use limited transfers
-                if (canMakeTransfers()) {
-                    // Free transfers before round starts
-                    Object.entries(teamChanges).forEach(([position, playerId]) => {
-                        userTeam.players[position] = playerId;
-                    });
-                } else {
-                    // Limited transfers during active round (existing logic)
-                const transfersUsed = gameData.transfersUsed[currentUser] || 0;
-                    const currentRoundDetails = gameData.rounds.find(r => r.id === gameData.currentRound);
-                    const transfersAllowed = currentRoundDetails ? currentRoundDetails.transfersAllowed : 2; // Default to 2 if not found
 
-                    const numChanges = Object.entries(teamChanges).reduce((count, [position, playerId]) => {
-                        return count + (userTeam.players[position] !== playerId ? 1 : 0);
-                    }, 0);
-
-                    if (numChanges === 0) {
-                        alert('No effective changes to save!');
-                    return;
-                }
-                
-                    if (transfersUsed + numChanges > transfersAllowed) {
-                        const remaining = Math.max(0, transfersAllowed - transfersUsed);
-                        alert(`You only have ${remaining} transfer(s) remaining this round.`);
-                        return;
-                    }
-                    
-                    // Apply changes and increment transfers used
-                Object.entries(teamChanges).forEach(([position, playerId]) => {
-                        if (userTeam.players[position] !== playerId) {
-                    userTeam.players[position] = playerId;
-                        }
-                    });
-                    gameData.transfersUsed[currentUser] = transfersUsed + numChanges;
-                }
-
-                // Recalculate and persist budget based on new team value
-                let newTeamValue2 = 0;
-                Object.values(userTeam.players).forEach(pid => {
-                    const p = gameData.players.find(pp => pp.id === pid);
-                    if (p) newTeamValue2 += Number(p.price) || 0;
-                });
-                userTeam.budget = Math.max(0, TOTAL_BUDGET - newTeamValue2);
-
-                teamChanges = {};
-                isTransfersMode = false;
-                
-                // Update button states
-                const transfersBtn = document.getElementById('transfers-mode-btn');
-                const saveBtn = document.getElementById('save-team-btn');
-                const cancelBtn = document.getElementById('cancel-changes-btn');
-                
-                transfersBtn.textContent = 'Transfer Mode';
-                transfersBtn.classList.remove('btn-danger');
-                transfersBtn.classList.add('btn-warning');
-                saveBtn.classList.add('hidden');
-                cancelBtn.classList.add('hidden');
-                
-                saveGameData();
-                updateUI();
-                
-                alert('Transfers saved successfully!');
+            if (transfersUsed + numChanges > transfersAllowed) {
+                const remaining = Math.max(0, transfersAllowed - transfersUsed);
+                alert(`You only have ${remaining} transfer(s) remaining this round.`);
+                return;
             }
+
+            Object.entries(teamChanges).forEach(([position, playerId]) => {
+                if (userTeam.players[position] !== playerId) {
+                    userTeam.players[position] = playerId;
+                }
+            });
+            gameData.transfersUsed[currentUser] = transfersUsed + numChanges;
         }
 
-        // Cancel team changes
+        // Recalculate and persist budget based on new team value
+        userTeam.budget = Math.max(0, TOTAL_BUDGET - pendingTeamValue);
+
+        teamChanges = {};
+        isTransfersMode = false;
+
+        // Update button states
+        const transfersBtn = document.getElementById('transfers-mode-btn');
+        const saveBtn = document.getElementById('save-team-btn');
+        const cancelBtn = document.getElementById('cancel-changes-btn');
+
+        transfersBtn.textContent = 'Transfer Mode';
+        transfersBtn.classList.remove('btn-danger');
+        transfersBtn.classList.add('btn-warning');
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+
+        saveGameData();
+        updateUI();
+
+        alert('Transfers saved successfully!');
+    }
+}
         function cancelTeamChanges() {
             if (Object.keys(teamChanges).length === 0) {
                 alert('No changes to cancel!');
@@ -3169,7 +3177,31 @@ function loadModalPlayers() {
     console.log('loadModalPlayers finished. Players rendered.');
 }
 
+// Add this helper function (put it near your other helper functions)
+function countPlayersFromTeam(effectivePlayers, teamName) {
+    let count = 0;
+    Object.values(effectivePlayers).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p && p.team === teamName) count++;
+    });
+    return count;
+}
 
+// Add this helper for validating the full team before saving
+function validateTeamLimit(playersObj, limit = 2) {
+    const teamCounts = {};
+    Object.values(playersObj).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p) {
+            teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
+        }
+    });
+    // Find if any team exceeds limit
+    for (const team in teamCounts) {
+        if (teamCounts[team] > limit) return team;
+    }
+    return null;
+}
         // Select player for position
        // Select player for position
 function selectPlayerForPosition(playerId) {
@@ -3188,6 +3220,15 @@ function selectPlayerForPosition(playerId) {
             if (pid) effectivePlayers[pos] = pid;
         });
 
+        // Team member limit check
+        const teamLimit = 2;
+        const currentCount = countPlayersFromTeam(effectivePlayers, player.team);
+        const currentPlayerInPosition = teamChanges[selectedPosition] || userTeam.players[selectedPosition];
+        if (currentCount >= teamLimit && currentPlayerInPosition !== playerId) {
+            alert('لا يمكنك اختيار أكثر من لاعبين من نفس الفريق!');
+            return;
+        }
+
         // If player is already assigned to another position (not the current selectedPosition) -> block
         const alreadyAssigned = Object.entries(effectivePlayers)
             .find(([pos, pid]) => pid === playerId && pos !== selectedPosition);
@@ -3204,7 +3245,6 @@ function selectPlayerForPosition(playerId) {
         updateTeamStats(); // live bank/team value preview
     }
 }
-
         // Update rankings
         function updateRankings() {
             // Calculate rankings based on user teams
