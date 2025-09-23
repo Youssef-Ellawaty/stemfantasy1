@@ -1,0 +1,4259 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEM Fantasy Football League</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --pink-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --blue-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --gold-gradient: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            --triple-captain-gradient: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            --bg-dark: #1a1d29;
+            --card-dark: #2d3142;
+            --text-light: #ffffff;
+            --border-dark: #404654;
+            --shadow-dark: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            direction: ltr;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 50%, #3498db 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark);
+            margin-bottom: 2rem;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-access {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+            font-size: 1.2rem;
+        }
+
+        .admin-access:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .user-info span {
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-info button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .user-info button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Admin Password Modal */
+        .admin-password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .admin-password-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-password-content {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-dark);
+            text-align: center;
+        }
+
+        .nav-tabs {
+            background: var(--card-dark);
+            padding: 0;
+            margin: 2rem auto 0;
+            max-width: 1200px;
+            border-radius: 0;
+            box-shadow: var(--shadow-dark);
+            overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--blue-gradient);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-tab.active::before,
+        .nav-tab:hover::before {
+            left: 0;
+        }
+
+        .nav-tab.active,
+        .nav-tab:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* My Team Layout */
+        .team-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* Left panel 1fr, Right panel (formation) 2fr */
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+
+        .team-info-panel { /* kept for potential old references */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .team-controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .team-formation-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            background: var(--card-dark);
+            border-radius: 15px;
+            box-shadow: var(--shadow-dark);
+            border: 1px solid var(--border-dark);
+            min-height: 500px; /* Ensure it takes up space */
+        }
+
+        .team-stats-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--purple-gradient);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .power-ups-panel {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .transfers-left-display {
+            background: var(--success-gradient);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .power-ups-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .team-management-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .team-management-buttons .btn {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .power-up-card {
+            background: var(--success-gradient);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .power-up-card.triple-captain {
+            background: var(--triple-captain-gradient);
+        }
+
+        .power-up-card.used {
+            background: var(--border-dark);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .power-up-card.active {
+            background: var(--gold-gradient);
+            color: #333;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .power-up-card:not(.used):hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-dark);
+        }
+
+        /* Formation Field */
+        .formation-field {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: linear-gradient(45deg, #2ecc71 0%, #27ae60 100%) !important;
+            aspect-ratio: 3/4;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark);
+            border: 3px solid #fff;
+            
+            background-image: 
+                radial-gradient(circle at center, transparent 60px, #fff 60px, #fff 62px, transparent 62px),
+                linear-gradient(to right, transparent 49%, #fff 49%, #fff 51%, transparent 51%),
+                linear-gradient(to right, transparent 20%, #fff 20%, #fff 22%, transparent 22%),
+                linear-gradient(to right, transparent 78%, #fff 78%, #fff 80%, transparent 80%),
+                linear-gradient(to bottom, transparent 8%, #fff 8%, #fff 10%, transparent 10%),
+                linear-gradient(to bottom, transparent 90%, #fff 90%, #fff 92%, transparent 92%);
+
+            background-size: 
+                100% 100%,
+                100% 2px,
+                100% 2px,
+                100% 2px,
+                100% 120px,
+                100% 120px;
+
+            background-position: 
+                center,
+                center,
+                center,
+                center,
+                center 0%,
+                center 100%;
+
+            background-repeat: no-repeat;
+        }
+
+        /* Field overlays: center circle, subs box, GK box */
+        .center-circle-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 160px;
+            height: 160px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.15) inset;
+        }
+        .subs-box {
+            position: absolute;
+            top: 18%;
+            left: 0%;
+            width: 24%;
+            height: 56%;
+            border: 3px solid #fff;
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .gk-box {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 320px;
+            height: 150px;
+            border: 3px solid #fff;
+            border-radius: 12px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .halfway-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #fff;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .position-slot {
+            position: absolute;
+            width: 90px;
+            height: 100px;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(40, 44, 52, 0.9);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            z-index: 2;
+        }
+
+        .position-slot:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .position-slot.filled {
+            background: #3a3a3a;
+            border-color: #bdbdbd;
+        }
+
+        .position-slot.captain {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .position-slot.triple-captain {
+            border-color: #ff6b35;
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
+        }
+
+        .position-slot.vice-captain {
+            border-color: #c0c0c0;
+        }
+
+        /* Common form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-dark);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--bg-dark);
+            color: var(--text-light);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn-primary {
+            background: var(--blue-gradient);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+        .card {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow-dark);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-dark);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .player-card {
+            background: #3a3a3a;
+            border: 2px solid #5a5a5a;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            color: #f1f1f1;
+        }
+
+        .player-card.selected {
+            border-color: #9e9e9e;
+            background: linear-gradient(135deg, #3a3a3a 0%, #9e9e9e30 100%);
+        }
+
+        .player-card.goalkeeper {
+            background: linear-gradient(135deg, #5D5D5D 0%, #4D4D4D 100%); /* Darker grey */
+            border-color: #A0A0A0;
+        }
+
+        .player-card.defender {
+            background: linear-gradient(135deg, #3A5FCD 0%, #2E4C9B 100%); /* Blue */
+            border-color: #6C8EDF;
+        }
+
+        .player-card.midfielder {
+            background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%); /* Green */
+            border-color: #58D683;
+        }
+
+        .player-card.forward {
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%); /* Red */
+            border-color: #F17D6E;
+        }
+
+        /* Enhanced card for captain selection */
+        .player-card.captain-option {
+            background: #4a4a4a;
+            border: 2px solid #4facfe;
+            color: #fff;
+        }
+        .player-card.captain-option .player-name {
+            font-size: 1rem;
+        }
+        .player-card.captain-option .player-team {
+            color: #e0e0e0;
+            font-size: 0.85rem;
+        }
+        .player-card.captain-option:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(79,172,254,0.35);
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+        }
+
+        .player-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .player-team {
+            color: #bbb;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .player-price {
+            color: #4facfe;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .player-team-tag {
+            margin-top: 4px;
+            font-size: 0.75rem;
+            color: #ddd;
+        }
+
+        /* Points badge inside formation tiles */
+        .player-points {
+            margin-top: 6px;
+            padding: 2px 8px;
+            background: #444;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+        .position-slot.captain .player-points {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .player-position-tag {
+            margin-top: 2px;
+            font-size: 0.7rem;
+            color: #999;
+            font-style: italic;
+        }
+
+        .player-details-body p {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #f1f1f1;
+        }
+
+        .player-details-body strong {
+            color: #4facfe;
+            margin-right: 5px;
+        }
+
+        .team-limit-warning {
+            background: var(--warning-gradient);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Rankings styles */
+        .rankings-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .ranking-section {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .ranking-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--blue-gradient);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--bg-dark);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            transform: translateX(5px);
+        }
+
+        .ranking-position {
+            font-weight: bold;
+            color: #4facfe;
+            min-width: 30px;
+        }
+
+        .ranking-name {
+            flex: 1;
+            margin: 0 15px;
+        }
+
+        .ranking-points {
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        /* Statistics styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-category {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .stat-category h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .stat-category.goals h3 { background: var(--danger-gradient); }
+        .stat-category.assists h3 { background: var(--warning-gradient); }
+        .stat-category.clean-sheets h3 { background: var(--success-gradient); }
+        .stat-category.saves h3 { background: var(--purple-gradient); }
+        .stat-category.cards h3 { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); }
+        .stat-category.red-cards h3 { background: var(--danger-gradient); }
+
+        .stat-list {
+            list-style: none;
+        }
+
+        .stat-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 5px 0;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-list li:hover {
+            transform: translateX(5px);
+        }
+
+        /* Match management styles */
+        .match-item {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-dark);
+        }
+
+        .match-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .match-teams {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .match-score {
+            font-size: 1.5rem;
+            color: #4facfe;
+            font-weight: bold;
+        }
+
+        .match-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .match-details.show {
+            display: block;
+        }
+
+        .match-events {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .event-section {
+            background: var(--bg-dark);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .event-section h4 {
+            margin-bottom: 10px;
+            color: #4facfe;
+        }
+
+        /* Admin styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-dark);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-dark);
+            position: relative;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-dark);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab {
+            padding: 10px 20px;
+            background: var(--border-dark);
+            border: none;
+            border-radius: 25px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-tab.active {
+            background: var(--blue-gradient);
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .team-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .team-stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .power-ups-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .rankings-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+            }
+        }
+
+        .match-card {
+            background-color: var(--card-dark);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-dark);
+            text-align: center;
+        }
+
+        #matches-container .card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .match-card h5 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .match-card p {
+            font-size: 0.9em;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .available-players-section {
+            display: none; /* Hidden by default */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="admin-access" onclick="toggleAdmin()">⚙️</button>
+        <div id="user-info" class="user-info">
+            <span id="current-username">Guest</span>
+            <button id="login-btn" onclick="showLoginModal()">Login</button>
+            <button id="logout-btn" onclick="logout()" class="hidden">Logout</button>
+        </div>
+        <h1>🏆 STEM Fantasy Football League</h1>
+        <p>Choose your team and win glory!</p>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="nav-tab active" onclick="showTab('my-team')">🏠 My Team</button>
+        <button class="nav-tab" onclick="showTab('matches')">⚽ Matches</button>
+        <button class="nav-tab" onclick="showTab('players-tab')">👤 Players</button>
+        <button class="nav-tab" onclick="showTab('rankings')">🏅 Rankings</button>
+        <button class="nav-tab" onclick="showTab('statistics')">📊 Statistics</button>
+        <button class="nav-tab admin-only hidden" onclick="showTab('admin')">⚙️ Admin</button>
+    </nav>
+
+    <div class="container">
+        <!-- My Team Tab -->
+        <div id="my-team" class="tab-content active">
+            <div class="team-layout">
+                <!-- Left Panel: Transfers, Power-ups, Management Buttons -->
+                <div class="team-controls-panel">
+                    <div class="team-stats-cards">
+                        <div class="stat-card">
+                            <div class="stat-value" id="current-points">0</div>
+                            <div class="stat-label">Current Points</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="bank-value">100.0</div>
+                            <div class="stat-label">Bank (M)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="team-value">0.0</div>
+                            <div class="stat-label">Team Value (M)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="power-ups-panel">
+                        <div class="transfers-left-display">
+                            Transfers Remaining: <span id="transfers-count">2</span>
+                        </div>
+                        
+                        <div class="power-ups-grid">
+                            <div class="power-up-card triple-captain" id="triple-captain-btn" onclick="showPowerUpConfirmation('triple-captain')">
+                                <div>🔥 Triple Captain</div>
+                                <small>Points x3</small>
+                            </div>
+                            <div class="power-up-card" id="bench-boost-btn" onclick="showPowerUpConfirmation('bench-boost')">
+                                <div>⚡ Bench Boost</div>
+                                <small>Substitute Points</small>
+                            </div>
+                            </div>
+                        </div>
+                        
+                        <div class="team-management-buttons">
+                        <button class="btn btn-primary" id="select-formation-btn" onclick="showFormationSelectionModal()">Select Formation</button>
+                            <button class="btn btn-primary" id="initial-formation-btn" onclick="toggleInitialFormation()">Select Initial Formation</button>
+                            <button class="btn btn-warning" id="transfers-mode-btn" onclick="toggleTransfersMode()">Transfer Mode</button>
+                        <button class="btn btn-primary" id="captain-mode-btn" onclick="showCaptainModal()">Choose Captain</button>
+                            <button class="btn btn-success hidden" id="save-team-btn" onclick="saveTeamChanges()">Save Changes</button>
+                            <button class="btn btn-danger hidden" id="cancel-changes-btn" onclick="cancelTeamChanges()">Cancel Changes</button>
+
+                            <!-- Current Team Section (for transfers) -->
+                            <div class="current-team-section" style="margin-top: 20px;">
+                                <h4>Your Current Team</h4>
+                                <div id="current-team" class="players-list-container" style="max-height: 200px; overflow-y: auto;">
+                                    <!-- Current team players will be loaded here -->
+                        </div>
+                    </div>
+
+                            <!-- Available Players Section -->
+                            <div class="available-players-section" style="margin-top: 20px;">
+                                <h4>Available Players</h4>
+                                <div class="grid grid-2">
+                                    <div class="form-group">
+                                        <label>Position Filter:</label>
+                                        <select class="form-control" id="position-filter" onchange="filterPlayers()">
+                                            <option value="all">All Positions</option>
+                                            <option value="goalkeeper">Goalkeeper</option>
+                                            <option value="defender">Defender</option>
+                                            <option value="midfielder">Midfielder</option>
+                                            <option value="forward">Forward</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Team Filter:</label>
+                                        <select class="form-control" id="team-filter" onchange="filterPlayers()">
+                                            <option value="all">All Teams</option>
+                                            <!-- Teams will be populated by populateFilters() -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="available-players" class="players-list-container" style="max-height: 400px; overflow-y: auto;">
+                                    <!-- Available players will be loaded here -->
+                                </div>
+                            </div>
+                </div>
+            </div>
+
+                <!-- Right Panel: Formation Field -->
+                <div class="team-formation-panel">
+            <div class="formation-field" id="formation">
+                <div class="position-slot gk" data-position="gk" onclick="selectPosition('gk')">
+                    <div class="player-name">GK</div>
+                </div>
+                <div class="position-slot def1" data-position="def1" onclick="selectPosition('def1')">
+                    <div class="player-name">DEF</div>
+                </div>
+                <div class="position-slot mid1" data-position="mid1" onclick="selectPosition('mid1')">
+                    <div class="player-name">MID</div>
+                </div>
+                <div class="position-slot mid2" data-position="mid2" onclick="selectPosition('mid2')">
+                    <div class="player-name">MID</div>
+                </div>
+                <div class="position-slot fwd1" data-position="fwd1" onclick="selectPosition('fwd1')">
+                    <div class="player-name">FWD</div>
+                </div>
+                <div class="position-slot sub1" data-position="sub1" onclick="selectPosition('sub1')">
+                    <div class="player-name">SUB 1</div>
+                </div>
+                <div class="position-slot sub2" data-position="sub2" onclick="selectPosition('sub2')">
+                    <div class="player-name">SUB 2</div>
+                        </div>
+                        <div class="center-circle-overlay"></div>
+                        <div class="halfway-line"></div>
+                        <div class="subs-box" style="top: 20%; left: 0%; width: 24%; height: 50%;"></div>
+                        <div class="gk-box" style="bottom: 0%; left: 50%; width: 60%; height: 25%; transform: translateX(-50%);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formation Selection Modal -->
+            <div id="formation-selection-modal" class="modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <button class="close-modal" onclick="closeFormationSelectionModal()">✖</button>
+                    <div class="modal-header">
+                        <h2>Select Formation</h2>
+                    </div>
+                    <div id="formation-options" class="grid grid-2"></div>
+                </div>
+            </div>
+
+            <!-- Captain Selection Modal -->
+            <div id="captain-selection-modal" class="modal">
+                <div class="modal-content" style="max-width: 700px;">
+                    <button class="close-modal" onclick="closeCaptainModal()">✖</button>
+                    <div class="modal-header">
+                        <h2>Choose Team Captain</h2>
+                    </div>
+                    <div id="captain-players" class="grid grid-3"></div>
+                </div>
+            </div>
+
+            <!-- Player Selection Modal -->
+            <div id="player-selection-modal" class="modal">
+                <div class="modal-content">
+                    <button class="close-modal" onclick="closePlayerSelection()">✖</button>
+                    <div class="modal-header">
+                        <h2>Select Player for Position: <span id="selected-position-name"></span></h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Filter by Position:</label>
+                        <select class="form-control" id="modal-position-filter" onchange="filterModalPlayers()">
+                            <option value="all">All Positions</option>
+                            <option value="goalkeeper">Goalkeepers</option>
+                            <option value="defender">Defenders</option>
+                            <option value="midfielder">Midfielders</option>
+                            <option value="forward">Forwards</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Filter by Team:</label>
+                        <select class="form-control" id="modal-team-filter" onchange="filterModalPlayers()">
+                            <option value="all">All Teams</option>
+                        </select>
+                    </div>
+                    
+                    <div id="modal-players" class="grid grid-3">
+                        <!-- Players will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power-up Confirmation Modal -->
+            <div id="powerup-confirmation-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Confirm Power-up Activation</h2>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <p id="powerup-confirmation-text">Are you sure you want to activate this power-up?</p>
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-success" id="confirm-powerup-btn" onclick="confirmPowerUp()">Confirm</button>
+                            <button class="btn btn-danger" onclick="closePowerUpConfirmation()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Players Tab -->
+        <div id="players-tab" class="tab-content">
+            <h2>All Players</h2>
+            <div id="all-players-list" class="grid grid-3"></div>
+
+            <!-- Player Details Modal -->
+            <div id="player-details-modal" class="modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <button class="close-modal" onclick="closePlayerDetailsModal()">✖</button>
+                    <div class="modal-header">
+                        <h2 id="player-details-name"></h2>
+                        <p id="player-details-team"></p>
+                    </div>
+                    <div class="player-details-body">
+                        <p><strong>Position:</strong> <span id="player-details-position"></span></p>
+                        <p><strong>Total Points:</strong> <span id="player-details-total-points"></span></p>
+                        <p><strong>Current Round Points:</strong> <span id="player-details-current-round-points"></span></p>
+                        <p><strong>Goals:</strong> <span id="player-details-goals"></span></p>
+                        <p><strong>Assists:</strong> <span id="player-details-assists"></span></p>
+                        <p><strong>Yellow Cards:</strong> <span id="player-details-yellow-cards"></span></p>
+                        <p><strong>Red Cards:</strong> <span id="player-details-red-cards"></span></p>
+                        <p id="player-details-clean-sheets-row"><strong>Clean Sheets:</strong> <span id="player-details-clean-sheets"></span></p>
+                        <p id="player-details-saves-row"><strong>Saves:</strong> <span id="player-details-saves"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matches Tab -->
+        <div id="matches" class="tab-content">
+            <h2>Matches</h2>
+            <div class="form-group">
+                <label>Select Round:</label>
+                <select class="form-control" id="matches-round-filter" onchange="filterMatches()">
+                    <option value="all">All Rounds</option>
+                </select>
+            </div>
+            
+            <div id="matches-container">
+                <!-- Matches will be populated here -->
+            </div>
+        </div>
+
+        <!-- Rankings Tab -->
+        <div id="rankings" class="tab-content">
+            <h2>Rankings</h2>
+            <div class="rankings-container">
+                <div class="ranking-section">
+                    <div class="ranking-header">
+                        <h3>Current Round Rankings</h3>
+                        <p>Round <span id="current-round">1</span></p>
+                    </div>
+                    <div id="round-rankings">
+                        <!-- Rankings will be populated dynamically -->
+                    </div>
+                </div>
+                
+                <div class="ranking-section">
+                    <div class="ranking-header">
+                        <h3>Overall Rankings</h3>
+                        <p>Total Points</p>
+                    </div>
+                    <div id="total-rankings">
+                        <!-- Rankings will be populated dynamically -->
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics" class="tab-content">
+            <h2>Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-category goals">
+                    <h3>🥅 Top Scorers</h3>
+                    <ul class="stat-list" id="goals-stats">
+                        <!-- Goals stats will be populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="stat-category assists">
+                    <h3>🎯 Most Assists</h3>
+                    <ul class="stat-list" id="assists-stats">
+                        <!-- Assists stats will be populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="stat-category clean-sheets">
+                    <h3>🛡️ Most Clean Sheets</h3>
+                    <ul class="stat-list" id="clean-sheets-stats">
+                        <!-- Clean sheets stats will be populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="stat-category saves">
+                    <h3>🥊 Most Saves</h3>
+                    <ul class="stat-list" id="saves-stats">
+                        <!-- Saves stats will be populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="stat-category cards">
+                    <h3>🟡 Most Yellow Cards</h3>
+                    <ul class="stat-list" id="cards-stats">
+                        <!-- Cards stats will be populated dynamically -->
+                    </ul>
+                </div>
+
+                <div class="stat-category red-cards">
+                    <h3>🟥 Most Red Cards</h3>
+                    <ul class="stat-list" id="red-cards-stats">
+                        <!-- Red cards stats will be populated dynamically -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login/Register Modal -->
+    <div id="auth-modal" class="admin-password-modal">
+        <div class="admin-password-content">
+            <h2 id="auth-title">Login</h2>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" class="form-control" id="auth-username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" class="form-control" id="auth-password" placeholder="Password">
+            </div>
+            <div class="form-group" id="email-group" style="display: none;">
+                <label>Email (optional):</label>
+                <input type="email" class="form-control" id="auth-email" placeholder="Email">
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" id="auth-submit-btn" onclick="handleAuth()">Login</button>
+                <button class="btn btn-danger" onclick="closeAuthModal()">Cancel</button>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="btn btn-primary" id="auth-switch-btn" onclick="switchAuthMode()">Create New Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Password Modal -->
+    <div id="admin-password-modal" class="admin-password-modal">
+        <div class="admin-password-content">
+            <h2>🔐 Admin Password</h2>
+            <p>Enter password to access admin panel</p>
+            <div class="form-group">
+                <input type="password" class="form-control" id="admin-password-input" placeholder="Password">
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" onclick="checkAdminPassword()">Enter</button>
+                <button class="btn btn-danger" onclick="closeAdminPassword()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeAdmin()">✖</button>
+            <div class="modal-header">
+                <h2>🔧 Fantasy Admin Panel</h2>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="showAdminTab('rounds')">📅 Rounds</button>
+                <button class="admin-tab" onclick="showAdminTab('matches')">⚽ Matches</button>
+                <button class="admin-tab" onclick="showAdminTab('teams')">🏟️ Teams</button>
+                <button class="admin-tab" onclick="showAdminTab('players')">👤 Players</button>
+                <button class="admin-tab" onclick="showAdminTab('users')">👥 Users</button>
+                <button class="admin-tab" onclick="showAdminTab('points')">🎯 Points</button>
+            </div>
+
+            <!-- Rounds Management -->
+            <div id="admin-rounds" class="admin-content active">
+                <h3>Rounds Management</h3>
+                <div class="form-group">
+                    <label>Round Name:</label>
+                    <input type="text" class="form-control" id="round-name" placeholder="e.g., Round 1">
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Start Date:</label>
+                        <input type="datetime-local" class="form-control" id="round-start">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date:</label>
+                        <input type="datetime-local" class="form-control" id="round-end">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Transfers Allowed:</label>
+                    <input type="number" class="form-control" id="round-transfers-allowed" value="2" min="0">
+                </div>
+                <button class="btn btn-success" onclick="addRound()">Add New Round</button>
+                
+                <div id="rounds-list" style="margin-top: 20px;">
+                    <!-- Rounds will be populated here -->
+                </div>
+            </div>
+
+            <!-- Matches Management -->
+            <div id="admin-matches" class="admin-content">
+                <h3>Matches Management</h3>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Round:</label>
+                        <select class="form-control" id="match-round">
+                            <option value="">Select Round</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Team 1:</label>
+                        <select class="form-control" id="match-team1">
+                            <option value="">Select Team</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Team 2:</label>
+                        <select class="form-control" id="match-team2">
+                            <option value="">Select Team</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Match Date & Time:</label>
+                        <input type="datetime-local" class="form-control" id="match-datetime">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addMatch()">Add New Match</button>
+                
+                <div id="matches-list" style="margin-top: 20px;">
+                    <!-- Matches will be populated here -->
+                </div>
+            </div>
+
+            <!-- Teams Management -->
+            <div id="admin-teams" class="admin-content">
+                <h3>Teams Management</h3>
+                <div class="form-group">
+                    <label>New Team Name:</label>
+                    <input type="text" class="form-control" id="team-name" placeholder="Team Name">
+                </div>
+                <button class="btn btn-success" onclick="addTeam()">Add Team</button>
+                
+                <div id="teams-list" style="margin-top: 20px;">
+                    <!-- Teams will be populated here -->
+                </div>
+            </div>
+
+            <!-- Players Management -->
+            <div id="admin-players" class="admin-content">
+                <h3>Players Management</h3>
+                <div class="form-group">
+                    <label>Player Name:</label>
+                    <input type="text" class="form-control" id="player-name" placeholder="Player Name">
+                </div>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Select Team:</label>
+                        <select class="form-control" id="player-team">
+                            <option value="">Select Team</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Position:</label>
+                        <select class="form-control" id="player-position">
+                            <option value="">Select Position</option>
+                            <option value="goalkeeper">Goalkeeper</option>
+                            <option value="defender">Defender</option>
+                            <option value="midfielder">Midfielder</option>
+                            <option value="forward">Forward</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Price (Million):</label>
+                    <input type="number" class="form-control" id="player-price" step="0.1" placeholder="Price">
+                </div>
+                <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
+                
+                <div id="players-list" style="margin-top: 20px;">
+                    <!-- Players will be populated here -->
+                </div>
+            </div>
+
+            <!-- Users Management -->
+            <div id="admin-users" class="admin-content">
+                <h3>Users Management</h3>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="user-search" placeholder="Search username to delete">
+                </div>
+                <button class="btn btn-danger" onclick="deleteUser()">Delete Account</button>
+                
+                <div id="users-list" style="margin-top: 20px;">
+                    <!-- Users will be populated here -->
+                </div>
+            </div>
+
+            <!-- Match Data Entry -->
+            <div id="admin-points" class="admin-content">
+                <h3>Match Data Entry</h3>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>Round:</label>
+                        <select class="form-control" id="points-round">
+                            <option value="">Select Round</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Match:</label>
+                        <select class="form-control" id="match-for-points">
+                            <option value="">Select Match</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="match-player-stats-container" style="margin-top: 20px;">
+                    <!-- Player stats input fields will be dynamically populated here -->
+                </div>
+                
+                <button class="btn btn-success" onclick="saveMatchPlayerStats()" style="margin-top: 20px;">Save Match Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+   // Global variables
+        let gameData = {
+            users: [],
+            teams: [
+                '7enkesh FC',
+                'ZD Manga United',
+                'Settak El- 3ay2a',
+                'Uncle Bahgat',
+                '5altak El-Ray2a',
+                'Goal Hunters',
+                'Goal poachers',
+                'Koom El-Zawany'
+            ],
+            players: [
+                { id: 'p1', name: 'Ziad Abdelkarem', team: '7enkesh FC', position: 'forward', price: 10.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p2', name: 'M3z', team: '7enkesh FC', position: 'midfielder', price: 8.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p3', name: 'Abdulhameed', team: '7enkesh FC', position: 'defender', price: 5.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p4', name: 'Osama', team: '7enkesh FC', position: 'midfielder', price: 4.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p5', name: 'Sharkawy', team: '7enkesh FC', position: 'goalkeeper', price: 5.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p6', name: 'El-Masry', team: 'ZD Manga United', position: 'forward', price: 9.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p7', name: 'A.Ayman', team: 'ZD Manga United', position: 'forward', price: 8.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p8', name: 'El-Lawaty', team: 'ZD Manga United', position: 'defender', price: 6.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p9', name: 'Hanafy', team: 'ZD Manga United', position: 'forward', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p10', name: 'Hommos', team: 'ZD Manga United', position: 'goalkeeper', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p11', name: 'Maher', team: 'Settak El- 3ay2a', position: 'forward', price: 10.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p12', name: 'Bavly', team: 'Settak El- 3ay2a', position: 'midfielder', price: 8.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p13', name: 'Abdulkareem', team: 'Settak El- 3ay2a', position: 'midfielder', price: 5.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p14', name: 'Saber', team: 'Settak El- 3ay2a', position: 'defender', price: 4.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p15', name: 'Ammar', team: 'Settak El- 3ay2a', position: 'goalkeeper', price: 5.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p16', name: 'Danaf', team: 'Uncle Bahgat', position: 'midfielder', price: 11.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p17', name: 'Ayyad', team: 'Uncle Bahgat', position: 'midfielder', price: 7.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p18', name: 'Bonna', team: 'Uncle Bahgat', position: 'midfielder', price: 5.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p19', name: 'Nasef', team: 'Uncle Bahgat', position: 'defender', price: 4.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p20', name: 'O.kamal', team: 'Uncle Bahgat', position: 'goalkeeper', price: 4.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p21', name: 'Yasser', team: '5altak El-Ray2a', position: 'midfielder', price: 12.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p22', name: 'Seif', team: '5altak El-Ray2a', position: 'midfielder', price: 7.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p23', name: 'Hazem', team: '5altak El-Ray2a', position: 'forward', price: 6.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p24', name: 'Y.Gaber', team: '5altak El-Ray2a', position: 'defender', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p25', name: 'El-Degwey', team: '5altak El-Ray2a', position: 'goalkeeper', price: 5.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p26', name: 'Eyad', team: 'Goal Hunters', position: 'midfielder', price: 12.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p27', name: 'Amr', team: 'Goal Hunters', position: 'forward', price: 8.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p28', name: 'Tharwat', team: 'Goal Hunters', position: 'midfielder', price: 5.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p29', name: 'Mo Ayman', team: 'Goal Hunters', position: 'midfielder', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p30', name: 'Y.mus3ad', team: 'Goal Hunters', position: 'goalkeeper', price: 4.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p31', name: 'Bedewy', team: 'Goal poachers', position: 'midfielder', price: 11.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p32', name: 'Yassin', team: 'Goal poachers', position: 'forward', price: 7.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p33', name: 'Salem', team: 'Goal poachers', position: 'midfielder', price: 6.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p34', name: 'Mowafi', team: 'Goal poachers', position: 'forward', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p35', name: 'Ba7rawy', team: 'Goal poachers', position: 'goalkeeper', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+
+                { id: 'p36', name: 'M. A4raf', team: 'Koom El-Zawany', position: 'forward', price: 10.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p37', name: 'Sherbo', team: 'Koom El-Zawany', position: 'midfielder', price: 9.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p38', name: 'O.Salah', team: 'Koom El-Zawany', position: 'defender', price: 6.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p39', name: 'Ali 2arada', team: 'Koom El-Zawany', position: 'defender', price: 4.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
+                { id: 'p40', name: 'Y.Ragab', team: 'Koom El-Zawany', position: 'goalkeeper', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 }
+            ],
+            rounds: [
+                { id: 1, name: 'الجولة الأولى', start: '2025-09-14T18:00', end: '2025-09-16T23:59', transfersAllowed: 2 }
+            ],
+            matches: [],
+            currentRound: 1,
+            userTeams: {},
+            transfersUsed: {},
+            powerUpsUsed: {},
+            activePowerUps: {},
+            formations: {
+                '1-2-1': { def: 1, mid: 2, fwd: 1 },
+                '2-1-1': { def: 2, mid: 1, fwd: 1 },
+                '1-1-2': { def: 1, mid: 1, fwd: 2 }
+            },
+            currentFormation: '1-2-1' // Default formation
+        };
+
+        let currentUser = localStorage.getItem('fantasyUser') || 'guest';
+        let selectedTransferIn = null;
+        let selectedTransferOut = null;
+        let isAdminMode = false;
+        let isTransfersMode = false;
+        let isInitialFormationMode = false;
+        let selectedPosition = null;
+        let pendingPowerUp = null;
+        let teamChanges = {};
+        let originalTeamState = {};
+        let isTeamSaved = false;
+        let authToken = localStorage.getItem('authToken');
+        let isLoginMode = true;
+        const ADMIN_PASSWORD = 'admin123'; // Change this to a secure password
+        const API_BASE_URL = 'http://localhost:3000/api';
+        const TOTAL_BUDGET = 45.0; // Total bank in millions
+
+        // Initialize the application
+        function initApp() {
+            // localStorage.clear(); // Removed: This was for temporary development and caused data loss
+            checkAuthStatus();
+            loadGameData();
+            initializeUserTeam();
+            updateCurrentRoundAndTransfers();
+
+            // Always attempt to load game data from server on init if authenticated
+            if (authToken) {
+                loadGameDataFromServer();
+            }
+
+            // Check if a round is active on app load
+            const activeRound = gameData.rounds.find(r => {
+                const now = new Date();
+                const start = new Date(r.start);
+                const end = new Date(r.end);
+                return now >= start && now <= end;
+            });
+
+            if (activeRound) {
+                // Disable team management and power-ups during an active round
+                const initialBtn = document.getElementById('initial-formation-btn');
+                const transfersBtn = document.getElementById('transfers-mode-btn');
+                const captainBtn = document.getElementById('captain-mode-btn');
+                const selectFormationBtn = document.getElementById('select-formation-btn'); // Get the new button
+                const tripleCaptainBtn = document.getElementById('triple-captain-btn');
+                const benchBoostBtn = document.getElementById('bench-boost-btn');
+                const saveBtn = document.getElementById('save-team-btn');
+                const cancelBtn = document.getElementById('cancel-changes-btn');
+
+                if (initialBtn) initialBtn.disabled = true;
+                if (transfersBtn) transfersBtn.disabled = true;
+                if (captainBtn) captainBtn.disabled = true;
+                if (selectFormationBtn) selectFormationBtn.disabled = true; // Disable select formation button
+                if (tripleCaptainBtn) tripleCaptainBtn.style.opacity = '0.5';
+                if (benchBoostBtn) benchBoostBtn.style.opacity = '0.5';
+                if (saveBtn) saveBtn.classList.add('hidden');
+                if (cancelBtn) cancelBtn.classList.add('hidden');
+
+                // For new users without a saved team, show a message
+                const userTeam = gameData.userTeams[currentUser];
+                const hasPlayers = Object.values(userTeam.players).some(playerId => playerId);
+
+                if (currentUser !== 'guest' && !hasPlayers) {
+                    alert('يرجى انتظار بدء جولة جديدة لإنشاء تشكيلة!');
+                }
+            } else {
+                // Ensure buttons are enabled if no active round
+                const initialBtn = document.getElementById('initial-formation-btn');
+                const transfersBtn = document.getElementById('transfers-mode-btn');
+                const captainBtn = document.getElementById('captain-mode-btn');
+                const tripleCaptainBtn = document.getElementById('triple-captain-btn');
+                const benchBoostBtn = document.getElementById('bench-boost-btn');
+
+                if (initialBtn) initialBtn.disabled = false;
+                if (transfersBtn) transfersBtn.disabled = false;
+                if (captainBtn) captainBtn.disabled = false;
+                if (tripleCaptainBtn) tripleCaptainBtn.style.opacity = '1';
+                if (benchBoostBtn) benchBoostBtn.style.opacity = '1';
+            }
+
+            updateUI();
+            populateFilters();
+            populateMatchesFilters();
+            updateStatistics();
+            // Periodically check round status to reset transfers when a new round starts
+            setInterval(updateCurrentRoundAndTransfers, 60000);
+        }
+
+        // Check authentication status
+        function checkAuthStatus() {
+            if (authToken) {
+                // Try to validate token by making a request
+                fetch(`${API_BASE_URL}/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Invalid token');
+                    }
+                })
+                .then(data => {
+                    currentUser = data.username;
+                    updateUserInterface();
+                })
+                .catch(error => {
+                    console.error('Auth check failed:', error);
+                    logout();
+                });
+            } else {
+                updateUserInterface();
+            }
+        }
+
+        // Update user interface based on auth status
+        function updateUserInterface() {
+            const usernameSpan = document.getElementById('current-username');
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            if (currentUser && currentUser !== 'guest') {
+                usernameSpan.textContent = currentUser;
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                usernameSpan.textContent = 'Guest';
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        // Show login modal
+        function showLoginModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.add('active');
+            isLoginMode = true;
+            updateAuthModal();
+        }
+
+        // Close auth modal
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            modal.classList.remove('active');
+            document.getElementById('auth-username').value = '';
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-email').value = '';
+        }
+
+        // Switch between login and register modes
+        function switchAuthMode() {
+            isLoginMode = !isLoginMode;
+            updateAuthModal();
+        }
+
+        // Update auth modal based on mode
+        function updateAuthModal() {
+            const title = document.getElementById('auth-title');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchBtn = document.getElementById('auth-switch-btn');
+            const emailGroup = document.getElementById('email-group');
+
+            if (isLoginMode) {
+                title.textContent = 'Login';
+                submitBtn.textContent = 'Login';
+                switchBtn.textContent = 'Create New Account';
+                emailGroup.style.display = 'none';
+            } else {
+                title.textContent = 'Create Account';
+                submitBtn.textContent = 'Create Account';
+                switchBtn.textContent = 'Login';
+                emailGroup.style.display = 'block';
+            }
+        }
+
+        // Handle authentication (login or register)
+        async function handleAuth() {
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const email = document.getElementById('auth-email').value.trim();
+
+            if (!username || !password) {
+                alert('Username and password are required!');
+                return;
+            }
+
+            try {
+                const endpoint = isLoginMode ? '/login' : '/register';
+                const body = { username, password };
+                if (!isLoginMode && email) {
+                    body.email = email;
+                }
+
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user.username;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('fantasyUser', currentUser);
+                    
+                    updateUserInterface();
+                    closeAuthModal();
+                    
+                    // Load game data from server
+                    await loadGameDataFromServer();
+                    
+                    alert(isLoginMode ? 'Login successful!' : 'Account created successfully!');
+                } else {
+                    alert(data.error || 'Authentication error occurred');
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                alert('Server connection error');
+            }
+        }
+
+        // Logout user
+        function logout() {
+            authToken = null;
+            currentUser = 'guest';
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('fantasyUser');
+            updateUserInterface();
+            alert('Logout successful!');
+        }
+
+        // Load game data from server
+        async function loadGameDataFromServer() {
+            if (!authToken) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/game-data`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const serverData = await response.json();
+                    gameData = { ...gameData, ...serverData };
+                    saveGameData();
+                    updateUI();
+                }
+            } catch (error) {
+                console.error('Error loading game data from server:', error);
+            }
+        }
+
+        // Save game data to server
+        async function saveGameDataToServer() {
+if (!authToken) {
+    localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
+    return;
+}
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/game-data`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ gameData })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to save to server, using localStorage');
+                    saveGameData(); // Fallback to localStorage
+                }
+            } catch (error) {
+                console.error('Error saving to server:', error);
+                saveGameData(); // Fallback to localStorage
+            }
+        }
+
+        // Load game data from localStorage
+        function loadGameData() {
+            // Only load from localStorage if not authenticated (server data will override later)
+            if (!authToken) {
+            const saved = localStorage.getItem('fantasyGameData');
+            if (saved) {
+                gameData = { ...gameData, ...JSON.parse(saved) };
+                }
+            }
+        }
+
+        // Save game data to localStorage
+        function saveGameData() {
+            localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
+            // Also try to save to server
+            saveGameDataToServer();
+        }
+
+        // Initialize user team if not exists
+        function initializeUserTeam() {
+            if (!gameData.userTeams[currentUser]) {
+                gameData.userTeams[currentUser] = {
+                    players: {},
+                    captain: null,
+                    viceCaptain: null,
+                    budget: TOTAL_BUDGET
+                };
+                isTeamSaved = false; // New team, not saved yet
+            } else {
+                // Check if team has any players - if yes, it's been saved
+                const userTeam = gameData.userTeams[currentUser];
+                const hasPlayers = Object.values(userTeam.players).some(playerId => playerId);
+                isTeamSaved = hasPlayers;
+            }
+            
+            if (!gameData.transfersUsed[currentUser]) {
+                gameData.transfersUsed[currentUser] = 0;
+            }
+            if (!gameData.powerUpsUsed[currentUser]) {
+                gameData.powerUpsUsed[currentUser] = {
+                    tripleCaptain: false,
+                    benchBoost: false
+                };
+            }
+            if (!gameData.activePowerUps[currentUser]) {
+                gameData.activePowerUps[currentUser] = {
+                    tripleCaptain: false,
+                    benchBoost: false,
+                    activeRound: null
+                };
+            }
+        }
+
+        // Update UI elements
+        function updateUI() {
+            updateTeamStats();
+            updateFormation();
+            updatePowerUps();
+            updateTransfersLeft();
+            loadAvailablePlayers();
+            loadCurrentTeam();
+            updateRankings();
+            updateMatches();
+            updatePlayersTab(); // Add this line
+            updateTeamManagementButtons();
+        }
+
+        // Update team management button states
+        function updateTeamManagementButtons() {
+            const initialBtn = document.getElementById('initial-formation-btn');
+            const transfersBtn = document.getElementById('transfers-mode-btn');
+            const selectFormationBtn = document.getElementById('select-formation-btn');
+            
+            if (isTeamSaved) {
+                // Team has been saved - show transfer mode
+                initialBtn.disabled = true;
+                initialBtn.textContent = 'Initial Formation Saved';
+                transfersBtn.disabled = false;
+                // Allow formation selection between rounds only
+                if (selectFormationBtn) selectFormationBtn.disabled = !canMakeTransfers();
+            } else {
+                // Team not saved yet - show initial formation mode
+                initialBtn.disabled = false;
+                initialBtn.textContent = 'Select Initial Formation';
+                transfersBtn.disabled = true;
+                // Allow selecting formation before saving as long as we are between rounds
+                if (selectFormationBtn) selectFormationBtn.disabled = !canMakeTransfers();
+            }
+        }
+
+        // Update team statistics
+        function updateTeamStats() {
+            const userTeam = gameData.userTeams[currentUser];
+            let currentPoints = 0;
+
+            // Build effective players map including pending changes for live preview
+            const effectivePlayers = { ...(userTeam.players || {}) };
+            Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+                effectivePlayers[pos] = pid;
+            });
+
+            let totalValue = 0;
+            Object.values(effectivePlayers).forEach(playerId => {
+                const player = gameData.players.find(p => p.id === playerId);
+                if (player) {
+                    totalValue += Number(player.price) || 0;
+                    currentPoints += Number(player.points) || 0;
+                }
+            });
+
+            const bankPreview = Math.max(0, TOTAL_BUDGET - totalValue);
+
+            document.getElementById('current-points').textContent = currentPoints;
+            const bankEl = document.getElementById('bank-value');
+            if (bankEl) bankEl.textContent = bankPreview.toFixed(1);
+            document.getElementById('team-value').textContent = totalValue.toFixed(1);
+        }
+
+        // Update formation display
+        function updateFormation() {
+            const userTeam = gameData.userTeams[currentUser];
+            const activePowerUp = gameData.activePowerUps[currentUser];
+            const formationField = document.getElementById('formation');
+            formationField.innerHTML = ''; // Clear existing slots
+
+            // Reintroduce effectivePlayers for rendering
+            const effectivePlayers = { ...(userTeam.players || {}) };
+            Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+                effectivePlayers[pos] = pid;
+            });
+
+            const currentFormationDetails = gameData.formations[gameData.currentFormation];
+            if (!currentFormationDetails) {
+                console.error('Invalid formation selected:', gameData.currentFormation);
+                return;
+            }
+
+            // Always add the GK slot
+            const gkSlot = createPositionSlot('gk', { bottom: '5%', left: '50%', transform: 'translateX(-50%)' });
+            formationField.appendChild(gkSlot);
+
+            // Dynamically add Def, Mid, Fwd slots
+            const defPositions = getDynamicPositions(currentFormationDetails.def, 65, 30, 'def'); // Reduced spread for defenders
+            defPositions.forEach((pos, i) => {
+                const slot = createPositionSlot(`def${i + 1}`, pos);
+                formationField.appendChild(slot);
+            });
+
+            const midPositions = getDynamicPositions(currentFormationDetails.mid, 40, 30, 'mid'); // Reduced spread for midfielders
+            midPositions.forEach((pos, i) => {
+                const slot = createPositionSlot(`mid${i + 1}`, pos);
+                formationField.appendChild(slot);
+            });
+
+            const fwdPositions = getDynamicPositions(currentFormationDetails.fwd, 18, 20, 'fwd'); // Reduced spread for forwards
+            fwdPositions.forEach((pos, i) => {
+                const slot = createPositionSlot(`fwd${i + 1}`, pos);
+                formationField.appendChild(slot);
+            });
+
+            // Add substitute slots
+            const sub1Slot = createPositionSlot('sub1', { top: '30%', left: '10%', transform: 'translateX(-50%)' });
+            formationField.appendChild(sub1Slot);
+            const sub2Slot = createPositionSlot('sub2', { top: '60%', left: '10%', transform: 'translateX(-50%)' });
+            formationField.appendChild(sub2Slot);
+
+            // Re-add field overlays
+            formationField.innerHTML += `
+                <div class="center-circle-overlay"></div>
+                <div class="halfway-line"></div>
+                <div class="subs-box" style="top: 15%; left: 0%; width: 20%; height: 70%;"></div>
+                <div class="gk-box" style="bottom: 0%; left: 50%; width: 50%; height: 20%; transform: translateX(-50%);"></div>
+            `;
+
+            const allPositions = ['gk', ...Array.from({ length: currentFormationDetails.def }, (_, i) => `def${i + 1}`),
+                                  ...Array.from({ length: currentFormationDetails.mid }, (_, i) => `mid${i + 1}`),
+                                  ...Array.from({ length: currentFormationDetails.fwd }, (_, i) => `fwd${i + 1}`),
+                                  'sub1', 'sub2'];
+            
+            allPositions.forEach(position => {
+                const slot = document.querySelector(`[data-position="${position}"]`);
+                if (!slot) return; // Slot might not exist if formation changed
+
+                let playerId = userTeam.players[position];
+                
+                // Check if there's a pending change for this position
+                if (teamChanges[position]) {
+                    playerId = teamChanges[position];
+                    slot.style.borderColor = '#ffd700'; // Gold border for pending changes
+                } else {
+                    slot.style.borderColor = '#fff'; // Reset border color
+                }
+                
+                if (playerId) {
+                    const player = gameData.players.find(p => p.id === playerId);
+                    if (player) {
+                        const points = Number(player.points) || 0;
+                        const team = player.team || '';
+                        slot.innerHTML = `<div class=\"player-name\">${player.name}</div><div class=\"player-team-tag\">${team}</div><div class=\"player-points\">${points} pts</div>`;
+                        slot.classList.add('filled');
+                        
+                        // Remove old captain classes
+                        slot.classList.remove('captain', 'vice-captain', 'triple-captain');
+                        
+                        // Add captain styling
+                        if (userTeam.captain === playerId) {
+                            if (activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
+                                slot.classList.add('triple-captain');
+                            } else {
+                                slot.classList.add('captain');
+                            }
+                        } else if (userTeam.viceCaptain === playerId) {
+                            slot.classList.add('vice-captain');
+                        }
+                    }
+                } else {
+                    slot.innerHTML = `<div class="player-name">${getPositionName(position)}</div>`;
+                    slot.classList.remove('filled', 'captain', 'vice-captain', 'triple-captain');
+                }
+            });
+
+            // Function to render a player in a slot
+            function renderPlayerInSlot(slotElement, playerId, isCaptain) {
+                const player = gameData.players.find(p => p.id === playerId);
+                if (!player) {
+                    slotElement.innerHTML = '';
+                    return;
+                }
+
+                // Determine current round to fetch match-specific points
+                const currentRound = gameData.rounds.find(r => {
+                    const now = new Date();
+                    const start = new Date(r.start);
+                    const end = new Date(r.end);
+                    return now >= start && now <= end;
+                });
+                
+                let currentRoundPoints = 0;
+                if (currentRound) {
+                    // Find any match in the current round that the player participated in
+                    const matchesInCurrentRound = gameData.matches.filter(m => m.round === currentRound.id && m.isFinished);
+                    for (const match of matchesInCurrentRound) {
+                        if (match.playerStats && match.playerStats[playerId]) {
+                            currentRoundPoints += (match.playerStats[playerId].points || 0);
+                        }
+                    }
+                }
+
+                const captainClass = isCaptain ? 'captain' : '';
+                const pointsDisplay = `<span class="player-points ${captainClass}">${currentRoundPoints}</span>`;
+
+                slotElement.innerHTML = `
+                    <div class="player-card ${player.position}">
+                        <img src="./assets/player_placeholder.png" alt="${player.name}" class="player-image">
+                        <div class="player-info">
+                            <span class="player-name">${player.name}</span>
+                            <span class="player-team-name">${player.team}</span>
+                            ${pointsDisplay}
+                        </div>
+                    </div>
+                `;
+
+                slotElement.querySelector('.player-card').onclick = (event) => {
+                    event.stopPropagation();
+                    selectPlayerForTransfer(playerId, slotElement.id);
+                };
+            }
+
+            // Render GK and main squad players
+            Object.entries(effectivePlayers).forEach(([slotId, playerId]) => {
+                const slotElement = document.getElementById(slotId);
+                if (slotElement && playerId) {
+                    const isCaptain = userTeam.captain === playerId;
+                    renderPlayerInSlot(slotElement, playerId, isCaptain);
+                }
+            });
+
+            // Render substitute players
+            const sub1PlayerId = effectivePlayers['sub1'];
+            const sub2PlayerId = effectivePlayers['sub2'];
+
+            if (document.getElementById('sub1') && sub1PlayerId) {
+                renderPlayerInSlot(document.getElementById('sub1'), sub1PlayerId, userTeam.captain === sub1PlayerId);
+            }
+            if (document.getElementById('sub2') && sub2PlayerId) {
+                renderPlayerInSlot(document.getElementById('sub2'), sub2PlayerId, userTeam.captain === sub2PlayerId);
+            }
+        }
+
+        // Helper to create a position slot element
+        function createPositionSlot(positionName, style) {
+            const slot = document.createElement('div');
+            slot.className = 'position-slot';
+            slot.setAttribute('data-position', positionName);
+            slot.setAttribute('onclick', `selectPosition('${positionName}')`);
+            Object.assign(slot.style, style);
+            slot.innerHTML = `<div class="player-name">${getPositionName(positionName)}</div>`;
+            return slot;
+        }
+    
+
+
+        // Helper to get dynamic positions for a line of players
+        function getDynamicPositions(count, topPercentage, horizontalSpreadPercentage, type) {
+            const positions = [];
+            if (count === 0) return positions;
+
+            if (count === 1) {
+                // Center a single player
+                positions.push({ top: `${topPercentage}%`, left: '50%', transform: 'translateX(-50%)' });
+                return positions;
+            }
+
+            // Distribute multiple players evenly across the width
+            const startLeft = (100 - horizontalSpreadPercentage) / 2;
+            const spacing = horizontalSpreadPercentage / (count - 1);
+            for (let i = 0; i < count; i++) {
+                const left = startLeft + (i * spacing);
+                positions.push({ top: `${topPercentage}%`, left: `${left}%`, transform: 'translateX(-50%)' });
+            }
+            return positions;
+        }
+
+        // Captain selection modal logic
+        function showFormationSelectionModal() {
+            if (!canMakeTransfers()) {
+                alert('لا يمكن تغيير نظام التشكيلة أثناء الجولة!');
+                return;
+            }
+            const modal = document.getElementById('formation-selection-modal');
+            const optionsContainer = document.getElementById('formation-options');
+            optionsContainer.innerHTML = '';
+
+            for (const formationName in gameData.formations) {
+                const formation = gameData.formations[formationName];
+                const card = document.createElement('div');
+                card.className = 'card player-card'; // Reusing player-card styles
+                card.innerHTML = `
+                    <h3>${formationName}</h3>
+                    <p>DEF: ${formation.def} | MID: ${formation.mid} | FWD: ${formation.fwd}</p>
+                `;
+                card.onclick = () => selectFormation(formationName);
+                optionsContainer.appendChild(card);
+            }
+            modal.classList.add('active');
+        }
+
+        function closeFormationSelectionModal() {
+            document.getElementById('formation-selection-modal').classList.remove('active');
+        }
+
+        function selectFormation(formationName) {
+            gameData.currentFormation = formationName;
+            saveGameData();
+            updateFormation();
+            closeFormationSelectionModal();
+        }
+
+      function showCaptainModal() {
+    const userTeam = gameData.userTeams[currentUser];
+    // ADD THIS LINE:
+    const effectivePlayers = { ...(userTeam.players || {}) };
+    Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+        effectivePlayers[pos] = pid;
+    });
+
+    const container = document.getElementById('captain-players');
+    container.innerHTML = '';
+
+    const currentFormationDetails = gameData.formations[gameData.currentFormation];
+    let starterPositions = ['gk'];
+    for (let i = 1; i <= currentFormationDetails.def; i++) starterPositions.push(`def${i}`);
+    for (let i = 1; i <= currentFormationDetails.mid; i++) starterPositions.push(`mid${i}`);
+    for (let i = 1; i <= currentFormationDetails.fwd; i++) starterPositions.push(`fwd${i}`);
+
+    const starterIds = starterPositions
+        .map(pos => effectivePlayers[pos])
+        .filter(Boolean);
+    const uniquePlayerIds = Array.from(new Set(starterIds));
+
+    if (uniquePlayerIds.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#bbb;">No players selected yet</p>';
+    } else {
+        uniquePlayerIds.forEach(playerId => {
+            const player = gameData.players.find(p => p.id === playerId);
+            if (!player) return;
+            const card = document.createElement('div');
+            card.className = 'player-card captain-option';
+            card.innerHTML = `
+                <div class="player-name">${player.name}</div>
+                <div class="player-team">${player.team}</div>
+                <div class="player-price" style="color:#ffd700;">Price: ${player.price} م</div>
+            `;
+            card.onclick = () => setCaptain(player.id);
+            container.appendChild(card);
+        });
+    }
+
+    document.getElementById('captain-selection-modal').classList.add('active');
+}
+        function closeCaptainModal() {
+            document.getElementById('captain-selection-modal').classList.remove('active');
+        }
+
+        function setCaptain(playerId) {
+            const userTeam = gameData.userTeams[currentUser];
+            userTeam.captain = playerId;
+            // Ensure vice captain doesn't duplicate captain
+            if (userTeam.viceCaptain === playerId) {
+                userTeam.viceCaptain = null;
+            }
+            closeCaptainModal();
+            saveGameData();
+            updateFormation();
+        }
+
+        // Get position name in English
+        function getPositionName(position) {
+            if (position.startsWith('def')) return 'DEF';
+            if (position.startsWith('mid')) return 'MID';
+            if (position.startsWith('fwd')) return 'FWD';
+            const names = {
+                'gk': 'GK',
+                'sub1': 'SUB 1',
+                'sub2': 'SUB 2'
+            };
+            return names[position] || position.toUpperCase();
+        }
+
+        // Update power-ups display
+        function updatePowerUps() {
+            const powerUpsUsed = gameData.powerUpsUsed[currentUser];
+            const activePowerUp = gameData.activePowerUps[currentUser];
+            
+            const tripleCaptainBtn = document.getElementById('triple-captain-btn');
+            const benchBoostBtn = document.getElementById('bench-boost-btn');
+            
+            // Triple Captain
+            if (powerUpsUsed.tripleCaptain) {
+                tripleCaptainBtn.classList.add('used');
+                tripleCaptainBtn.innerHTML = '<div>🔥 Triple Captain</div><small>Used</small>';
+            } else if (activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
+                tripleCaptainBtn.classList.add('active');
+                tripleCaptainBtn.innerHTML = '<div>🔥 Triple Captain</div><small>Active</small>';
+            }
+            
+            // Bench Boost
+            if (powerUpsUsed.benchBoost) {
+                benchBoostBtn.classList.add('used');
+                benchBoostBtn.innerHTML = '<div>⚡ Bench Boost</div><small>Used</small>';
+            } else if (activePowerUp.benchBoost && activePowerUp.activeRound === gameData.currentRound) {
+                benchBoostBtn.classList.add('active');
+                benchBoostBtn.innerHTML = '<div>⚡ Bench Boost</div><small>Active</small>';
+            }
+        }
+
+        // Update transfers left display
+        function updateTransfersLeft() {
+            const transfersUsed = gameData.transfersUsed[currentUser] || 0;
+            const currentRoundDetails = gameData.rounds.find(r => r.id === gameData.currentRound);
+            const transfersAllowed = currentRoundDetails ? currentRoundDetails.transfersAllowed : 2; // Default to 2 if not found
+            const transfersLeft = Math.max(0, transfersAllowed - transfersUsed);
+            
+            const el = document.getElementById('transfers-count');
+            if (el) el.textContent = transfersLeft;
+        }
+
+        // Toggle initial formation mode
+        function toggleInitialFormation() {
+            console.log(`toggleInitialFormation called. isInitialFormationMode was: ${isInitialFormationMode}`);
+            if (!canMakeTransfers()) {
+                alert('لا يمكن تعديل التشكيلة أثناء الجولة!');
+                return;
+            }
+            if (isTeamSaved) {
+                alert('Team has already been saved! Use Transfer Mode for changes.');
+                return;
+            }
+            
+            isInitialFormationMode = !isInitialFormationMode;
+            const initialBtn = document.getElementById('initial-formation-btn');
+            const saveBtn = document.getElementById('save-team-btn');
+            const cancelBtn = document.getElementById('cancel-changes-btn');
+            
+            if (isInitialFormationMode) {
+                initialBtn.textContent = 'Exit Formation Mode';
+                initialBtn.classList.remove('btn-primary');
+                initialBtn.classList.add('btn-danger');
+                saveBtn.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+                originalTeamState = JSON.parse(JSON.stringify(gameData.userTeams[currentUser] || {}));
+            } else {
+                initialBtn.textContent = 'Select Initial Formation';
+                initialBtn.classList.remove('btn-danger');
+                initialBtn.classList.add('btn-primary');
+                saveBtn.classList.add('hidden');
+                cancelBtn.classList.add('hidden');
+                teamChanges = {};
+            }
+            console.log(`toggleInitialFormation finished. isInitialFormationMode is now: ${isInitialFormationMode}`);
+            updateUI(); // Ensure UI reflects the mode change
+        }
+
+        // Toggle transfers mode
+        function toggleTransfersMode() {
+            console.log(`toggleTransfersMode called. isTransfersMode was: ${isTransfersMode}`);
+            if (!isTeamSaved) {
+                alert('Please save your initial formation first!');
+                return;
+            }
+            
+            if (!canMakeTransfers()) {
+                alert('Cannot make transfers during an active round!');
+                return;
+            }
+            
+            isTransfersMode = !isTransfersMode;
+            const transfersBtn = document.getElementById('transfers-mode-btn');
+            const saveBtn = document.getElementById('save-team-btn');
+            const cancelBtn = document.getElementById('cancel-changes-btn');
+            
+            if (isTransfersMode) {
+                transfersBtn.textContent = 'Cancel Transfers';
+                transfersBtn.classList.remove('btn-warning');
+                transfersBtn.classList.add('btn-danger');
+                saveBtn.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+                originalTeamState = JSON.parse(JSON.stringify(gameData.userTeams[currentUser] || {}));
+            } else {
+                transfersBtn.textContent = 'Transfer Mode';
+                transfersBtn.classList.remove('btn-danger');
+                transfersBtn.classList.add('btn-warning');
+                saveBtn.classList.add('hidden');
+                cancelBtn.classList.add('hidden');
+                teamChanges = {};
+            }
+            console.log(`toggleTransfersMode finished. isTransfersMode is now: ${isTransfersMode}`);
+            updateUI(); // Ensure UI reflects the mode change
+        }
+
+        // Check if transfers can be made
+        function canMakeTransfers() {
+            console.log('canMakeTransfers called.');
+            const currentRound = gameData.rounds.find(r => r.id === gameData.currentRound);
+            if (!currentRound) {
+                console.log('No current round found, can make transfers.');
+                return true;
+            }
+            
+            const now = new Date();
+            const roundStart = new Date(currentRound.start);
+            const roundEnd = new Date(currentRound.end);
+            
+            const canTransfer = now < roundStart || now > roundEnd;
+            console.log(`Current Round: ${currentRound.name}, Start: ${roundStart.toLocaleString()}, End: ${roundEnd.toLocaleString()}, Now: ${now.toLocaleString()}, Can Transfer: ${canTransfer}`);
+            return canTransfer;
+        }
+
+        // Detect current round and reset transfer allowance between rounds
+        function updateCurrentRoundAndTransfers() {
+            if (!gameData || !Array.isArray(gameData.rounds)) return;
+            const now = new Date();
+
+            // Determine active round if any
+            let activeRoundId = null;
+            for (const round of gameData.rounds) {
+                const start = new Date(round.start);
+                const end = new Date(round.end);
+                if (now >= start && now <= end) {
+                    activeRoundId = round.id;
+                    break;
+                }
+            }
+
+            if (activeRoundId !== null) {
+                gameData.currentRound = activeRoundId;
+            }
+
+            // When we detect we have moved to a different round than the last processed, reset transfers to 0 used
+            const lastProcessedKey = 'fantasy_last_round_processed';
+            const lastProcessed = parseInt(localStorage.getItem(lastProcessedKey) || '');
+            if (!isNaN(lastProcessed)) {
+                if (lastProcessed !== (gameData.currentRound || 0)) {
+                    Object.keys(gameData.transfersUsed || {}).forEach(username => {
+                        gameData.transfersUsed[username] = 0; // two available -> 0 used
+                    });
+                    saveGameData();
+                }
+            } else {
+                // First run: ensure key is set
+                localStorage.setItem(lastProcessedKey, String(gameData.currentRound || ''));
+            }
+
+            // Always persist the current considered round id for next comparison
+            localStorage.setItem(lastProcessedKey, String(gameData.currentRound || ''));
+
+            updateTransfersLeft();
+        }
+
+        // Save team changes
+       function saveTeamChanges() {
+    const userTeam = gameData.userTeams[currentUser];
+    // Combine original team and pending changes:
+    const pendingPlayers = { ...(userTeam.players || {}), ...teamChanges };
+    const exceededTeam = validateTeamLimit(pendingPlayers, 2);
+    if (exceededTeam) {
+        alert('لا يمكنك حفظ التشكيلة مع أكثر من لاعبين من نفس الفريق: ' + exceededTeam);
+        return;
+    }
+
+    // TEAM VALUE VALIDATION
+    let pendingTeamValue = 0;
+    Object.values(pendingPlayers).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p) pendingTeamValue += Number(p.price) || 0;
+    });
+    if (pendingTeamValue > TOTAL_BUDGET) {
+        alert('قيمة الفريق تجاوزت الحد الأقصى المسموح: 45 مليون');
+        return;
+    }
+
+    if (Object.keys(teamChanges).length === 0) {
+        alert('No changes to save!');
+        return;
+    }
+
+    if (isInitialFormationMode) {
+        // Initial formation - unlimited changes, no transfer count
+        Object.entries(teamChanges).forEach(([position, playerId]) => {
+            userTeam.players[position] = playerId;
+        });
+        // Recalculate and persist budget based on new team value
+        userTeam.budget = Math.max(0, TOTAL_BUDGET - pendingTeamValue);
+
+        teamChanges = {};
+        isTeamSaved = true;
+        isInitialFormationMode = false;
+
+        // Update button states
+        const initialBtn = document.getElementById('initial-formation-btn');
+        const saveBtn = document.getElementById('save-team-btn');
+        const cancelBtn = document.getElementById('cancel-changes-btn');
+
+        initialBtn.textContent = 'Select Initial Formation';
+        initialBtn.classList.remove('btn-danger');
+        initialBtn.classList.add('btn-primary');
+        initialBtn.disabled = true;
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+
+        saveGameData();
+        updateUI();
+
+        alert('Initial formation saved successfully!');
+    } else if (isTransfersMode) {
+        // Allow free transfers if before round starts, otherwise use limited transfers
+        if (canMakeTransfers()) {
+            Object.entries(teamChanges).forEach(([position, playerId]) => {
+                userTeam.players[position] = playerId;
+            });
+        } else {
+            // Limited transfers during active round
+            const transfersUsed = gameData.transfersUsed[currentUser] || 0;
+            const currentRoundDetails = gameData.rounds.find(r => r.id === gameData.currentRound);
+            const transfersAllowed = currentRoundDetails ? currentRoundDetails.transfersAllowed : 2;
+
+            const numChanges = Object.entries(teamChanges).reduce((count, [position, playerId]) => {
+                return count + (userTeam.players[position] !== playerId ? 1 : 0);
+            }, 0);
+
+            if (numChanges === 0) {
+                alert('No effective changes to save!');
+                return;
+            }
+
+            if (transfersUsed + numChanges > transfersAllowed) {
+                const remaining = Math.max(0, transfersAllowed - transfersUsed);
+                alert(`You only have ${remaining} transfer(s) remaining this round.`);
+                return;
+            }
+
+            Object.entries(teamChanges).forEach(([position, playerId]) => {
+                if (userTeam.players[position] !== playerId) {
+                    userTeam.players[position] = playerId;
+                }
+            });
+            gameData.transfersUsed[currentUser] = transfersUsed + numChanges;
+        }
+
+        // Recalculate and persist budget based on new team value
+        userTeam.budget = Math.max(0, TOTAL_BUDGET - pendingTeamValue);
+
+        teamChanges = {};
+        isTransfersMode = false;
+
+        // Update button states
+        const transfersBtn = document.getElementById('transfers-mode-btn');
+        const saveBtn = document.getElementById('save-team-btn');
+        const cancelBtn = document.getElementById('cancel-changes-btn');
+
+        transfersBtn.textContent = 'Transfer Mode';
+        transfersBtn.classList.remove('btn-danger');
+        transfersBtn.classList.add('btn-warning');
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+
+        saveGameData();
+        updateUI();
+
+        alert('Transfers saved successfully!');
+    }
+}
+        function cancelTeamChanges() {
+            if (Object.keys(teamChanges).length === 0) {
+                alert('No changes to cancel!');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to cancel all changes?')) {
+                // Restore original team state
+                gameData.userTeams[currentUser] = JSON.parse(JSON.stringify(originalTeamState));
+                teamChanges = {};
+                
+                if (isInitialFormationMode) {
+                    isInitialFormationMode = false;
+                    const initialBtn = document.getElementById('initial-formation-btn');
+                    const saveBtn = document.getElementById('save-team-btn');
+                    const cancelBtn = document.getElementById('cancel-changes-btn');
+                    
+                    initialBtn.textContent = 'Select Initial Formation';
+                    initialBtn.classList.remove('btn-danger');
+                    initialBtn.classList.add('btn-primary');
+                    saveBtn.classList.add('hidden');
+                    cancelBtn.classList.add('hidden');
+                } else if (isTransfersMode) {
+                    isTransfersMode = false;
+                    const transfersBtn = document.getElementById('transfers-mode-btn');
+                    const saveBtn = document.getElementById('save-team-btn');
+                    const cancelBtn = document.getElementById('cancel-changes-btn');
+                    
+                    transfersBtn.textContent = 'Transfer Mode';
+                    transfersBtn.classList.remove('btn-danger');
+                    transfersBtn.classList.add('btn-warning');
+                    saveBtn.classList.add('hidden');
+                    cancelBtn.classList.add('hidden');
+                }
+                
+                saveGameData();
+                updateUI();
+                
+                alert('Changes cancelled successfully!');
+            }
+        }
+
+        // Show power-up confirmation
+        function showPowerUpConfirmation(type) {
+            if (!canMakeTransfers()) {
+                alert('لا يمكن استخدام القوى أثناء الجولة!');
+                return;
+            }
+            pendingPowerUp = type;
+            const modal = document.getElementById('powerup-confirmation-modal');
+            const text = document.getElementById('powerup-confirmation-text');
+            
+            if (type === 'triple-captain') {
+                text.textContent = 'Are you sure you want to activate Triple Captain? You will get 3x points for your captain this round.';
+            } else {
+                text.textContent = 'Are you sure you want to activate Bench Boost? You will get points from all substitute players this round.';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        // Close power-up confirmation
+        function closePowerUpConfirmation() {
+            const modal = document.getElementById('powerup-confirmation-modal');
+            modal.classList.remove('active');
+            pendingPowerUp = null;
+        }
+
+        // Confirm power-up activation
+        function confirmPowerUp() {
+            if (pendingPowerUp) {
+                activatePowerUp(pendingPowerUp);
+                closePowerUpConfirmation();
+            }
+        }
+
+        // Activate power-up
+        function activatePowerUp(type) {
+            const powerUpsUsed = gameData.powerUpsUsed[currentUser];
+            const activePowerUp = gameData.activePowerUps[currentUser];
+            
+            // Check if already used
+            if (powerUpsUsed[type === 'triple-captain' ? 'tripleCaptain' : 'benchBoost']) {
+                alert('هذه القوة مُستعملة بالفعل!');
+                return;
+            }
+            
+            // Check if another power-up is active this round
+            if (activePowerUp.activeRound === gameData.currentRound && 
+                ((type === 'triple-captain' && activePowerUp.benchBoost) || 
+                 (type === 'bench-boost' && activePowerUp.tripleCaptain))) {
+                alert('لا يمكن استعمال أكثر من قوة واحدة في نفس الجولة!');
+                return;
+            }
+            
+            // Activate power-up
+            if (type === 'triple-captain') {
+                activePowerUp.tripleCaptain = true;
+                activePowerUp.benchBoost = false;
+            } else {
+                activePowerUp.benchBoost = true;
+                activePowerUp.tripleCaptain = false;
+            }
+            
+            activePowerUp.activeRound = gameData.currentRound;
+            
+            saveGameData();
+            updatePowerUps();
+            updateFormation();
+            
+            alert(type === 'triple-captain' ? 'تم تفعيل التريبل كابتن!' : 'تم تفعيل البينش بوست!');
+        }
+
+        // Show tab
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Update specific tab content when shown
+            if (tabName === 'statistics') {
+                updateStatistics();
+            } else if (tabName === 'matches') {
+                updateMatches();
+            } else if (tabName === 'rankings') {
+                updateRankings();
+            } else if (tabName === 'players-tab') {
+                updatePlayersTab();
+            }
+        }
+
+        // Populate filters
+        function populateFilters() {
+            const teamFilter = document.getElementById('team-filter');
+            teamFilter.innerHTML = '<option value="all">All Teams</option>';
+            gameData.teams.forEach(team => {
+                teamFilter.innerHTML += `<option value="${team}">${team}</option>`;
+            });
+        }
+
+        // Filter players
+        function filterPlayers() {
+            loadAvailablePlayers();
+        }
+
+        // Load available players for transfers
+        function loadAvailablePlayers() {
+            const container = document.getElementById('available-players');
+            const positionFilter = document.getElementById('position-filter')?.value || 'all';
+            const teamFilter = document.getElementById('team-filter')?.value || 'all';
+            const userTeam = gameData.userTeams[currentUser];
+            
+            let filteredPlayers = gameData.players.filter(player => {
+                // Filter by position
+                if (positionFilter !== 'all' && player.position !== positionFilter) return false;
+                
+                // Filter by team
+                if (teamFilter !== 'all' && player.team !== teamFilter) return false;
+                
+                // Don't show players already in user's team
+                if (Object.values(userTeam.players).includes(player.id)) return false;
+                
+                return true;
+            });
+            
+            container.innerHTML = '';
+            filteredPlayers.forEach(player => {
+                // Check team limit
+                const teamCount = Object.values(userTeam.players).filter(playerId => {
+                    const p = gameData.players.find(pl => pl.id === playerId);
+                    return p && p.team === player.team;
+                }).length;
+                
+                const isTeamLimitReached = teamCount >= 2;
+                
+                const playerCard = document.createElement('div');
+                playerCard.className = `player-card ${selectedTransferIn === player.id ? 'selected' : ''}`;
+                if (isTeamLimitReached) {
+                    playerCard.style.opacity = '0.5';
+                    playerCard.style.cursor = 'not-allowed';
+                }
+                
+                playerCard.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-team">${player.team}</div>
+                    <div class="player-price">${player.price} م</div>
+                    ${isTeamLimitReached ? '<div class="team-limit-warning">حد الفريق مكتمل</div>' : ''}
+                `;
+                
+                if (!isTeamLimitReached) {
+                    playerCard.onclick = () => selectTransferIn(player.id);
+                }
+                
+                container.appendChild(playerCard);
+            });
+        }
+
+        // Load current team for transfers
+        function loadCurrentTeam() {
+            const container = document.getElementById('current-team');
+            const userTeam = gameData.userTeams[currentUser];
+            
+            container.innerHTML = '';
+            Object.entries(userTeam.players).forEach(([position, playerId]) => {
+                const player = gameData.players.find(p => p.id === playerId);
+                if (player) {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = `player-card ${selectedTransferOut === playerId ? 'selected' : ''}`;
+                    playerCard.innerHTML = `
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-team">${player.team}</div>
+                        <div class="player-price">${player.price} م</div>
+                        <div style="font-size: 0.8rem; color: #bbb;">${getPositionName(position)}</div>
+                    `;
+                    
+                    playerCard.onclick = () => selectTransferOut(playerId);
+                    container.appendChild(playerCard);
+                }
+            });
+        }
+
+        // Select player for transfer in
+        function selectTransferIn(playerId) {
+            selectedTransferIn = playerId;
+            loadAvailablePlayers();
+            updateTransferSummary();
+        }
+
+        // Select player for transfer out
+        function selectTransferOut(playerId) {
+            selectedTransferOut = playerId;
+            loadCurrentTeam();
+            updateTransferSummary();
+        }
+
+        // Update transfer summary
+        function updateTransferSummary() {
+            const transferInElement = document.getElementById('transfer-in');
+            const transferOutElement = document.getElementById('transfer-out');
+            const transferCostElement = document.getElementById('transfer-cost');
+            const confirmButton = document.getElementById('confirm-transfer');
+            
+            if (selectedTransferIn) {
+                const player = gameData.players.find(p => p.id === selectedTransferIn);
+                transferInElement.textContent = `دخول: ${player.name} (${player.price} م)`;
+            } else {
+                transferInElement.textContent = 'دخول: -';
+            }
+            
+            if (selectedTransferOut) {
+                const player = gameData.players.find(p => p.id === selectedTransferOut);
+                transferOutElement.textContent = `خروج: ${player.name} (${player.price} م)`;
+            } else {
+                transferOutElement.textContent = 'خروج: -';
+            }
+            
+            if (selectedTransferIn && selectedTransferOut) {
+                const playerIn = gameData.players.find(p => p.id === selectedTransferIn);
+                const playerOut = gameData.players.find(p => p.id === selectedTransferOut);
+                const cost = playerIn.price - playerOut.price;
+                transferCostElement.textContent = `التكلفة: ${cost > 0 ? '+' : ''}${cost.toFixed(1)} مليون`;
+                confirmButton.disabled = false;
+            } else {
+                transferCostElement.textContent = 'التكلفة: 0 مليون';
+                confirmButton.disabled = true;
+            }
+        }
+
+        // Confirm transfer
+        function confirmTransfer() {
+            if (!selectedTransferIn || !selectedTransferOut) {
+                alert('يجب اختيار لاعب للدخول وآخر للخروج!');
+                return;
+            }
+            
+            const transfersUsed = gameData.transfersUsed[currentUser] || 0;
+            if (transfersUsed >= 2) {
+                alert('لقد استنفدت جميع التبديلات المتاحة!');
+                return;
+            }
+            
+            const userTeam = gameData.userTeams[currentUser];
+            const playerIn = gameData.players.find(p => p.id === selectedTransferIn);
+            const playerOut = gameData.players.find(p => p.id === selectedTransferOut);
+            
+            // Check budget
+            const cost = playerIn.price - playerOut.price;
+            if (userTeam.budget < cost) {
+                alert('الميزانية غير كافية!');
+                return;
+            }
+            
+            // Find position of player being transferred out
+            let transferPosition = null;
+            Object.entries(userTeam.players).forEach(([pos, playerId]) => {
+                if (playerId === selectedTransferOut) {
+                    transferPosition = pos;
+                }
+            });
+            
+            if (!transferPosition) {
+                alert('خطأ في العثور على موقع اللاعب!');
+                return;
+            }
+            
+            // Check if positions are compatible
+            if (!isPositionCompatible(playerIn.position, transferPosition)) {
+                alert('اللاعب الجديد لا يمكنه اللعب في هذا المركز!');
+                return;
+            }
+            
+            // Execute transfer
+            userTeam.players[transferPosition] = selectedTransferIn;
+            userTeam.budget -= cost;
+            gameData.transfersUsed[currentUser] = transfersUsed + 1;
+            
+            // Reset captain if transferred out
+            if (userTeam.captain === selectedTransferOut) {
+                userTeam.captain = null;
+            }
+            if (userTeam.viceCaptain === selectedTransferOut) {
+                userTeam.viceCaptain = null;
+            }
+            
+            // Clear selections
+            selectedTransferIn = null;
+            selectedTransferOut = null;
+            
+            saveGameData();
+            updateUI();
+            
+            alert('تم التبديل بنجاح!');
+        }
+
+        // Check if position is compatible
+        function isPositionCompatible(playerPosition, slotPosition) {
+            if (slotPosition === 'gk') {
+                return playerPosition === 'goalkeeper';
+            }
+            if (slotPosition.startsWith('def')) {
+                return playerPosition === 'defender';
+            }
+            if (slotPosition.startsWith('mid')) {
+                return playerPosition === 'midfielder';
+            }
+            if (slotPosition.startsWith('fwd')) {
+                return playerPosition === 'forward';
+            }
+            if (slotPosition.startsWith('sub')) {
+                return ['goalkeeper', 'defender', 'midfielder', 'forward'].includes(playerPosition);
+            }
+            return false;
+        }
+
+        // Show transfers tab
+        function showTransfers() {
+            showTab('transfers');
+            document.querySelector('[onclick="showTab(\'transfers\')"]').classList.add('active');
+        }
+
+        // Select position (for captain selection or player selection in transfers mode)
+        function selectPosition(position) {
+            console.log(`selectPosition called for: ${position}, isInitialFormationMode: ${isInitialFormationMode}, isTransfersMode: ${isTransfersMode}`);
+
+            // Prioritize active round check - this prevents any team changes during an active round
+            if (!canMakeTransfers()) {
+                alert('لا يمكن تعديل التشكيلة أثناء الجولة، يرجى انتظار انتهاء الجولة الحالية.');
+                return;
+            }
+
+            if (isInitialFormationMode || isTransfersMode) {
+                // Already in a player selection mode, proceed to show modal
+                selectedPosition = position;
+                showPlayerSelectionModal(position);
+            } else if (!isTeamSaved) {
+                // No mode active and team not saved, activate initial formation mode
+                toggleInitialFormation();
+                selectedPosition = position;
+                showPlayerSelectionModal(position);
+            } else if (isTeamSaved) {
+                // No mode active and team is saved, activate transfers mode
+                toggleTransfersMode();
+                selectedPosition = position;
+                showPlayerSelectionModal(position);
+            }
+            
+            // Captain selection logic (only if no player selection mode is active)
+            if (!isInitialFormationMode && !isTransfersMode) {
+                const userTeam = gameData.userTeams[currentUser];
+                const playerId = userTeam.players[position];
+                
+                if (playerId) { // Only allow captain selection if a player is already in the slot
+                if (userTeam.captain === playerId) {
+                        if (!userTeam.viceCaptain) {
+                            userTeam.viceCaptain = playerId;
+                        } else {
+                    userTeam.captain = null;
+                        }
+                } else if (userTeam.viceCaptain === playerId) {
+                    userTeam.viceCaptain = null;
+                    } else {
+                        if (!userTeam.captain) {
+                    userTeam.captain = playerId;
+                        } else if (!userTeam.viceCaptain) {
+                            userTeam.viceCaptain = playerId;
+                } else {
+                            alert('Only one captain and one vice-captain allowed.');
+                    }
+                }
+                saveGameData();
+                    updateUI();
+                updateFormation();
+                } else {
+                    // If no player in slot and not in selection mode, do nothing for captain
+                    console.log('No player in slot for captain selection, and not in selection mode.');
+                }
+            }
+        }
+window.selectPosition = selectPosition;
+        // Show player selection modal
+        function showPlayerSelectionModal(position) {
+            console.log(`showPlayerSelectionModal called for position: ${position}`);
+            const modal = document.getElementById('player-selection-modal');
+            const positionName = document.getElementById('selected-position-name');
+            
+            positionName.textContent = getPositionName(position);
+            modal.classList.add('active');
+            
+            populateModalFilters();
+            loadModalPlayers();
+            console.log('Player selection modal should be active.');
+        }
+
+        // Close player selection modal
+        function closePlayerSelection() {
+            const modal = document.getElementById('player-selection-modal');
+            modal.classList.remove('active');
+            selectedPosition = null;
+        }
+
+        // Populate modal filters
+        function populateModalFilters() {
+            const teamFilter = document.getElementById('modal-team-filter');
+            teamFilter.innerHTML = '<option value="all">All Teams</option>';
+            gameData.teams.forEach(team => {
+                teamFilter.innerHTML += `<option value="${team}">${team}</option>`;
+            });
+        }
+
+        // Filter modal players
+        function filterModalPlayers() {
+            loadModalPlayers();
+        }
+
+        // Load players in modal
+      // Load players in modal
+function loadModalPlayers() {
+    console.log('loadModalPlayers called.');
+    const container = document.getElementById('modal-players');
+    const positionFilter = document.getElementById('modal-position-filter')?.value || 'all';
+    const teamFilter = document.getElementById('modal-team-filter')?.value || 'all';
+    const userTeam = gameData.userTeams[currentUser];
+
+    // Build effective players map (current team + pending teamChanges)
+    const effectivePlayers = { ...(userTeam.players || {}) };
+    Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+        if (pid) effectivePlayers[pos] = pid;
+    });
+
+    let filteredPlayers = gameData.players.filter(player => {
+        // Filter by position
+        if (positionFilter !== 'all' && player.position !== positionFilter) return false;
+
+        // Filter by team
+        if (teamFilter !== 'all' && player.team !== teamFilter) return false;
+
+        // Don't show players already in user's effective team (except current position)
+        const currentPlayerInPosition = teamChanges[selectedPosition] || userTeam.players[selectedPosition];
+        if (Object.values(effectivePlayers).includes(player.id) && player.id !== currentPlayerInPosition) return false;
+
+        // Enforce compatibility with the selected slot
+        if (selectedPosition && !isPositionCompatible(player.position, selectedPosition)) return false;
+
+        return true; // If all filters pass, include player
+    });
+
+    container.innerHTML = ''; // Clear previous players
+
+    if (filteredPlayers.length === 0) {
+        console.log('No players found after filtering.');
+        container.innerHTML = '<p style="text-align: center; color: #bbb;">No players found</p>';
+        return;
+    }
+
+    console.log(`Found ${filteredPlayers.length} players after filtering.`);
+    filteredPlayers.forEach(player => {
+        const playerCard = document.createElement('div');
+        playerCard.className = `player-card ${player.position}`;
+        playerCard.onclick = () => selectPlayerForPosition(player.id);
+        playerCard.innerHTML = `
+            <img src="./assets/player_placeholder.png" alt="${player.name}" class="player-image">
+            <div class="player-info">
+                <span class="player-name">${player.name}</span>
+                <span class="player-team-name">${player.team}</span>
+                <span class="player-position-tag">${getPositionNameArabic(player.position)}</span>
+                <span class="player-price">$${player.price.toFixed(1)}M</span>
+            </div>
+        `;
+        container.appendChild(playerCard);
+    });
+    console.log('loadModalPlayers finished. Players rendered.');
+}
+
+// Add this helper function (put it near your other helper functions)
+function countPlayersFromTeam(effectivePlayers, teamName) {
+    let count = 0;
+    Object.values(effectivePlayers).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p && p.team === teamName) count++;
+    });
+    return count;
+}
+
+// Add this helper for validating the full team before saving
+function validateTeamLimit(playersObj, limit = 2) {
+    const teamCounts = {};
+    Object.values(playersObj).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p) {
+            teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
+        }
+    });
+    // Find if any team exceeds limit
+    for (const team in teamCounts) {
+        if (teamCounts[team] > limit) return team;
+    }
+    return null;
+}
+        // Select player for position
+       // Select player for position
+function selectPlayerForPosition(playerId) {
+    if (selectedPosition) {
+        const player = gameData.players.find(p => p.id === playerId);
+        if (!player) return;
+        if (!isPositionCompatible(player.position, selectedPosition)) {
+            alert('اللاعب لا يناسب هذا المركز');
+            return;
+        }
+
+        // Prevent selecting the same player twice (consider userTeam + pending teamChanges)
+        const userTeam = gameData.userTeams[currentUser];
+        const effectivePlayers = { ...(userTeam.players || {}) };
+        Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+            if (pid) effectivePlayers[pos] = pid;
+        });
+
+        // Team member limit check
+        const teamLimit = 2;
+        const currentCount = countPlayersFromTeam(effectivePlayers, player.team);
+        const currentPlayerInPosition = teamChanges[selectedPosition] || userTeam.players[selectedPosition];
+        if (currentCount >= teamLimit && currentPlayerInPosition !== playerId) {
+            alert('لا يمكنك اختيار أكثر من لاعبين من نفس الفريق!');
+            return;
+        }
+
+        // If player is already assigned to another position (not the current selectedPosition) -> block
+        const alreadyAssigned = Object.entries(effectivePlayers)
+            .find(([pos, pid]) => pid === playerId && pos !== selectedPosition);
+
+        if (alreadyAssigned) {
+            alert('هذا اللاعب مُختار بالفعل في موقع آخر. الرجاء اختيار لاعب آخر.');
+            return;
+        }
+
+        // OK — set pending change
+        teamChanges[selectedPosition] = playerId;
+        closePlayerSelection();
+        updateFormation();
+        updateTeamStats(); // live bank/team value preview
+    }
+}
+        // Update rankings
+        function updateRankings() {
+            // Calculate rankings based on user teams
+            const userRankings = Object.keys(gameData.userTeams).map(username => {
+                const userTeam = gameData.userTeams[username];
+                const totalPoints = Object.values(userTeam.players).reduce((sum, playerId) => {
+                    const player = gameData.players.find(p => p.id === playerId);
+                    return sum + (player ? player.points : 0);
+                }, 0);
+                return { username, totalPoints };
+            }).sort((a, b) => b.totalPoints - a.totalPoints);
+
+            // Update round rankings
+            const roundContainer = document.getElementById('round-rankings');
+            roundContainer.innerHTML = '';
+            userRankings.forEach((user, index) => {
+                const rankingItem = document.createElement('div');
+                rankingItem.className = 'ranking-item';
+                rankingItem.innerHTML = `
+                    <span class="ranking-position">${index + 1}</span>
+                    <span class="ranking-name">${user.username}</span>
+                    <span class="ranking-points">${user.totalPoints}</span>
+                `;
+                roundContainer.appendChild(rankingItem);
+            });
+
+            // Update total rankings (same for now)
+            const totalContainer = document.getElementById('total-rankings');
+            totalContainer.innerHTML = '';
+            userRankings.forEach((user, index) => {
+                const rankingItem = document.createElement('div');
+                rankingItem.className = 'ranking-item';
+                rankingItem.innerHTML = `
+                    <span class="ranking-position">${index + 1}</span>
+                    <span class="ranking-name">${user.username}</span>
+                    <span class="ranking-points">${user.totalPoints}</span>
+                `;
+                totalContainer.appendChild(rankingItem);
+            });
+        }
+
+        // Populate matches filters
+        function populateMatchesFilters() {
+            const filter = document.getElementById('matches-round-filter');
+            filter.innerHTML = '<option value="all">All Rounds</option>';
+            gameData.rounds.forEach(round => {
+                filter.innerHTML += `<option value="${round.id}">${round.name}</option>`;
+            });
+        }
+
+        // Filter matches
+        function filterMatches() {
+            updateMatches();
+        }
+
+        // Update matches display
+        function updateMatches() {
+            const container = document.getElementById('matches-container');
+            const roundFilter = document.getElementById('matches-round-filter')?.value || 'all';
+            
+            let filteredMatches = gameData.matches;
+            if (roundFilter !== 'all') {
+                filteredMatches = gameData.matches.filter(match => match.round == roundFilter);
+            }
+            
+            container.innerHTML = '';
+            
+            if (filteredMatches.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #bbb;">No matches found</p>';
+                return;
+            }
+            
+            // Group matches by round
+            const matchesByRound = {};
+            filteredMatches.forEach(match => {
+                const roundName = gameData.rounds.find(r => r.id === match.round)?.name || 'Undefined';
+                if (!matchesByRound[roundName]) {
+                    matchesByRound[roundName] = [];
+                }
+                matchesByRound[roundName].push(match);
+            });
+            
+            Object.entries(matchesByRound).forEach(([roundName, matches]) => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'card';
+                roundDiv.innerHTML = `<h3>${roundName}</h3>`;
+                
+                matches.forEach(match => {
+                    const matchStatusText = match.isFinished ? 'انتهت' : 'لم تبدأ بعد';
+                    const team1Score = match.score?.team1 || '-';
+                    const team2Score = match.score?.team2 || '-';
+                    const matchTime = new Date(match.datetime).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+                    const matchDate = new Date(match.datetime).toLocaleDateString('en-US');
+
+                    const matchCard = document.createElement('div');
+                    matchCard.className = 'match-card';
+                    matchCard.innerHTML = `
+                        <h5 style="font-size: 1.2em;">
+                            ${match.team1} <span style="font-weight: bold;">${team1Score}</span> vs <span style="font-weight: bold;">${team2Score}</span> ${match.team2}
+                        </h5>
+                        <p>Time: ${matchTime}, ${matchDate}</p>
+                        <p>الحالة: ${matchStatusText}</p>
+                    `;
+                    roundDiv.appendChild(matchCard);
+                });
+                container.appendChild(roundDiv);
+            });
+        }
+
+        // Show match details
+        function showMatchDetails(match) {
+            if (!match.score) {
+                alert('Match has not finished yet!');
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="close-modal" onclick="this.closest('.modal').remove()">✖</button>
+                    <div class="modal-header">
+                        <h2>${match.team1} vs ${match.team2}</h2>
+                        <p>Score: ${match.score}</p>
+                    </div>
+                    <div class="match-events">
+                        <div class="event-section">
+                            <h4>Goals</h4>
+                            <p>${match.events.goals || 'No goals'}</p>
+                        </div>
+                        <div class="event-section">
+                            <h4>Assists</h4>
+                            <p>${match.events.assists || 'No assists'}</p>
+                        </div>
+                        <div class="event-section">
+                            <h4>Yellow Cards</h4>
+                            <p>${match.events.yellowCards || 'No yellow cards'}</p>
+                        </div>
+                        <div class="event-section">
+                            <h4>Red Cards</h4>
+                            <p>${match.events.redCards || 'No red cards'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            // Goals stats
+            const goalsStats = gameData.players
+                .filter(p => p.goals > 0)
+                .sort((a, b) => b.goals - a.goals)
+                .slice(0, 5);
+            
+            const goalsContainer = document.getElementById('goals-stats');
+            goalsContainer.innerHTML = '';
+            if (goalsStats.length > 0) {
+                goalsStats.forEach(player => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${player.name}</span><span>${player.goals} goals</span>`;
+                    goalsContainer.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = '<span style="color: #888;">No goals scored yet</span>';
+                goalsContainer.appendChild(li);
+            }
+            
+            // Assists stats
+            const assistsStats = gameData.players
+                .filter(p => p.assists > 0)
+                .sort((a, b) => b.assists - a.assists)
+                .slice(0, 5);
+            
+            const assistsContainer = document.getElementById('assists-stats');
+            assistsContainer.innerHTML = '';
+            if (assistsStats.length > 0) {
+                assistsStats.forEach(player => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${player.name}</span><span>${player.assists} assists</span>`;
+                    assistsContainer.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = '<span style="color: #888;">No assists yet</span>';
+                assistsContainer.appendChild(li);
+            }
+            
+            // Clean sheets stats
+            const cleanSheetsStats = gameData.players
+                .filter(p => p.cleanSheets > 0)
+                .sort((a, b) => b.cleanSheets - a.cleanSheets)
+                .slice(0, 5);
+            
+            const cleanSheetsContainer = document.getElementById('clean-sheets-stats');
+            cleanSheetsContainer.innerHTML = '';
+            if (cleanSheetsStats.length > 0) {
+                cleanSheetsStats.forEach(player => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${player.name}</span><span>${player.cleanSheets} matches</span>`;
+                    cleanSheetsContainer.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = '<span style="color: #888;">No clean sheets yet</span>';
+                cleanSheetsContainer.appendChild(li);
+            }
+            
+            // Saves stats
+            const savesStats = gameData.players
+                .filter(p => p.saves > 0)
+                .sort((a, b) => b.saves - a.saves)
+                .slice(0, 5);
+            
+            const savesContainer = document.getElementById('saves-stats');
+            savesContainer.innerHTML = '';
+            if (savesStats.length > 0) {
+                savesStats.forEach(player => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${player.name}</span><span>${player.saves} saves</span>`;
+                    savesContainer.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = '<span style="color: #888;">No saves yet</span>';
+                savesContainer.appendChild(li);
+            }
+            
+            // Cards stats
+            const cardsStats = gameData.players
+                .filter(p => p.yellowCards > 0)
+                .sort((a, b) => b.yellowCards - a.yellowCards)
+                .slice(0, 5);
+            
+            const cardsContainer = document.getElementById('cards-stats');
+            cardsContainer.innerHTML = '';
+            if (cardsStats.length > 0) {
+                cardsStats.forEach(player => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${player.name}</span><span>${player.yellowCards} cards</span>`;
+                    cardsContainer.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = '<span style="color: #888;">No yellow cards yet</span>';
+                cardsContainer.appendChild(li);
+            }
+            
+            // Red cards stats
+            const redCardsStats = gameData.players
+                .filter(p => p.redCards > 0)
+                .sort((a, b) => b.redCards - a.redCards)
+                .slice(0, 5);
+            
+            const redCardsContainer = document.getElementById('red-cards-stats');
+            redCardsContainer.innerHTML = '';
+            if (redCardsStats.length > 0) {
+                redCardsStats.forEach(player => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${player.name}</span><span>${player.redCards} red cards</span>`;
+                    redCardsContainer.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = '<span style="color: #888;">No red cards yet</span>';
+                redCardsContainer.appendChild(li);
+            }
+        }
+
+        // Toggle admin mode
+        function toggleAdmin() {
+            const modal = document.getElementById('admin-password-modal');
+            modal.classList.add('active');
+        }
+
+        // Check admin password
+        function checkAdminPassword() {
+            const password = document.getElementById('admin-password-input').value;
+            if (password === ADMIN_PASSWORD) {
+                closeAdminPassword();
+                const adminModal = document.getElementById('admin-modal');
+                adminModal.classList.add('active');
+            loadAdminData();
+            } else {
+                alert('Incorrect password!');
+            }
+        }
+
+        // Close admin password modal
+        function closeAdminPassword() {
+            const modal = document.getElementById('admin-password-modal');
+            modal.classList.remove('active');
+            document.getElementById('admin-password-input').value = '';
+        }
+
+        // Close admin modal
+        function closeAdmin() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('active');
+        }
+
+        // Show admin tab
+        function showAdminTab(tabName) {
+            document.querySelectorAll('.admin-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(`admin-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load admin data
+        function loadAdminData() {
+            loadRoundsList();
+            loadMatchesList();
+            loadTeamsList();
+            loadPlayersList();
+            loadUsersList();
+            populateAdminDropdowns();
+        }
+
+        // Populate admin dropdowns
+        function populateAdminDropdowns() {
+            // Populate rounds dropdown
+            const roundSelects = ['match-round', 'points-round'];
+            roundSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Select Round</option>';
+                gameData.rounds.forEach(round => {
+                    select.innerHTML += `<option value="${round.id}">${round.name}</option>`;
+                });
+            });
+            
+            // Populate teams dropdown
+            const teamSelects = ['match-team1', 'match-team2', 'player-team'];
+            teamSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Select Team</option>';
+                gameData.teams.forEach(team => {
+                    select.innerHTML += `<option value="${team}">${team}</option>`;
+                });
+            });
+            
+            // Add event listener for round selection in match data entry
+            document.getElementById('points-round').addEventListener('change', (event) => {
+                populateMatchDropdown(event.target.value);
+            });
+
+            // Add event listener for match selection in match data entry
+            document.getElementById('match-for-points').addEventListener('change', (event) => {
+                loadMatchPlayerStats(event.target.value);
+            });
+        }
+
+        function populateMatchDropdown(roundId) {
+            const matchSelect = document.getElementById('match-for-points');
+            matchSelect.innerHTML = '<option value="">Select Match</option>';
+            if (roundId) {
+                const matchesInRound = gameData.matches.filter(match => match.round == roundId && match.isFinished === true);
+                matchesInRound.forEach(match => {
+                    matchSelect.innerHTML += `<option value="${match.id}">${match.team1} vs ${match.team2}</option>`;
+                });
+            }
+            // Clear player stats when round or match changes
+            document.getElementById('match-player-stats-container').innerHTML = '';
+        }
+
+        function loadMatchPlayerStats(matchId) {
+            const container = document.getElementById('match-player-stats-container');
+            container.innerHTML = ''; // Clear previous player stats
+
+            const match = gameData.matches.find(m => m.id == matchId);
+            if (!match) return;
+
+            // Add match score input fields
+            const matchScoreDiv = document.createElement('div');
+            matchScoreDiv.className = 'card mb-3';
+            matchScoreDiv.innerHTML = `
+                <h5>Match Score: ${match.team1} vs ${match.team2}</h5>
+                <div class="grid grid-2">
+                    <div class="form-group">
+                        <label>${match.team1} Score:</label>
+                        <input type="number" class="form-control" id="match-score-team1" value="${match.score?.team1 || 0}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>${match.team2} Score:</label>
+                        <input type="number" class="form-control" id="match-score-team2" value="${match.score?.team2 || 0}" min="0">
+                    </div>
+                </div>
+            `;
+            container.appendChild(matchScoreDiv);
+
+            const playersInMatch = gameData.players.filter(player => 
+                player.team === match.team1 || player.team === match.team2
+            );
+
+            playersInMatch.forEach(player => {
+                const playerMatchStats = match.playerStats && match.playerStats[player.id] || {};
+
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'card mb-3';
+                playerDiv.innerHTML = `
+                    <h5>${player.name} (${player.team}) - ${player.position}</h5>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label>Goals ⚽:</label>
+                            <input type="number" class="form-control" data-player-id="${player.id}" data-stat="goals" value="${playerMatchStats.goals || 0}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Assists 🎯:</label>
+                            <input type="number" class="form-control" data-player-id="${player.id}" data-stat="assists" value="${playerMatchStats.assists || 0}" min="0">
+                        </div>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label>Yellow Cards 🟨:</label>
+                            <input type="number" class="form-control" data-player-id="${player.id}" data-stat="yellowCards" value="${playerMatchStats.yellowCards || 0}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Red Cards 🟥:</label>
+                            <input type="number" class="form-control" data-player-id="${player.id}" data-stat="redCards" value="${playerMatchStats.redCards || 0}" min="0">
+                        </div>
+                    </div>
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label>Clean Sheets 🥅:</label>
+                            <input type="number" class="form-control" data-player-id="${player.id}" data-stat="cleanSheets" value="${playerMatchStats.cleanSheets || 0}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Saves (GK only) 🧤:</label>
+                            <input type="number" class="form-control" data-player-id="${player.id}" data-stat="saves" value="${playerMatchStats.saves || 0}" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Manual Points (for this match):</label>
+                        <input type="number" class="form-control" data-player-id="${player.id}" data-stat="points" value="${playerMatchStats.points || 0}" min="0">
+                    </div>
+                `;
+                container.appendChild(playerDiv);
+            });
+        }
+
+        function saveMatchPlayerStats() {
+            const matchId = document.getElementById('match-for-points').value;
+            if (!matchId) {
+                alert('Please select a match first!');
+                return;
+            }
+
+            const match = gameData.matches.find(m => m.id == matchId);
+            if (!match) {
+                alert('Selected match not found!');
+                return;
+            }
+
+            // Save match score
+            const team1Score = parseInt(document.getElementById('match-score-team1').value) || 0;
+            const team2Score = parseInt(document.getElementById('match-score-team2').value) || 0;
+            match.score = { team1: team1Score, team2: team2Score };
+
+            if (!match.playerStats) {
+                match.playerStats = {};
+            }
+
+            const playerStatInputs = document.querySelectorAll('#match-player-stats-container input[data-player-id]');
+            playerStatInputs.forEach(input => {
+                const playerId = input.dataset.playerId;
+                const stat = input.dataset.stat;
+                const value = parseInt(input.value) || 0;
+
+                if (!match.playerStats[playerId]) {
+                    match.playerStats[playerId] = {};
+                }
+                match.playerStats[playerId][stat] = value;
+            });
+
+            saveGameData();
+            alert('Match player statistics saved successfully!');
+            // Optionally reload the stats for the currently selected match to show updated values
+            loadMatchPlayerStats(matchId);
+        }
+
+        function addRound() {
+            const name = document.getElementById('round-name').value;
+            const start = document.getElementById('round-start').value;
+            const end = document.getElementById('round-end').value;
+            const transfersAllowed = parseInt(document.getElementById('round-transfers-allowed').value) || 0;
+            
+            if (!name || !start || !end) {
+                alert('All fields must be filled!');
+                return;
+            }
+            
+            const newRound = {
+                id: gameData.rounds.length + 1,
+                name,
+                start,
+                end,
+                transfersAllowed
+            };
+            
+            gameData.rounds.push(newRound);
+            saveGameData();
+            loadRoundsList();
+            populateAdminDropdowns();
+            
+            // Clear form
+            document.getElementById('round-name').value = '';
+            document.getElementById('round-start').value = '';
+            document.getElementById('round-end').value = '';
+            document.getElementById('round-transfers-allowed').value = '2'; // Reset to default
+            
+            alert('Round added successfully!');
+        }
+
+        function addMatch() {
+            const round = document.getElementById('match-round').value;
+            const team1 = document.getElementById('match-team1').value;
+            const team2 = document.getElementById('match-team2').value;
+            const datetime = document.getElementById('match-datetime').value;
+            
+            if (!round || !team1 || !team2 || !datetime) {
+                alert('All fields must be filled!');
+                return;
+            }
+            
+            if (team1 === team2) {
+                alert('A team cannot play against itself!');
+                return;
+            }
+            
+            const newMatch = {
+                id: Date.now(),
+                round: parseInt(round),
+                team1,
+                team2,
+                datetime,
+                score: null,
+                events: {},
+                isFinished: false,
+                playerStats: {}
+            };
+            
+            gameData.matches.push(newMatch);
+            saveGameData();
+            loadMatchesList();
+            
+            // Clear form
+            document.getElementById('match-round').value = '';
+            document.getElementById('match-team1').value = '';
+            document.getElementById('match-team2').value = '';
+            document.getElementById('match-datetime').value = '';
+            
+            alert('Match added successfully!');
+        }
+
+        function addTeam() {
+            const name = document.getElementById('team-name').value.trim();
+            
+            if (!name) {
+                alert('Team name is required!');
+                return;
+            }
+            
+            if (gameData.teams.includes(name)) {
+                alert('Team already exists!');
+                return;
+            }
+            
+            gameData.teams.push(name);
+            saveGameData();
+            loadTeamsList();
+            populateAdminDropdowns();
+            populateFilters();
+            
+            document.getElementById('team-name').value = '';
+            alert('Team added successfully!');
+        }
+
+        function addPlayer() {
+            const name = document.getElementById('player-name').value.trim();
+            const team = document.getElementById('player-team').value;
+            const position = document.getElementById('player-position').value;
+            const price = parseFloat(document.getElementById('player-price').value);
+            
+            if (!name || !team || !position || isNaN(price) || price <= 0) {
+                alert('All fields must be filled correctly!');
+                return;
+            }
+            
+            const newPlayer = {
+                id: 'p' + Date.now(),
+                name,
+                team,
+                position,
+                price,
+                points: 0,
+                goals: 0,
+                assists: 0,
+                saves: 0,
+                cleanSheets: 0,
+                yellowCards: 0,
+                redCards: 0
+            };
+            
+            gameData.players.push(newPlayer);
+            saveGameData();
+            loadPlayersList();
+            populateAdminDropdowns();
+            
+            // Clear form
+            document.getElementById('player-name').value = '';
+            document.getElementById('player-team').value = '';
+            document.getElementById('player-position').value = '';
+            document.getElementById('player-price').value = '';
+            
+            alert('Player added successfully!');
+        }
+
+        function deleteUser() {
+            const username = document.getElementById('user-search').value.trim();
+            
+            if (!username) {
+                alert('Username is required!');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete account "${username}"?`)) {
+                delete gameData.userTeams[username];
+                delete gameData.transfersUsed[username];
+                delete gameData.powerUpsUsed[username];
+                delete gameData.activePowerUps[username];
+                
+                saveGameData();
+                loadUsersList();
+                
+                document.getElementById('user-search').value = '';
+                alert('Account deleted successfully!');
+            }
+        }
+
+        function updatePlayerPoints() {
+            console.log('updatePlayerPoints function called.');
+            const round = document.getElementById('points-round').value;
+            const playerId = document.getElementById('points-player').value;
+            const directPoints = parseInt(document.getElementById('direct-points').value) || 0;
+            const goals = parseInt(document.getElementById('goals').value) || 0;
+            const assists = parseInt(document.getElementById('assists').value) || 0;
+            const yellowCards = parseInt(document.getElementById('yellow-cards').value) || 0;
+            const redCards = parseInt(document.getElementById('red-cards').value) || 0;
+            const injured = document.getElementById('player-injured').value === 'yes';
+            
+            console.log(`Round: ${round}, PlayerId: ${playerId}, Direct: ${directPoints}, Goals: ${goals}, Assists: ${assists}, Yellow: ${yellowCards}, Red: ${redCards}, Injured: ${injured}`);
+            
+            if (!round || !playerId) {
+                alert('Round and player must be selected!');
+                console.error('Validation failed: Round or Player not selected.');
+                return;
+            }
+            
+            const player = gameData.players.find(p => p.id === playerId);
+            if (!player) {
+                alert('Player not found!');
+                console.error('Validation failed: Player not found for ID:', playerId);
+                return;
+            }
+            
+            // Calculate points based on performance
+            let totalPoints = directPoints;
+            totalPoints += goals * (player.position === 'forward' ? 4 : player.position === 'midfielder' ? 5 : 6);
+            totalPoints += assists * 3;
+            totalPoints -= yellowCards * 1;
+            totalPoints -= redCards * 3;
+            if (injured) totalPoints -= 2;
+            
+            // Update player stats
+            player.points = Math.max(0, totalPoints);
+            player.goals += goals;
+            player.assists += assists;
+            player.yellowCards += yellowCards;
+            player.redCards += redCards;
+            
+            saveGameData();
+            updateUI();
+            updateStatistics();
+            
+            alert(`Updated ${player.name}'s points to ${player.points} points!`);
+            console.log(`Player ${player.name} points updated to ${player.points}.`);
+            
+            // Clear form
+            document.getElementById('direct-points').value = '0';
+            document.getElementById('goals').value = '0';
+            document.getElementById('assists').value = '0';
+            document.getElementById('yellow-cards').value = '0';
+            document.getElementById('red-cards').value = '0';
+            document.getElementById('player-injured').value = 'no';
+        }
+
+        // Load admin lists
+        function loadRoundsList() {
+            const container = document.getElementById('rounds-list');
+            container.innerHTML = '<h4>الجولات الحالية:</h4>';
+            
+            gameData.rounds.forEach(round => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'card';
+                roundDiv.innerHTML = `
+                    <h5>${round.name}</h5>
+                    <p>البداية: ${new Date(round.start).toLocaleString('en-US')}</p>
+                    <p>النهاية: ${new Date(round.end).toLocaleString('en-US')}</p>
+                    <p>التبديلات المسموحة: ${round.transfersAllowed}</p>
+                    <button class="btn btn-danger" onclick="deleteRound(${round.id})">حذف</button>
+                `;
+                container.appendChild(roundDiv);
+            });
+        }
+
+        function loadMatchesList() {
+            const container = document.getElementById('matches-list');
+            container.innerHTML = '<h4>المباريات الحالية:</h4>';
+            
+            gameData.matches.forEach(match => {
+                const roundName = gameData.rounds.find(r => r.id === match.round)?.name || 'غير محدد';
+                const matchStatusText = match.isFinished ? 'انتهت' : 'لم تبدأ بعد';
+                const matchStatusClass = match.isFinished ? 'btn-success' : 'btn-warning';
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'card';
+                matchDiv.innerHTML = `
+                    <h5>${match.team1} ضد ${match.team2}</h5>
+                    <p>الجولة: ${roundName}</p>
+                    <p>التوقيت: ${new Date(match.datetime).toLocaleString('en-US')}</p>
+                    <p>النتيجة: ${match.score || 'لم تُحدد بعد'}</p>
+                    <p>الحالة: ${matchStatusText}</p>
+                    <button class="btn ${matchStatusClass}" onclick="toggleMatchStatus(${match.id})">تغيير الحالة</button>
+                    <button class="btn btn-danger" onclick="deleteMatch(${match.id})">حذف</button>
+                `;
+                container.appendChild(matchDiv);
+            });
+        }
+
+        function loadTeamsList() {
+            const container = document.getElementById('teams-list');
+            container.innerHTML = '<h4>الفرق الحالية:</h4>';
+            
+            gameData.teams.forEach(team => {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'card';
+                teamDiv.innerHTML = `
+                    <h5>${team}</h5>
+                    <button class="btn btn-danger" onclick="deleteTeam('${team}')">حذف</button>
+                `;
+                container.appendChild(teamDiv);
+            });
+        }
+
+        function loadPlayersList() {
+            const container = document.getElementById('players-list');
+            container.innerHTML = '<h4>اللاعبون الحاليون:</h4>';
+            
+            gameData.players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'card';
+                playerDiv.innerHTML = `
+                    <h5>${player.name}</h5>
+                    <p>الفريق: ${player.team}</p>
+                    <p>المركز: ${getPositionNameArabic(player.position)}</p>
+                    <p>السعر: ${player.price} مليون</p>
+                    <p>النقاط: ${player.points}</p>
+                    <button class="btn btn-danger" onclick="deletePlayer('${player.id}')">حذف</button>
+                    <button class="btn btn-warning" onclick="editPlayer('${player.id}')">تعديل</button>
+                `;
+                container.appendChild(playerDiv);
+            });
+        }
+
+        function loadUsersList() {
+            const container = document.getElementById('users-list');
+            container.innerHTML = '<h4>المستخدمون المسجلون:</h4>';
+            
+            Object.keys(gameData.userTeams).forEach(username => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'card';
+                const teamCount = Object.keys(gameData.userTeams[username].players).length;
+                const totalPoints = Object.values(gameData.userTeams[username].players).reduce((sum, playerId) => {
+                    const player = gameData.players.find(p => p.id === playerId);
+                    return sum + (player ? player.points : 0);
+                }, 0);
+                
+                userDiv.innerHTML = `
+                    <h5>${username}</h5>
+                    <p>عدد اللاعبين: ${teamCount}</p>
+                    <p>إجمالي النقاط: ${totalPoints}</p>
+                    <p>التبديلات المستعملة: ${gameData.transfersUsed[username] || 0}/2</p>
+                `;
+                container.appendChild(userDiv);
+            });
+        }
+
+        // Helper function to get position name in Arabic
+        function getPositionNameArabic(position) {
+            const names = {
+                'goalkeeper': 'حارس مرمى',
+                'defender': 'مدافع',
+                'midfielder': 'لاعب وسط',
+                'forward': 'مهاجم'
+            };
+            return names[position] || position;
+        }
+
+        // Delete functions
+        function deleteRound(roundId) {
+            if (confirm('هل أنت متأكد من حذف هذه الجولة؟')) {
+                gameData.rounds = gameData.rounds.filter(r => r.id !== roundId);
+                gameData.matches = gameData.matches.filter(m => m.round !== roundId);
+                saveGameData();
+                loadRoundsList();
+                loadMatchesList();
+                populateAdminDropdowns();
+            }
+        }
+
+        function deleteMatch(matchId) {
+            if (confirm('هل أنت متأكد من حذف هذه المباراة؟')) {
+                gameData.matches = gameData.matches.filter(m => m.id !== matchId);
+                saveGameData();
+                loadMatchesList();
+            }
+        }
+
+        function deleteTeam(teamName) {
+            if (confirm(`هل أنت متأكد من حذف فريق "${teamName}"؟`)) {
+                gameData.teams = gameData.teams.filter(t => t !== teamName);
+                gameData.players = gameData.players.filter(p => p.team !== teamName);
+                saveGameData();
+                loadTeamsList();
+                loadPlayersList();
+                populateAdminDropdowns();
+                populateFilters();
+            }
+        }
+
+        function deletePlayer(playerId) {
+            if (confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
+                gameData.players = gameData.players.filter(p => p.id !== playerId);
+                
+                // Remove player from all user teams
+                Object.keys(gameData.userTeams).forEach(username => {
+                    const userTeam = gameData.userTeams[username];
+                    Object.keys(userTeam.players).forEach(position => {
+                        if (userTeam.players[position] === playerId) {
+                            delete userTeam.players[position];
+                        }
+                    });
+                    
+                    // Reset captain if deleted
+                    if (userTeam.captain === playerId) userTeam.captain = null;
+                    if (userTeam.viceCaptain === playerId) userTeam.viceCaptain = null;
+                });
+                
+                saveGameData();
+                loadPlayersList();
+                populateAdminDropdowns();
+                updateUI();
+            }
+        }
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
+
+        // Update players tab
+        function updatePlayersTab() {
+            const container = document.getElementById('all-players-list');
+            container.innerHTML = '';
+
+            // Determine current round
+            const currentRound = gameData.rounds.find(r => {
+                const now = new Date();
+                const start = new Date(r.start);
+                const end = new Date(r.end);
+                return now >= start && now <= end;
+            });
+
+            gameData.players.forEach(player => {
+                // Aggregate player stats across all matches for total points
+                let totalPointsAggregated = 0;
+                let currentRoundPoints = 0;
+
+                gameData.matches.forEach(match => {
+                    if (match.playerStats && match.playerStats[player.id]) {
+                        const stats = match.playerStats[player.id];
+                        totalPointsAggregated += (stats.points || 0);
+
+                        // Also calculate current round points
+                        if (currentRound && match.round === currentRound.id && match.isFinished) {
+                            currentRoundPoints += (stats.points || 0);
+                        }
+                    }
+                });
+
+                const playerCard = document.createElement('div');
+                playerCard.className = `player-card ${player.position}`;
+
+                playerCard.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-team-tag">${player.team}</div>
+                    <div class="player-position-tag">${getPositionNameArabic(player.position)}</div>
+                    <div class="player-points">Total: ${totalPointsAggregated} pts</div>
+                    <div class="player-points" style="background: #555; margin-top: 5px;">Round: ${currentRoundPoints} pts</div>
+                `;
+                playerCard.onclick = () => showPlayerDetailsModal(player.id);
+                container.appendChild(playerCard);
+            });
+        }
+
+        // Show player details modal
+        function showPlayerDetailsModal(playerId) {
+            const player = gameData.players.find(p => p.id === playerId);
+            if (!player) return;
+
+            // Aggregate player stats across all matches
+            let totalGoals = 0;
+            let totalAssists = 0;
+            let totalYellowCards = 0;
+            let totalRedCards = 0;
+            let totalCleanSheets = 0;
+            let totalSaves = 0;
+            let totalPointsAggregated = 0;
+
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[playerId]) {
+                    const stats = match.playerStats[playerId];
+                    totalGoals += (stats.goals || 0);
+                    totalAssists += (stats.assists || 0);
+                    totalYellowCards += (stats.yellowCards || 0);
+                    totalRedCards += (stats.redCards || 0);
+                    totalCleanSheets += (stats.cleanSheets || 0);
+                    totalSaves += (stats.saves || 0);
+                    totalPointsAggregated += (stats.points || 0);
+                }
+            });
+
+            // Determine current round points
+            let currentRoundPoints = 0;
+            const currentRound = gameData.rounds.find(r => {
+                const now = new Date();
+                const start = new Date(r.start);
+                const end = new Date(r.end);
+                return now >= start && now <= end;
+            });
+            if (currentRound) {
+                const matchesInCurrentRound = gameData.matches.filter(m => m.round === currentRound.id && m.isFinished);
+                for (const match of matchesInCurrentRound) {
+                    if (match.playerStats && match.playerStats[playerId]) {
+                        currentRoundPoints += (match.playerStats[playerId].points || 0);
+                    }
+                }
+            }
+
+            document.getElementById('player-details-name').textContent = player.name;
+            document.getElementById('player-details-team').textContent = `Team: ${player.team}`;
+            document.getElementById('player-details-position').textContent = getPositionNameArabic(player.position);
+            document.getElementById('player-details-total-points').textContent = totalPointsAggregated;
+            document.getElementById('player-details-current-round-points').textContent = currentRoundPoints;
+            document.getElementById('player-details-goals').textContent = totalGoals;
+            document.getElementById('player-details-assists').textContent = totalAssists;
+            document.getElementById('player-details-yellow-cards').textContent = totalYellowCards;
+            document.getElementById('player-details-red-cards').textContent = totalRedCards;
+
+            const cleanSheetsRow = document.getElementById('player-details-clean-sheets-row');
+            const savesRow = document.getElementById('player-details-saves-row');
+
+            if (player.position === 'goalkeeper' || player.position === 'defender') {
+                cleanSheetsRow.style.display = 'block';
+                document.getElementById('player-details-clean-sheets').textContent = totalCleanSheets;
+            } else {
+                cleanSheetsRow.style.display = 'none';
+            }
+
+            if (player.position === 'goalkeeper') {
+                savesRow.style.display = 'block';
+                document.getElementById('player-details-saves').textContent = totalSaves;
+            } else {
+                savesRow.style.display = 'none';
+            }
+
+            document.getElementById('player-details-modal').classList.add('active');
+        }
+
+        function closePlayerDetailsModal() {
+            document.getElementById('player-details-modal').classList.remove('active');
+        }
+
+        function toggleMatchStatus(matchId) {
+            const match = gameData.matches.find(m => m.id === matchId);
+            if (match) {
+                match.isFinished = !match.isFinished;
+                saveGameData();
+                loadMatchesList();
+            }
+        }
+        
+    </script>
+</body>
+</html>
