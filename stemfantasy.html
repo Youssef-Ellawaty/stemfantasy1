@@ -2111,175 +2111,111 @@ function updateTeamStats() {
 }
 
         // Update formation display
-        function updateFormation() {
-            const userTeam = gameData.userTeams[currentUser];
-            const activePowerUp = gameData.activePowerUps[currentUser];
-            const formationField = document.getElementById('formation');
-            formationField.innerHTML = ''; // Clear existing slots
+function updateFormation() {
+    const userTeam = gameData.userTeams[currentUser];
+    const activePowerUp = gameData.activePowerUps[currentUser];
+    const formationField = document.getElementById('formation');
+    formationField.innerHTML = ''; // Clear existing slots
 
-            // Reintroduce effectivePlayers for rendering
-            const effectivePlayers = { ...(userTeam.players || {}) };
-            Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
-                effectivePlayers[pos] = pid;
-            });
+    // Reintroduce effectivePlayers for rendering
+    const effectivePlayers = { ...(userTeam.players || {}) };
+    Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+        effectivePlayers[pos] = pid;
+    });
 
-            const currentFormationDetails = gameData.formations[gameData.currentFormation];
-            if (!currentFormationDetails) {
-                console.error('Invalid formation selected:', gameData.currentFormation);
-                return;
-            }
+    const currentFormationDetails = gameData.formations[gameData.currentFormation];
+    if (!currentFormationDetails) {
+        console.error('Invalid formation selected:', gameData.currentFormation);
+        return;
+    }
 
-            // Always add the GK slot
-            const gkSlot = createPositionSlot('gk', { bottom: '5%', left: '50%', transform: 'translateX(-50%)' });
-            formationField.appendChild(gkSlot);
+    // Always add the GK slot
+    const gkSlot = createPositionSlot('gk', { bottom: '5%', left: '50%', transform: 'translateX(-50%)' });
+    formationField.appendChild(gkSlot);
 
-            // Dynamically add Def, Mid, Fwd slots
-            const defPositions = getDynamicPositions(currentFormationDetails.def, 65, 30, 'def'); // Reduced spread for defenders
-            defPositions.forEach((pos, i) => {
-                const slot = createPositionSlot(`def${i + 1}`, pos);
-                formationField.appendChild(slot);
-            });
+    // Dynamically add Def, Mid, Fwd slots
+    const defPositions = getDynamicPositions(currentFormationDetails.def, 65, 30, 'def');
+    defPositions.forEach((pos, i) => {
+        const slot = createPositionSlot(`def${i + 1}`, pos);
+        formationField.appendChild(slot);
+    });
 
-            const midPositions = getDynamicPositions(currentFormationDetails.mid, 40, 30, 'mid'); // Reduced spread for midfielders
-            midPositions.forEach((pos, i) => {
-                const slot = createPositionSlot(`mid${i + 1}`, pos);
-                formationField.appendChild(slot);
-            });
+    const midPositions = getDynamicPositions(currentFormationDetails.mid, 40, 30, 'mid');
+    midPositions.forEach((pos, i) => {
+        const slot = createPositionSlot(`mid${i + 1}`, pos);
+        formationField.appendChild(slot);
+    });
 
-            const fwdPositions = getDynamicPositions(currentFormationDetails.fwd, 18, 20, 'fwd'); // Reduced spread for forwards
-            fwdPositions.forEach((pos, i) => {
-                const slot = createPositionSlot(`fwd${i + 1}`, pos);
-                formationField.appendChild(slot);
-            });
+    const fwdPositions = getDynamicPositions(currentFormationDetails.fwd, 18, 20, 'fwd');
+    fwdPositions.forEach((pos, i) => {
+        const slot = createPositionSlot(`fwd${i + 1}`, pos);
+        formationField.appendChild(slot);
+    });
 
-            // Add substitute slots
-            const sub1Slot = createPositionSlot('sub1', { top: '30%', left: '10%', transform: 'translateX(-50%)' });
-            formationField.appendChild(sub1Slot);
-            const sub2Slot = createPositionSlot('sub2', { top: '60%', left: '10%', transform: 'translateX(-50%)' });
-            formationField.appendChild(sub2Slot);
+    // Add substitute slots
+    const sub1Slot = createPositionSlot('sub1', { top: '30%', left: '10%', transform: 'translateX(-50%)' });
+    formationField.appendChild(sub1Slot);
+    const sub2Slot = createPositionSlot('sub2', { top: '60%', left: '10%', transform: 'translateX(-50%)' });
+    formationField.appendChild(sub2Slot);
 
-            // Re-add field overlays
-            formationField.innerHTML += `
-                <div class="center-circle-overlay"></div>
-                <div class="halfway-line"></div>
-                <div class="subs-box" style="top: 15%; left: 0%; width: 20%; height: 70%;"></div>
-                <div class="gk-box" style="bottom: 0%; left: 50%; width: 50%; height: 20%; transform: translateX(-50%);"></div>
-            `;
+    // Re-add field overlays
+    formationField.innerHTML += `
+        <div class="center-circle-overlay"></div>
+        <div class="halfway-line"></div>
+        <div class="subs-box" style="top: 15%; left: 0%; width: 20%; height: 70%;"></div>
+        <div class="gk-box" style="bottom: 0%; left: 50%; width: 50%; height: 20%; transform: translateX(-50%);"></div>
+    `;
 
-            const allPositions = ['gk', ...Array.from({ length: currentFormationDetails.def }, (_, i) => `def${i + 1}`),
-                                  ...Array.from({ length: currentFormationDetails.mid }, (_, i) => `mid${i + 1}`),
-                                  ...Array.from({ length: currentFormationDetails.fwd }, (_, i) => `fwd${i + 1}`),
-                                  'sub1', 'sub2'];
-            
-            allPositions.forEach(position => {
-                const slot = document.querySelector(`[data-position="${position}"]`);
-                if (!slot) return; // Slot might not exist if formation changed
+    const allPositions = ['gk', ...Array.from({ length: currentFormationDetails.def }, (_, i) => `def${i + 1}`),
+                          ...Array.from({ length: currentFormationDetails.mid }, (_, i) => `mid${i + 1}`),
+                          ...Array.from({ length: currentFormationDetails.fwd }, (_, i) => `fwd${i + 1}`),
+                          'sub1', 'sub2'];
+    
+    allPositions.forEach(position => {
+        const slot = document.querySelector(`[data-position="${position}"]`);
+        if (!slot) return;
 
-                let playerId = userTeam.players[position];
-                
-                // Check if there's a pending change for this position
-                if (teamChanges[position]) {
-                    playerId = teamChanges[position];
-                    slot.style.borderColor = '#ffd700'; // Gold border for pending changes
-                } else {
-                    slot.style.borderColor = '#fff'; // Reset border color
-                }
-                
-                if (playerId) {
-                    const player = gameData.players.find(p => p.id === playerId);
-                    if (player) {
-                        const points = Number(player.points) || 0;
-                        const team = player.team || '';
-                        slot.innerHTML = `<div class=\"player-name\">${player.name}</div><div class=\"player-team-tag\">${team}</div><div class=\"player-points\">${points} pts</div>`;
-                        slot.classList.add('filled');
-                        
-                        // Remove old captain classes
-                        slot.classList.remove('captain', 'vice-captain', 'triple-captain');
-                        
-                        // Add captain styling
-                        if (userTeam.captain === playerId) {
-                            if (activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
-                                slot.classList.add('triple-captain');
-                            } else {
-                                slot.classList.add('captain');
-                            }
-                        } else if (userTeam.viceCaptain === playerId) {
-                            slot.classList.add('vice-captain');
-                        }
-                    }
-                } else {
-                    slot.innerHTML = `<div class="player-name">${getPositionName(position)}</div>`;
-                    slot.classList.remove('filled', 'captain', 'vice-captain', 'triple-captain');
-                }
-            });
-
-            // Function to render a player in a slot
-            function renderPlayerInSlot(slotElement, playerId, isCaptain) {
-                const player = gameData.players.find(p => p.id === playerId);
-                if (!player) {
-                    slotElement.innerHTML = '';
-                    return;
-                }
-
-                // Determine current round to fetch match-specific points
-                const currentRound = gameData.rounds.find(r => {
-                    const now = new Date();
-                    const start = new Date(r.start);
-                    const end = new Date(r.end);
-                    return now >= start && now <= end;
-                });
-                
-                let currentRoundPoints = 0;
-                if (currentRound) {
-                    // Find any match in the current round that the player participated in
-                    const matchesInCurrentRound = gameData.matches.filter(m => m.round === currentRound.id && m.isFinished);
-                    for (const match of matchesInCurrentRound) {
-                        if (match.playerStats && match.playerStats[playerId]) {
-                            currentRoundPoints += (match.playerStats[playerId].points || 0);
-                        }
-                    }
-                }
-
-                const captainClass = isCaptain ? 'captain' : '';
-                const pointsDisplay = `<span class="player-points ${captainClass}">${currentRoundPoints}</span>`;
-
-                slotElement.innerHTML = `
-                    <div class="player-card ${player.position}">
-                        <img src="./assets/player_placeholder.png" alt="${player.name}" class="player-image">
-                        <div class="player-info">
-                            <span class="player-name">${player.name}</span>
-                            <span class="player-team-name">${player.team}</span>
-                            ${pointsDisplay}
-                        </div>
-                    </div>
-                `;
-
-                slotElement.querySelector('.player-card').onclick = (event) => {
-                    event.stopPropagation();
-                    selectPlayerForTransfer(playerId, slotElement.id);
-                };
-            }
-
-            // Render GK and main squad players
-            Object.entries(effectivePlayers).forEach(([slotId, playerId]) => {
-                const slotElement = document.getElementById(slotId);
-                if (slotElement && playerId) {
-                    const isCaptain = userTeam.captain === playerId;
-                    renderPlayerInSlot(slotElement, playerId, isCaptain);
-                }
-            });
-
-            // Render substitute players
-            const sub1PlayerId = effectivePlayers['sub1'];
-            const sub2PlayerId = effectivePlayers['sub2'];
-
-            if (document.getElementById('sub1') && sub1PlayerId) {
-                renderPlayerInSlot(document.getElementById('sub1'), sub1PlayerId, userTeam.captain === sub1PlayerId);
-            }
-            if (document.getElementById('sub2') && sub2PlayerId) {
-                renderPlayerInSlot(document.getElementById('sub2'), sub2PlayerId, userTeam.captain === sub2PlayerId);
-            }
+        let playerId = userTeam.players[position];
+        if (teamChanges[position]) {
+            playerId = teamChanges[position];
+            slot.style.borderColor = '#ffd700';
+        } else {
+            slot.style.borderColor = '#fff';
         }
+
+        if (playerId) {
+            const player = gameData.players.find(p => p.id === playerId);
+            if (player) {
+                let points = Number(player.points) || 0;
+                // مضاعفة نقاط الكابتن في الملعب
+                if (userTeam.captain === playerId) {
+                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
+                        points *= 3;
+                    } else {
+                        points *= 2;
+                    }
+                }
+                const team = player.team || '';
+                slot.innerHTML = `<div class="player-name">${player.name}</div><div class="player-team-tag">${team}</div><div class="player-points">${points} pts</div>`;
+                slot.classList.add('filled');
+
+                slot.classList.remove('captain', 'vice-captain', 'triple-captain');
+                if (userTeam.captain === playerId) {
+                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
+                        slot.classList.add('triple-captain');
+                    } else {
+                        slot.classList.add('captain');
+                    }
+                } else if (userTeam.viceCaptain === playerId) {
+                    slot.classList.add('vice-captain');
+                }
+            }
+        } else {
+            slot.innerHTML = `<div class="player-name">${getPositionName(position)}</div>`;
+            slot.classList.remove('filled', 'captain', 'vice-captain', 'triple-captain');
+        }
+    });
+}
 
         // Helper to create a position slot element
         function createPositionSlot(positionName, style) {
