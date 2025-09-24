@@ -1908,27 +1908,38 @@ if (response.ok) {
         }
 
         // Load game data from server
-        async function loadGameDataFromServer() {
-            if (!authToken) return;
+async function loadGameDataFromServer() {
+    if (!authToken) return;
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/game-data`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-
-                if (response.ok) {
-                    const serverData = await response.json();
-                    gameData = { ...gameData, ...serverData };
-                    saveGameData();
-                    updateUI();
-                }
-            } catch (error) {
-                console.error('Error loading game data from server:', error);
+    try {
+        const response = await fetch(`${API_BASE_URL}/game-data`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
             }
-        }
+        });
 
+        if (response.ok) {
+            const serverData = await response.json();
+            // استبدل بيانات الجولات والمباريات والفرق واللاعبين بالكامل
+            gameData.rounds = serverData.rounds || [];
+            gameData.matches = serverData.matches || [];
+            gameData.teams = serverData.teams || [];
+            gameData.players = serverData.players || [];
+            gameData.userTeams = serverData.userTeams || {};
+            gameData.transfersUsed = serverData.transfersUsed || {};
+            gameData.powerUpsUsed = serverData.powerUpsUsed || {};
+            gameData.activePowerUps = serverData.activePowerUps || {};
+            gameData.formations = serverData.formations || gameData.formations;
+            gameData.currentFormation = serverData.currentFormation || gameData.currentFormation;
+            gameData.currentRound = serverData.currentRound || gameData.currentRound;
+
+            saveGameData();
+            updateUI();
+        }
+    } catch (error) {
+        console.error('Error loading game data from server:', error);
+    }
+}
         // Save game data to server
         async function saveGameDataToServer() {
 if (!authToken) {
