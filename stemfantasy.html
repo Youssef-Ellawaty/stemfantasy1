@@ -677,7 +677,7 @@
         }
 
         .player-price {
-            color: #4facfe;
+            color: #000000;
             font-weight: bold;
             font-size: 0.9rem;
         }
@@ -707,7 +707,7 @@
         .player-position-tag {
             margin-top: 2px;
             font-size: 0.7rem;
-            color: #999;
+            color: #000000;
             font-style: italic;
         }
 
@@ -1035,6 +1035,106 @@
             display: none; /* Hidden by default */
             margin-top: 20px;
         }
+
+        /* تحسين تصميم جدول الترتيب */
+.standings-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    align-items: flex-start;
+}
+.standings-table-section {
+    flex: 2;
+    min-width: 350px;
+    background: var(--card-dark);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: var(--shadow-dark);
+}
+.knockout-section {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.standings-title {
+    text-align: center;
+    margin-bottom: 1rem;
+    background: var(--blue-gradient);
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #222;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px #0002;
+}
+.standings-table th, .standings-table td {
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+.standings-table th {
+    background: #333;
+    color: #fff;
+    font-weight: bold;
+}
+.standings-table tr {
+    transition: background 0.2s;
+}
+.standings-table tr.top2 {
+    background: linear-gradient(90deg, #4ecdc4 0%, #44a08d 100%);
+    color: #fff;
+    font-weight: bold;
+}
+.standings-table tr.playoff {
+    background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+    color: #333;
+    font-weight: bold;
+}
+.standings-table tr.rest {
+    background: #222;
+    color: #bbb;
+}
+.standings-table tr:hover {
+    background: #444;
+}
+.playoff-section, .semifinal-section, .final-section {
+    background: var(--card-dark);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: var(--shadow-dark);
+}
+.playoff-section ul, .semifinal-section ul, .final-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.playoff-section li, .semifinal-section li, .final-section li {
+    padding: 8px 0;
+    font-size: 1rem;
+    border-bottom: 1px solid #3333;
+}
+.playoff-section li:last-child, .semifinal-section li:last-child, .final-section li:last-child {
+    border-bottom: none;
+}
+@media (max-width: 900px) {
+    .standings-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .standings-table-section, .knockout-section {
+        min-width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -1054,6 +1154,7 @@
         <button class="nav-tab" onclick="showTab('matches')">⚽ Matches</button>
         <button class="nav-tab" onclick="showTab('players-tab')">👤 Players</button>
         <button class="nav-tab" onclick="showTab('rankings')">🏅 Rankings</button>
+        <button class="nav-tab" onclick="showTab('team-standings')">🏟️ Team Standings</button>
         <button class="nav-tab" onclick="showTab('statistics')">📊 Statistics</button>
         <button class="nav-tab admin-only hidden" onclick="showTab('admin')">⚙️ Admin</button>
     </nav>
@@ -1316,6 +1417,32 @@
             </div>
         </div>
 
+
+        <!-- Team Standings Tab -->
+<div id="team-standings" class="tab-content">
+    <h2 style="text-align:center; margin-bottom: 1.5rem;">🏟️ Group & Knockout Standings</h2>
+    <div class="standings-wrapper">
+        <div class="standings-table-section">
+            <h3 class="standings-title">Group Stage Table</h3>
+            <div id="group-standings-table"></div>
+        </div>
+        <div class="knockout-section">
+            <div class="playoff-section">
+                <h3 class="standings-title">Playoff (3rd-6th)</h3>
+                <div id="playoff-section"></div>
+            </div>
+            <div class="semifinal-section">
+                <h3 class="standings-title">Semi Finals</h3>
+                <div id="semifinal-section"></div>
+            </div>
+            <div class="final-section">
+                <h3 class="standings-title">Final</h3>
+                <div id="final-section"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
         <!-- Statistics Tab -->
         <div id="statistics" class="tab-content">
             <h2>Statistics</h2>
@@ -1480,6 +1607,22 @@
                         <input type="datetime-local" class="form-control" id="match-datetime">
                     </div>
                 </div>
+                <div class="form-group">
+    <label>Match Type:</label>
+    <select class="form-control" id="match-type">
+        <option value="group">Group Stage</option>
+        <option value="playoff">Playoff</option>
+        <option value="semifinal">Semi Final</option>
+        <option value="final">Final</option>
+    </select>
+</div>
+<div class="form-group" id="leg-group" style="display:none;">
+    <label>Leg:</label>
+    <select class="form-control" id="match-leg">
+        <option value="first">First Leg</option>
+        <option value="second">Second Leg</option>
+    </select>
+</div>
                 <button class="btn btn-success" onclick="addMatch()">Add New Match</button>
                 
                 <div id="matches-list" style="margin-top: 20px;">
@@ -1579,10 +1722,37 @@
 
     <script>
 
-window.localStorage.setItem = function() {};
-window.localStorage.getItem = function() { return null; };
-window.localStorage.removeItem = function() {};
-window.localStorage.clear = function() {};
+// السماح فقط بتخزين authToken وfantasyUser في localStorage
+(function() {
+    const allowedKeys = ['authToken', 'fantasyUser'];
+    const realSetItem = window.localStorage.setItem.bind(window.localStorage);
+    const realGetItem = window.localStorage.getItem.bind(window.localStorage);
+    const realRemoveItem = window.localStorage.removeItem.bind(window.localStorage);
+    const realClear = window.localStorage.clear.bind(window.localStorage);
+
+    window.localStorage.setItem = function(key, value) {
+        if (allowedKeys.includes(key)) {
+            realSetItem(key, value);
+        }
+        // تجاهل أي محاولة لحفظ بيانات أخرى
+    };
+    window.localStorage.getItem = function(key) {
+        if (allowedKeys.includes(key)) {
+            return realGetItem(key);
+        }
+        return null;
+    };
+    window.localStorage.removeItem = function(key) {
+        if (allowedKeys.includes(key)) {
+            realRemoveItem(key);
+        }
+        // تجاهل حذف أي بيانات أخرى
+    };
+    window.localStorage.clear = function() {
+        // فقط احذف مفاتيح الدخول
+        allowedKeys.forEach(key => realRemoveItem(key));
+    };
+})();
 
    // Global variables
         let gameData = {
@@ -1680,6 +1850,7 @@ window.localStorage.clear = function() {};
         const ADMIN_PASSWORD = 'admin123'; // Change this to a secure password
         const API_BASE_URL = 'https://stemfantasy1-production.up.railway.app/api';
         const TOTAL_BUDGET = 45.0; // Total bank in millions
+
 
         // Initialize the application
         function initApp() {
@@ -1986,6 +2157,11 @@ if (!authToken) {
 
         // Initialize user team if not exists
         function initializeUserTeam() {
+            const activeRound = getCurrentActiveRound();
+            if (activeRound) {
+        alert('لا يمكنك إنشاء أو تعديل التشكيلة أثناء وجود جولة جارية!');
+        return;
+    }
             if (!gameData.userTeams[currentUser]) {
                 gameData.userTeams[currentUser] = {
                     players: {},
@@ -2084,41 +2260,41 @@ function updatePlayersTotalPoints() {
 }
 
 function updateAllUsersRoundPoints() {
-    const activeRound = getCurrentActiveRound();
-    if (!activeRound) return;
+    // احسب نقاط كل جولة لكل مستخدم (وليس فقط الجولة الحالية)
+    gameData.rounds.forEach(round => {
+        Object.keys(gameData.userTeams).forEach(username => {
+            const userTeam = gameData.userTeams[username];
+            let roundPoints = 0;
 
-    Object.keys(gameData.userTeams).forEach(username => {
-        const userTeam = gameData.userTeams[username];
-        let roundPoints = 0;
+            // احسب النقاط من لاعبي التشكيلة الأساسية فقط
+            Object.values(userTeam.players || {}).forEach(playerId => {
+                const player = gameData.players.find(p => p.id === playerId);
+                if (player) {
+                    let playerPoints = 0;
+                    // نقاط اللاعب في هذه الجولة فقط
+                    gameData.matches.forEach(match => {
+                        if (match.round === round.id && match.playerStats && match.playerStats[player.id]) {
+                            playerPoints += match.playerStats[player.id].points || 0;
+                        }
+                    });
 
-        // احسب النقاط من لاعبي التشكيلة الأساسية فقط
-        Object.values(userTeam.players || {}).forEach(playerId => {
-            const player = gameData.players.find(p => p.id === playerId);
-            if (player) {
-                let playerPoints = 0;
-                // نقاط اللاعب في الجولة الحالية فقط
-                gameData.matches.forEach(match => {
-                    if (match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
-                        playerPoints += match.playerStats[player.id].points || 0;
-                    }
-                });
-
-                // مضاعفة نقاط الكابتن
-                if (userTeam.captain === playerId) {
+                    // مضاعفة نقاط الكابتن حسب القوة المفعلة في هذه الجولة
                     const activePowerUp = gameData.activePowerUps[username];
-                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
-                        playerPoints *= 3;
-                    } else {
-                        playerPoints *= 2;
+                    if (userTeam.captain === playerId) {
+                        if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === round.id) {
+                            playerPoints *= 3;
+                        } else {
+                            playerPoints *= 2;
+                        }
                     }
+                    roundPoints += playerPoints;
                 }
-                roundPoints += playerPoints;
-            }
-        });
+            });
 
-        // احفظ النقاط في خاصية roundPoints
-        if (!userTeam.roundPoints) userTeam.roundPoints = {};
-        userTeam.roundPoints[activeRound.id] = roundPoints;
+            // احفظ النقاط في خاصية roundPoints
+            if (!userTeam.roundPoints) userTeam.roundPoints = {};
+            userTeam.roundPoints[round.id] = roundPoints;
+        });
     });
 }
 
@@ -2428,6 +2604,11 @@ function updateFormation() {
         }
 
         function setCaptain(playerId) {
+                const activeRound = getCurrentActiveRound();
+    if (activeRound) {
+        alert('لا يمكنك تغيير الكابتن أثناء وجود جولة جارية!');
+        return;
+    }
             const userTeam = gameData.userTeams[currentUser];
             userTeam.captain = playerId;
             // Ensure vice captain doesn't duplicate captain
@@ -2624,6 +2805,11 @@ function updateFormation() {
 
         // Save team changes
        function saveTeamChanges() {
+            const activeRound = getCurrentActiveRound();
+    if (activeRound) {
+        alert('لا يمكنك حفظ أو تعديل التشكيلة أثناء وجود جولة جارية!');
+        return;
+    }
     const userTeam = gameData.userTeams[currentUser];
     // Combine original team and pending changes:
     const pendingPlayers = { ...(userTeam.players || {}), ...teamChanges };
@@ -2813,6 +2999,11 @@ function updateFormation() {
 
         // Activate power-up
 function activatePowerUp(type) {
+        const activeRound = getCurrentActiveRound();
+    if (activeRound) {
+        alert('لا يمكنك تفعيل القوى أثناء وجود جولة جارية!');
+        return;
+    }
     const powerUpsUsed = gameData.powerUpsUsed[currentUser];
     const activePowerUp = gameData.activePowerUps[currentUser];
 
@@ -2877,6 +3068,9 @@ function activatePowerUp(type) {
                 updateRankings();
             } else if (tabName === 'players-tab') {
                 updatePlayersTab();
+            }
+            if (tabName === 'team-standings') {
+                updateTeamStandings();
             }
         }
 
@@ -3373,6 +3567,83 @@ function updateRankings() {
         `;
         totalContainer.appendChild(rankingItem);
     });
+}
+
+function updateTeamStandings() {
+    // حساب نقاط كل فريق (وليس المستخدمين)
+    const teamStats = {};
+    gameData.teams.forEach(team => {
+        teamStats[team] = { team, points: 0, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 };
+    });
+
+    // احسب النتائج من كل المباريات المنتهية
+    gameData.matches.forEach(match => {
+        if (!match.isFinished || !match.score) return;
+        const t1 = match.team1, t2 = match.team2;
+        const s1 = Number(match.score.team1) || 0;
+        const s2 = Number(match.score.team2) || 0;
+        teamStats[t1].played++; teamStats[t2].played++;
+        teamStats[t1].goalsFor += s1; teamStats[t1].goalsAgainst += s2;
+        teamStats[t2].goalsFor += s2; teamStats[t2].goalsAgainst += s1;
+        if (s1 > s2) { teamStats[t1].wins++; teamStats[t2].losses++; teamStats[t1].points += 3; }
+        else if (s1 < s2) { teamStats[t2].wins++; teamStats[t1].losses++; teamStats[t2].points += 3; }
+        else { teamStats[t1].draws++; teamStats[t2].draws++; teamStats[t1].points += 1; teamStats[t2].points += 1; }
+    });
+
+    // رتب الفرق حسب النقاط ثم فارق الأهداف ثم الأهداف المسجلة
+    const sortedTeams = Object.values(teamStats).sort((a, b) =>
+        b.points - a.points ||
+        (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst) ||
+        b.goalsFor - a.goalsFor
+    );
+
+    // جدول الترتيب المحسن
+    let html = `<table class="standings-table">
+        <tr>
+            <th>#</th><th>Team</th><th>Played</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Points</th>
+        </tr>`;
+    sortedTeams.forEach((t, i) => {
+        let rowClass = '';
+        if (i < 2) rowClass = 'top2'; // متأهل مباشرة
+        else if (i < 6) rowClass = 'playoff'; // ملحق
+        else rowClass = 'rest';
+        html += `<tr class="${rowClass}">
+            <td>${i+1}</td>
+            <td>${t.team}</td>
+            <td>${t.played}</td>
+            <td>${t.wins}</td>
+            <td>${t.draws}</td>
+            <td>${t.losses}</td>
+            <td>${t.goalsFor}</td>
+            <td>${t.goalsAgainst}</td>
+            <td>${t.goalsFor-t.goalsAgainst}</td>
+            <td>${t.points}</td>
+        </tr>`;
+    });
+    html += `</table>`;
+    document.getElementById('group-standings-table').innerHTML = html;
+
+    // التصفيات (الملحق)
+    let playoffHtml = `<ul>`;
+    const playoffTeams = sortedTeams.slice(2,6);
+    playoffTeams.forEach((t, i) => {
+        playoffHtml += `<li><strong>${i+3}.</strong> ${t.team}</li>`;
+    });
+    playoffHtml += `</ul>`;
+    document.getElementById('playoff-section').innerHTML = playoffHtml;
+
+    // نصف النهائي
+    let semiHtml = `<ul>
+        <li><strong>1st:</strong> ${sortedTeams[0]?.team || '-'} vs <span style="color:#ffd700;">Playoff Winner 1</span></li>
+        <li><strong>2nd:</strong> ${sortedTeams[1]?.team || '-'} vs <span style="color:#ffd700;">Playoff Winner 2</span></li>
+    </ul>`;
+    document.getElementById('semifinal-section').innerHTML = semiHtml;
+
+    // النهائي
+    let finalHtml = `<ul>
+        <li><strong>Final:</strong> <span style="color:#4ecdc4;">Semi Winner 1</span> vs <span style="color:#4ecdc4;">Semi Winner 2</span></li>
+    </ul>`;
+    document.getElementById('final-section').innerHTML = finalHtml;
 }
 
         // Populate matches filters
@@ -3919,45 +4190,53 @@ loadGameDataFromServer().then(() => {
 });
 
 function addMatch() {
-            const round = document.getElementById('match-round').value;
-            const team1 = document.getElementById('match-team1').value;
-            const team2 = document.getElementById('match-team2').value;
-            const datetime = document.getElementById('match-datetime').value;
-            
-            if (!round || !team1 || !team2 || !datetime) {
-                alert('All fields must be filled!');
-                return;
-            }
-            
-            if (team1 === team2) {
-                alert('A team cannot play against itself!');
-                return;
-            }
-            
-            const newMatch = {
-                id: Date.now(),
-                round: parseInt(round),
-                team1,
-                team2,
-                datetime,
-                score: null,
-                events: {},
-                isFinished: false,
-                playerStats: {}
-            };
-            
-            gameData.matches.push(newMatch);
-            saveGameData();
-            loadMatchesList();
-            
-            // Clear form
-            document.getElementById('match-round').value = '';
-            document.getElementById('match-team1').value = '';
-            document.getElementById('match-team2').value = '';
-            document.getElementById('match-datetime').value = '';
-            
-            alert('Match added successfully!');
-        }
+    const round = document.getElementById('match-round').value;
+    const team1 = document.getElementById('match-team1').value;
+    const team2 = document.getElementById('match-team2').value;
+    const datetime = document.getElementById('match-datetime').value;
+    const matchType = document.getElementById('match-type').value;
+    let leg = null;
+    if (matchType === 'playoff' || matchType === 'semifinal') {
+        leg = document.getElementById('match-leg').value;
+    }
+
+    if (!round || !team1 || !team2 || !datetime || !matchType) {
+        alert('All fields must be filled!');
+        return;
+    }
+    if (team1 === team2) {
+        alert('A team cannot play against itself!');
+        return;
+    }
+
+    const newMatch = {
+        id: Date.now(),
+        round: parseInt(round),
+        team1,
+        team2,
+        datetime,
+        matchType, // نوع المباراة
+        leg,       // الذهاب/العودة (null إذا ليست ملحق أو نصف نهائي)
+        score: null,
+        events: {},
+        isFinished: false,
+        playerStats: {}
+    };
+
+    gameData.matches.push(newMatch);
+    saveGameData();
+    loadMatchesList();
+
+    // Clear form
+    document.getElementById('match-round').value = '';
+    document.getElementById('match-team1').value = '';
+    document.getElementById('match-team2').value = '';
+    document.getElementById('match-datetime').value = '';
+    document.getElementById('match-type').value = 'group';
+    document.getElementById('leg-group').style.display = 'none';
+
+    alert('Match added successfully!');
+}
 
         function addTeam() {
             const name = document.getElementById('team-name').value.trim();
@@ -4155,6 +4434,27 @@ function loadRoundsList() {
                 `;
                 container.appendChild(matchDiv);
             });
+            const matchTypeText = {
+    group: 'دور مجموعات',
+    playoff: 'ملحق',
+    semifinal: 'نصف نهائي',
+    final: 'نهائي'
+};
+const legText = {
+    first: 'ذهاب',
+    second: 'عودة'
+};
+matchDiv.innerHTML = `
+    <h5>${match.team1} ضد ${match.team2}</h5>
+    <p>الجولة: ${roundName}</p>
+    <p>نوع المباراة: ${matchTypeText[match.matchType] || '-'}</p>
+    ${match.leg ? `<p>المرحلة: ${legText[match.leg]}</p>` : ''}
+    <p>التوقيت: ${new Date(match.datetime).toLocaleString('en-US')}</p>
+    <p>النتيجة: ${match.score || 'لم تُحدد بعد'}</p>
+    <p>الحالة: ${matchStatusText}</p>
+    <button class="btn ${matchStatusClass}" onclick="toggleMatchStatus(${match.id})">تغيير الحالة</button>
+    <button class="btn btn-danger" onclick="deleteMatch(${match.id})">حذف</button>
+`;
         }
 
         function loadTeamsList() {

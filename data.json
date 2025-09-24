@@ -27,6 +27,34 @@
       "password": "$2b$10$vrGcU/Ve7IGFnUiRokEqLuQZFVo4jUnBxckJ/Pu8ZJNSnoK9TKQPO",
       "email": "",
       "createdAt": "2025-09-24T13:20:27.182Z"
+    },
+    {
+      "id": "1758748434764",
+      "username": "Yassin Hossam",
+      "password": "$2b$10$UlL5SBRVnzLLlnzw16kDvuyZFkgtDUFZFeJRF5F5zk9dMVYa6bNOe",
+      "email": "",
+      "createdAt": "2025-09-24T21:13:54.764Z"
+    },
+    {
+      "id": "1758748655081",
+      "username": "Citizen Zooma",
+      "password": "$2b$10$I1GBR/VSMEjSstRUXmkdmOqNvaql6aO4Bbtl6qCXtKCX2AuU5Kakq",
+      "email": "hazemelhrairy@gmail.com",
+      "createdAt": "2025-09-24T21:17:35.081Z"
+    },
+    {
+      "id": "1758749187302",
+      "username": "vosk",
+      "password": "$2b$10$iIjBB5NKTCWa/AF6hwpChOe5Bpc1WsaZIVMQndo.6CNkfTogrk7oW",
+      "email": "",
+      "createdAt": "2025-09-24T21:26:27.302Z"
+    },
+    {
+      "id": "1758749560469",
+      "username": "Citizen Zooma69",
+      "password": "$2b$10$ASrpjlzgDZaXHMDIB9/lS.Y/JRosOVpwNvpBq0W4L.d/ptceyXHwu",
+      "email": "",
+      "createdAt": "2025-09-24T21:32:40.469Z"
     }
   ],
   "gameData": {
@@ -48,7 +76,7 @@
         "team": "7enkesh FC",
         "position": "forward",
         "price": 10,
-        "points": 0,
+        "points": 22,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -62,7 +90,7 @@
         "team": "7enkesh FC",
         "position": "midfielder",
         "price": 8,
-        "points": 0,
+        "points": 5,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -118,7 +146,7 @@
         "team": "ZD Manga United",
         "position": "forward",
         "price": 9.5,
-        "points": 0,
+        "points": 10,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -132,7 +160,7 @@
         "team": "ZD Manga United",
         "position": "forward",
         "price": 8,
-        "points": 0,
+        "points": 7,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -146,7 +174,7 @@
         "team": "ZD Manga United",
         "position": "defender",
         "price": 6,
-        "points": 0,
+        "points": 53,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -328,7 +356,7 @@
         "team": "5altak El-Ray2a",
         "position": "midfielder",
         "price": 12.5,
-        "points": 0,
+        "points": 2,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -342,7 +370,7 @@
         "team": "5altak El-Ray2a",
         "position": "midfielder",
         "price": 7.5,
-        "points": 0,
+        "points": 2,
         "goals": 0,
         "assists": 0,
         "saves": 0,
@@ -606,52 +634,73 @@
     "rounds": [
       {
         "id": 1,
-        "name": "الجولة الأولى (دابل)",
-        "start": "2025-09-28T15:00",
-        "end": "2025-10-1T22:00",
-        "transfersAllowed": "1"
+        "name": "1",
+        "start": "2025-09-24T23:00",
+        "end": "2025-09-24T23:59",
+        "transfersAllowed": 1
+      },
+      {
+        "id": 2,
+        "name": "2",
+        "start": "2025-09-25T00:03",
+        "end": "2025-09-25T00:10",
+        "transfersAllowed": 2
+      },
+      {
+        "id": 3,
+        "name": "3",
+        "start": "2025-09-25T00:12",
+        "end": "2025-09-25T00:20",
+        "transfersAllowed": 1
+      },
+      {
+        "id": 4,
+        "name": "الجولة الأولي (تيست)",
+        "start": "2025-09-25T01:15",
+        "end": "2025-09-25T01:45",
+        "transfersAllowed": 1
       }
     ],
     "matches": [
       {
-        "id": 1758717605178,
+        "id": 1758747235683,
         "round": 1,
         "team1": "7enkesh FC",
-        "team2": "Goal Hunters",
-        "datetime": "2025-09-28T16:00",
+        "team2": "ZD Manga United",
+        "datetime": "2025-09-24T23:00",
         "score": {
-          "team1": 3,
-          "team2": 2
+          "team1": 0,
+          "team2": 5
         },
         "events": {},
         "isFinished": true,
         "playerStats": {
           "p1": {
-            "goals": 2,
-            "assists": 1,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 10
-          },
-          "p2": {
             "goals": 0,
-            "assists": 1,
-            "yellowCards": 1,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 5
-          },
-          "p3": {
-            "goals": 1,
             "assists": 0,
             "yellowCards": 0,
             "redCards": 0,
             "cleanSheets": 0,
             "saves": 0,
             "points": 3
+          },
+          "p2": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p3": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
           },
           "p4": {
             "goals": 0,
@@ -668,11 +717,221 @@
             "yellowCards": 0,
             "redCards": 0,
             "cleanSheets": 0,
-            "saves": 3,
+            "saves": 0,
+            "points": 0
+          },
+          "p6": {
+            "goals": 2,
+            "assists": 1,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p7": {
+            "goals": 1,
+            "assists": 2,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p8": {
+            "goals": 2,
+            "assists": 2,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 1,
+            "saves": 0,
+            "points": 15
+          },
+          "p9": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p10": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          }
+        }
+      },
+      {
+        "id": 1758747451011,
+        "round": 2,
+        "team1": "Settak El- 3ay2a",
+        "team2": "ZD Manga United",
+        "datetime": "2025-09-25T00:00",
+        "score": {
+          "team1": 0,
+          "team2": 5
+        },
+        "events": {},
+        "isFinished": true,
+        "playerStats": {
+          "p6": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p7": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p8": {
+            "goals": 5,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 1,
+            "saves": 0,
+            "points": 30
+          },
+          "p9": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p10": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p11": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p12": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p13": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p14": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p15": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          }
+        }
+      },
+      {
+        "id": 1758747498006,
+        "round": 1,
+        "team1": "5altak El-Ray2a",
+        "team2": "Goal Hunters",
+        "datetime": "2025-09-24T23:00",
+        "score": {
+          "team1": 0,
+          "team2": 0
+        },
+        "events": {},
+        "isFinished": true,
+        "playerStats": {
+          "p21": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 2
+          },
+          "p22": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 2
+          },
+          "p23": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p24": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p25": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
             "points": 0
           },
           "p26": {
-            "goals": 2,
+            "goals": 0,
             "assists": 0,
             "yellowCards": 0,
             "redCards": 0,
@@ -682,7 +941,7 @@
           },
           "p27": {
             "goals": 0,
-            "assists": 1,
+            "assists": 0,
             "yellowCards": 0,
             "redCards": 0,
             "cleanSheets": 0,
@@ -691,7 +950,7 @@
           },
           "p28": {
             "goals": 0,
-            "assists": 1,
+            "assists": 0,
             "yellowCards": 0,
             "redCards": 0,
             "cleanSheets": 0,
@@ -713,19 +972,278 @@
             "yellowCards": 0,
             "redCards": 0,
             "cleanSheets": 0,
-            "saves": 2,
+            "saves": 0,
             "points": 0
           }
         }
+      },
+      {
+        "id": 1758748092772,
+        "round": 2,
+        "team1": "7enkesh FC",
+        "team2": "Koom El-Zawany",
+        "datetime": "2025-09-25T00:05",
+        "score": {
+          "team1": 3,
+          "team2": 0
+        },
+        "events": {},
+        "isFinished": true,
+        "playerStats": {
+          "p1": {
+            "goals": 3,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 12
+          },
+          "p2": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p3": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p4": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p5": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p36": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p37": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p38": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p39": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p40": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          }
+        }
+      },
+      {
+        "id": 1758748399726,
+        "round": 3,
+        "team1": "7enkesh FC",
+        "team2": "ZD Manga United",
+        "datetime": "2025-09-25T00:12",
+        "score": {
+          "team1": 2,
+          "team2": 5
+        },
+        "events": {},
+        "isFinished": true,
+        "playerStats": {
+          "p1": {
+            "goals": 2,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 1,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 7
+          },
+          "p2": {
+            "goals": 0,
+            "assists": 2,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 5
+          },
+          "p3": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p4": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p5": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p6": {
+            "goals": 1,
+            "assists": 1,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 10
+          },
+          "p7": {
+            "goals": 2,
+            "assists": 1,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 7
+          },
+          "p8": {
+            "goals": 2,
+            "assists": 1,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 1,
+            "saves": 0,
+            "points": 8
+          },
+          "p9": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p10": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          }
+        }
+      },
+      {
+        "id": 1758751239701,
+        "round": 4,
+        "team1": "5altak El-Ray2a",
+        "team2": "Settak El- 3ay2a",
+        "datetime": "2025-09-25T01:15",
+        "score": null,
+        "events": {},
+        "isFinished": false,
+        "playerStats": {}
+      },
+      {
+        "id": 1758751271839,
+        "round": 4,
+        "team1": "ZD Manga United",
+        "team2": "Koom El-Zawany",
+        "datetime": "2025-09-25T01:15",
+        "score": null,
+        "events": {},
+        "isFinished": false,
+        "playerStats": {}
+      },
+      {
+        "id": 1758751298123,
+        "round": 4,
+        "team1": "7enkesh FC",
+        "team2": "Uncle Bahgat",
+        "datetime": "2025-09-25T01:15",
+        "score": null,
+        "events": {},
+        "isFinished": false,
+        "playerStats": {}
+      },
+      {
+        "id": 1758751320746,
+        "round": 4,
+        "team1": "Goal Hunters",
+        "team2": "Goal poachers",
+        "datetime": "2025-09-25T01:15",
+        "score": null,
+        "events": {},
+        "isFinished": false,
+        "playerStats": {}
       }
     ],
-    "currentRound": 1,
+    "currentRound": 3,
     "userTeams": {
       "nonsesneguy404": {
         "players": {},
         "captain": null,
         "viceCaptain": null,
-        "budget": 100
+        "budget": 100,
+        "roundPoints": {
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
       },
       "aaaaaa": {
         "players": {
@@ -739,7 +1257,12 @@
         },
         "captain": "p1",
         "viceCaptain": null,
-        "budget": 1
+        "budget": 1,
+        "roundPoints": {
+          "1": 21,
+          "2": 54,
+          "3": 27
+        }
       },
       "7enkesh09": {
         "players": {
@@ -753,20 +1276,67 @@
         },
         "captain": "p17",
         "viceCaptain": null,
-        "budget": 0
+        "budget": 0,
+        "roundPoints": {
+          "1": 18,
+          "2": 42,
+          "3": 20
+        }
       },
       "A7A": {
         "players": {},
         "captain": null,
         "viceCaptain": null,
-        "budget": 100
+        "budget": 100,
+        "roundPoints": {
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      "vosk": {
+        "players": {
+          "fwd1": "p1",
+          "mid1": "p2",
+          "mid2": "p12",
+          "def1": "p8",
+          "gk": "p30",
+          "sub2": "p39",
+          "sub1": "p34"
+        },
+        "captain": null,
+        "viceCaptain": null,
+        "budget": 0,
+        "roundPoints": {
+          "3": 20
+        }
+      },
+      "Citizen Zooma69": {
+        "players": {
+          "gk": "p25",
+          "def1": "p8",
+          "mid2": "p29",
+          "mid1": "p33",
+          "fwd1": "p7",
+          "sub2": "p20",
+          "sub1": "p39",
+          "fwd2": "p23"
+        },
+        "captain": "p23",
+        "viceCaptain": null,
+        "budget": 0.5,
+        "roundPoints": {
+          "3": 15
+        }
       }
     },
     "transfersUsed": {
       "nonsesneguy404": 0,
       "aaaaaa": 0,
       "7enkesh09": 0,
-      "A7A": 0
+      "A7A": 0,
+      "vosk": 0,
+      "Citizen Zooma69": 0
     },
     "powerUpsUsed": {
       "nonsesneguy404": {
@@ -774,7 +1344,7 @@
         "benchBoost": false
       },
       "aaaaaa": {
-        "tripleCaptain": false,
+        "tripleCaptain": true,
         "benchBoost": false
       },
       "7enkesh09": {
@@ -782,6 +1352,14 @@
         "benchBoost": false
       },
       "A7A": {
+        "tripleCaptain": false,
+        "benchBoost": false
+      },
+      "vosk": {
+        "tripleCaptain": false,
+        "benchBoost": false
+      },
+      "Citizen Zooma69": {
         "tripleCaptain": false,
         "benchBoost": false
       }
@@ -793,9 +1371,9 @@
         "activeRound": null
       },
       "aaaaaa": {
-        "tripleCaptain": false,
+        "tripleCaptain": true,
         "benchBoost": false,
-        "activeRound": null
+        "activeRound": 1
       },
       "7enkesh09": {
         "tripleCaptain": false,
@@ -803,6 +1381,16 @@
         "activeRound": null
       },
       "A7A": {
+        "tripleCaptain": false,
+        "benchBoost": false,
+        "activeRound": null
+      },
+      "vosk": {
+        "tripleCaptain": false,
+        "benchBoost": false,
+        "activeRound": null
+      },
+      "Citizen Zooma69": {
         "tripleCaptain": false,
         "benchBoost": false,
         "activeRound": null
@@ -825,6 +1413,6 @@
         "fwd": 2
       }
     },
-    "currentFormation": "1-2-1"
+    "currentFormation": "1-1-2"
   }
 }
