@@ -129,7 +129,10 @@ function authenticateToken(req, res, next) {
         req.user = user;
         next();
     });
-    app.get('/api/users', authenticateToken, async (req, res) => {
+}
+
+// --- ضع هذا الـ Route خارج دالة authenticateToken وليس بداخلها ---
+app.get('/api/users', authenticateToken, async (req, res) => {
     try {
         const data = await readData();
         res.json(data.users.map(u => ({
@@ -142,7 +145,6 @@ function authenticateToken(req, res, next) {
         res.status(500).json({ error: 'Failed to load users' });
     }
 });
-}
 
 // Routes
 
@@ -316,19 +318,14 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+// Serve main HTML file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'stemfantasy.html'));
 });
+
 // Serve static files
 app.use(express.static('.'));
-
-// Start server
-async function startServer() {
-    await initializeData();
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
-}
 
 // Delete user (admin only)
 app.delete('/api/users/:username', authenticateToken, async (req, res) => {
@@ -349,19 +346,28 @@ app.delete('/api/users/:username', authenticateToken, async (req, res) => {
     }
 });
 
-const fs = require("fs");
-const path = require("path");
+// --- احذف السطرين التاليين من نهاية الملف ---
+// const fs = require("fs");
+// const path = require("path");
 
-// مسار ملف data.json
-const dataPath = path.join(__dirname, "data.json");
-
-// Route للباك أب
+// --- Route للباك أب (يمكنك إبقاؤه كما هو) ---
+const fsBackup = require("fs");
+const pathBackup = require("path");
+const dataPath = pathBackup.join(__dirname, "data.json");
 app.get("/download-data", (req, res) => {
-  if (fs.existsSync(dataPath)) {
-    res.download(dataPath, "data.json"); // يخلي المتصفح يحمل الملف
+  if (fsBackup.existsSync(dataPath)) {
+    res.download(dataPath, "data.json");
   } else {
     res.status(404).send("data.json not found");
   }
 });
+
+// Start server
+async function startServer() {
+    await initializeData();
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
 
 startServer().catch(console.error);
