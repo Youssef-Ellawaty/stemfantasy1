@@ -20,6 +20,13 @@
       "password": "$2b$10$0CVTtCHsIa91fHmloXFt1.opRL1akqYP9qciZe5ULTN8azw.2PZs2",
       "email": "",
       "createdAt": "2025-09-24T12:32:19.922Z"
+    },
+    {
+      "id": "1758720027182",
+      "username": "A7A",
+      "password": "$2b$10$vrGcU/Ve7IGFnUiRokEqLuQZFVo4jUnBxckJ/Pu8ZJNSnoK9TKQPO",
+      "email": "",
+      "createdAt": "2025-09-24T13:20:27.182Z"
     }
   ],
   "gameData": {
@@ -626,7 +633,7 @@
             "redCards": 0,
             "cleanSheets": 0,
             "saves": 0,
-            "points": 0
+            "points": 10
           },
           "p2": {
             "goals": 0,
@@ -635,7 +642,7 @@
             "redCards": 0,
             "cleanSheets": 0,
             "saves": 0,
-            "points": 0
+            "points": 5
           },
           "p3": {
             "goals": 1,
@@ -644,7 +651,7 @@
             "redCards": 0,
             "cleanSheets": 0,
             "saves": 0,
-            "points": 0
+            "points": 3
           },
           "p4": {
             "goals": 0,
@@ -721,10 +728,18 @@
         "budget": 100
       },
       "aaaaaa": {
-        "players": {},
-        "captain": null,
+        "players": {
+          "fwd1": "p1",
+          "mid1": "p2",
+          "mid2": "p28",
+          "def1": "p8",
+          "gk": "p40",
+          "sub1": "p35",
+          "sub2": "p38"
+        },
+        "captain": "p1",
         "viceCaptain": null,
-        "budget": 100
+        "budget": 1
       },
       "7enkesh09": {
         "players": {
@@ -739,12 +754,19 @@
         "captain": "p17",
         "viceCaptain": null,
         "budget": 0
+      },
+      "A7A": {
+        "players": {},
+        "captain": null,
+        "viceCaptain": null,
+        "budget": 100
       }
     },
     "transfersUsed": {
       "nonsesneguy404": 0,
       "aaaaaa": 0,
-      "7enkesh09": 0
+      "7enkesh09": 0,
+      "A7A": 0
     },
     "powerUpsUsed": {
       "nonsesneguy404": {
@@ -756,6 +778,10 @@
         "benchBoost": false
       },
       "7enkesh09": {
+        "tripleCaptain": false,
+        "benchBoost": false
+      },
+      "A7A": {
         "tripleCaptain": false,
         "benchBoost": false
       }
@@ -772,6 +798,11 @@
         "activeRound": null
       },
       "7enkesh09": {
+        "tripleCaptain": false,
+        "benchBoost": false,
+        "activeRound": null
+      },
+      "A7A": {
         "tripleCaptain": false,
         "benchBoost": false,
         "activeRound": null

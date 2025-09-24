@@ -3417,127 +3417,182 @@ function selectPlayerForPosition(playerId) {
         }
 
         // Update statistics
-        function updateStatistics() {
-            // Goals stats
-            const goalsStats = gameData.players
-                .filter(p => p.goals > 0)
-                .sort((a, b) => b.goals - a.goals)
-                .slice(0, 5);
-            
-            const goalsContainer = document.getElementById('goals-stats');
-            goalsContainer.innerHTML = '';
-            if (goalsStats.length > 0) {
-                goalsStats.forEach(player => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${player.name}</span><span>${player.goals} goals</span>`;
-                    goalsContainer.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<span style="color: #888;">No goals scored yet</span>';
-                goalsContainer.appendChild(li);
-            }
-            
-            // Assists stats
-            const assistsStats = gameData.players
-                .filter(p => p.assists > 0)
-                .sort((a, b) => b.assists - a.assists)
-                .slice(0, 5);
-            
-            const assistsContainer = document.getElementById('assists-stats');
-            assistsContainer.innerHTML = '';
-            if (assistsStats.length > 0) {
-                assistsStats.forEach(player => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${player.name}</span><span>${player.assists} assists</span>`;
-                    assistsContainer.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<span style="color: #888;">No assists yet</span>';
-                assistsContainer.appendChild(li);
-            }
-            
-            // Clean sheets stats
-            const cleanSheetsStats = gameData.players
-                .filter(p => p.cleanSheets > 0)
-                .sort((a, b) => b.cleanSheets - a.cleanSheets)
-                .slice(0, 5);
-            
-            const cleanSheetsContainer = document.getElementById('clean-sheets-stats');
-            cleanSheetsContainer.innerHTML = '';
-            if (cleanSheetsStats.length > 0) {
-                cleanSheetsStats.forEach(player => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${player.name}</span><span>${player.cleanSheets} matches</span>`;
-                    cleanSheetsContainer.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<span style="color: #888;">No clean sheets yet</span>';
-                cleanSheetsContainer.appendChild(li);
-            }
-            
-            // Saves stats
-            const savesStats = gameData.players
-                .filter(p => p.saves > 0)
-                .sort((a, b) => b.saves - a.saves)
-                .slice(0, 5);
-            
-            const savesContainer = document.getElementById('saves-stats');
-            savesContainer.innerHTML = '';
-            if (savesStats.length > 0) {
-                savesStats.forEach(player => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${player.name}</span><span>${player.saves} saves</span>`;
-                    savesContainer.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<span style="color: #888;">No saves yet</span>';
-                savesContainer.appendChild(li);
-            }
-            
-            // Cards stats
-            const cardsStats = gameData.players
-                .filter(p => p.yellowCards > 0)
-                .sort((a, b) => b.yellowCards - a.yellowCards)
-                .slice(0, 5);
-            
-            const cardsContainer = document.getElementById('cards-stats');
-            cardsContainer.innerHTML = '';
-            if (cardsStats.length > 0) {
-                cardsStats.forEach(player => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${player.name}</span><span>${player.yellowCards} cards</span>`;
-                    cardsContainer.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<span style="color: #888;">No yellow cards yet</span>';
-                cardsContainer.appendChild(li);
-            }
-            
-            // Red cards stats
-            const redCardsStats = gameData.players
-                .filter(p => p.redCards > 0)
-                .sort((a, b) => b.redCards - a.redCards)
-                .slice(0, 5);
-            
-            const redCardsContainer = document.getElementById('red-cards-stats');
-            redCardsContainer.innerHTML = '';
-            if (redCardsStats.length > 0) {
-                redCardsStats.forEach(player => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${player.name}</span><span>${player.redCards} red cards</span>`;
-                    redCardsContainer.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<span style="color: #888;">No red cards yet</span>';
-                redCardsContainer.appendChild(li);
-            }
-        }
+function updateStatistics() {
+    // Goals stats
+    const goalsStats = gameData.players
+        .map(player => {
+            // جمع الأهداف من كل مباريات اللاعب
+            let totalGoals = 0;
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[player.id]) {
+                    totalGoals += match.playerStats[player.id].goals || 0;
+                }
+            });
+            return { ...player, totalGoals };
+        })
+        .filter(p => p.totalGoals > 0)
+        .sort((a, b) => b.totalGoals - a.totalGoals)
+        .slice(0, 5);
+
+    const goalsContainer = document.getElementById('goals-stats');
+    goalsContainer.innerHTML = '';
+    if (goalsStats.length > 0) {
+        goalsStats.forEach(player => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${player.name}</span><span>${player.totalGoals} goals</span>`;
+            goalsContainer.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.innerHTML = '<span style="color: #888;">No goals scored yet</span>';
+        goalsContainer.appendChild(li);
+    }
+
+    // Assists stats
+    const assistsStats = gameData.players
+        .map(player => {
+            let totalAssists = 0;
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[player.id]) {
+                    totalAssists += match.playerStats[player.id].assists || 0;
+                }
+            });
+            return { ...player, totalAssists };
+        })
+        .filter(p => p.totalAssists > 0)
+        .sort((a, b) => b.totalAssists - a.totalAssists)
+        .slice(0, 5);
+
+    const assistsContainer = document.getElementById('assists-stats');
+    assistsContainer.innerHTML = '';
+    if (assistsStats.length > 0) {
+        assistsStats.forEach(player => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${player.name}</span><span>${player.totalAssists} assists</span>`;
+            assistsContainer.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.innerHTML = '<span style="color: #888;">No assists yet</span>';
+        assistsContainer.appendChild(li);
+    }
+
+    // Clean sheets stats
+    const cleanSheetsStats = gameData.players
+        .map(player => {
+            let totalCleanSheets = 0;
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[player.id]) {
+                    totalCleanSheets += match.playerStats[player.id].cleanSheets || 0;
+                }
+            });
+            return { ...player, totalCleanSheets };
+        })
+        .filter(p => p.totalCleanSheets > 0)
+        .sort((a, b) => b.totalCleanSheets - a.totalCleanSheets)
+        .slice(0, 5);
+
+    const cleanSheetsContainer = document.getElementById('clean-sheets-stats');
+    cleanSheetsContainer.innerHTML = '';
+    if (cleanSheetsStats.length > 0) {
+        cleanSheetsStats.forEach(player => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${player.name}</span><span>${player.totalCleanSheets} matches</span>`;
+            cleanSheetsContainer.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.innerHTML = '<span style="color: #888;">No clean sheets yet</span>';
+        cleanSheetsContainer.appendChild(li);
+    }
+
+    // Saves stats
+    const savesStats = gameData.players
+        .map(player => {
+            let totalSaves = 0;
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[player.id]) {
+                    totalSaves += match.playerStats[player.id].saves || 0;
+                }
+            });
+            return { ...player, totalSaves };
+        })
+        .filter(p => p.totalSaves > 0)
+        .sort((a, b) => b.totalSaves - a.totalSaves)
+        .slice(0, 5);
+
+    const savesContainer = document.getElementById('saves-stats');
+    savesContainer.innerHTML = '';
+    if (savesStats.length > 0) {
+        savesStats.forEach(player => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${player.name}</span><span>${player.totalSaves} saves</span>`;
+            savesContainer.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.innerHTML = '<span style="color: #888;">No saves yet</span>';
+        savesContainer.appendChild(li);
+    }
+
+    // Cards stats
+    const cardsStats = gameData.players
+        .map(player => {
+            let totalYellowCards = 0;
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[player.id]) {
+                    totalYellowCards += match.playerStats[player.id].yellowCards || 0;
+                }
+            });
+            return { ...player, totalYellowCards };
+        })
+        .filter(p => p.totalYellowCards > 0)
+        .sort((a, b) => b.totalYellowCards - a.totalYellowCards)
+        .slice(0, 5);
+
+    const cardsContainer = document.getElementById('cards-stats');
+    cardsContainer.innerHTML = '';
+    if (cardsStats.length > 0) {
+        cardsStats.forEach(player => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${player.name}</span><span>${player.totalYellowCards} cards</span>`;
+            cardsContainer.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.innerHTML = '<span style="color: #888;">No yellow cards yet</span>';
+        cardsContainer.appendChild(li);
+    }
+
+    // Red cards stats
+    const redCardsStats = gameData.players
+        .map(player => {
+            let totalRedCards = 0;
+            gameData.matches.forEach(match => {
+                if (match.playerStats && match.playerStats[player.id]) {
+                    totalRedCards += match.playerStats[player.id].redCards || 0;
+                }
+            });
+            return { ...player, totalRedCards };
+        })
+        .filter(p => p.totalRedCards > 0)
+        .sort((a, b) => b.totalRedCards - a.totalRedCards)
+        .slice(0, 5);
+
+    const redCardsContainer = document.getElementById('red-cards-stats');
+    redCardsContainer.innerHTML = '';
+    if (redCardsStats.length > 0) {
+        redCardsStats.forEach(player => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${player.name}</span><span>${player.totalRedCards} red cards</span>`;
+            redCardsContainer.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.innerHTML = '<span style="color: #888;">No red cards yet</span>';
+        redCardsContainer.appendChild(li);
+    }
+}
 
         // Toggle admin mode
         function toggleAdmin() {
