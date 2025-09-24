@@ -2132,16 +2132,24 @@ function updateTeamStats() {
     });
 
     let totalValue = 0;
+    const activeRound = getCurrentActiveRound();
+
     Object.values(effectivePlayers).forEach(playerId => {
         const player = gameData.players.find(p => p.id === playerId);
         if (player) {
             totalValue += Number(player.price) || 0;
-            let playerPoints = Number(player.points) || 0;
+            // استخدم نقاط الجولة الحالية فقط
+            let playerPoints = 0;
+            gameData.matches.forEach(match => {
+                if (activeRound && match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
+                    playerPoints += match.playerStats[player.id].points || 0;
+                }
+            });
 
-            // مضاعفة نقاط الكابتن
+            // مضاعفة نقاط الكابتن بنفس منطق updateAllUsersRoundPoints
+            const activePowerUp = gameData.activePowerUps[currentUser];
             if (userTeam.captain === playerId) {
-                const activePowerUp = gameData.activePowerUps[currentUser];
-                if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
+                if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
                     playerPoints *= 3;
                 } else {
                     playerPoints *= 2;
