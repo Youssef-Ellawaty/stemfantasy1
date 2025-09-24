@@ -1576,7 +1576,10 @@
 
     <script>
 
-localStorage.clear();
+window.localStorage.setItem = function() {};
+window.localStorage.getItem = function() { return null; };
+window.localStorage.removeItem = function() {};
+window.localStorage.clear = function() {};
 
    // Global variables
         let gameData = {
@@ -1658,6 +1661,7 @@ localStorage.clear();
             currentFormation: '1-2-1' // Default formation
         };
 
+        let currentUser = localStorage.getItem('fantasyUser') || 'guest';
         let selectedTransferIn = null;
         let selectedTransferOut = null;
         let isAdminMode = false;
@@ -1668,6 +1672,7 @@ localStorage.clear();
         let teamChanges = {};
         let originalTeamState = {};
         let isTeamSaved = false;
+        let authToken = localStorage.getItem('authToken');
         let isLoginMode = true;
         const ADMIN_PASSWORD = 'admin123'; // Change this to a secure password
         const API_BASE_URL = 'https://stemfantasy1-production.up.railway.app/api';
@@ -1675,6 +1680,7 @@ localStorage.clear();
 
         // Initialize the application
         function initApp() {
+            // localStorage.clear(); // Removed: This was for temporary development and caused data loss
             checkAuthStatus();
             loadGameData();
             initializeUserTeam();
@@ -1863,6 +1869,8 @@ localStorage.clear();
                 if (response.ok) {
                     authToken = data.token;
                     currentUser = data.user.username;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('fantasyUser', currentUser);
                     
                     updateUserInterface();
                     closeAuthModal();
@@ -1886,6 +1894,8 @@ localStorage.clear();
 });
 // ...existing code...
 if (response.ok) {
+    localStorage.setItem('authToken', data.token);
+    localStorage.setItem('fantasyUser', data.username);
     authToken = data.token;
     currentUser = data.username;
     closeAuthModal();
@@ -1898,6 +1908,8 @@ if (response.ok) {
         function logout() {
             authToken = null;
             currentUser = 'guest';
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('fantasyUser');
             updateUserInterface();
             alert('Logout successful!');
         }
@@ -1907,6 +1919,7 @@ async function loadGameDataFromServer() {
     if (!authToken) return;
     try {
         // احذف بيانات LocalStorage القديمة أولاً
+        localStorage.removeItem('gameData');
 
         const response = await fetch(`${API_BASE_URL}/game-data`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
@@ -1925,6 +1938,10 @@ async function loadGameDataFromServer() {
 
 // Save game data to server
         async function saveGameDataToServer() {
+if (!authToken) {
+    localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
+    return;
+}
 
             try {
                 const response = await fetch(`${API_BASE_URL}/game-data`, {
@@ -1949,14 +1966,18 @@ async function loadGameDataFromServer() {
         // Load game data from localStorage
         function loadGameData() {
             // Only load from localStorage if not authenticated (server data will override later)
+            if (!authToken) {
+            const saved = localStorage.getItem('fantasyGameData');
             if (saved) {
                 gameData = { ...gameData, ...JSON.parse(saved) };
                 }
             }
-        
+        }
 
         // Save game data to localStorage
-        function saveGameData() {            // Also try to save to server
+        function saveGameData() {
+            localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
+            // Also try to save to server
             saveGameDataToServer();
         }
 
@@ -2522,6 +2543,7 @@ async function loadGameDataFromServer() {
 
             // When we detect we have moved to a different round than the last processed, reset transfers to 0 used
             const lastProcessedKey = 'fantasy_last_round_processed';
+            const lastProcessed = parseInt(localStorage.getItem(lastProcessedKey) || '');
             if (!isNaN(lastProcessed)) {
                 if (lastProcessed !== (gameData.currentRound || 0)) {
                     Object.keys(gameData.transfersUsed || {}).forEach(username => {
@@ -2529,9 +2551,13 @@ async function loadGameDataFromServer() {
                     });
                     saveGameData();
                 }
-            } 
+            } else {
+                // First run: ensure key is set
+                localStorage.setItem(lastProcessedKey, String(gameData.currentRound || ''));
+            }
 
             // Always persist the current considered round id for next comparison
+            localStorage.setItem(lastProcessedKey, String(gameData.currentRound || ''));
 
             updateTransfersLeft();
         }
