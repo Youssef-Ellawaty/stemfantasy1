@@ -2167,7 +2167,8 @@ if (!authToken) {
                     players: {},
                     captain: null,
                     viceCaptain: null,
-                    budget: TOTAL_BUDGET
+                    budget: TOTAL_BUDGET,
+                    formation: gameData.currentFormation
                 };
                 isTeamSaved = false; // New team, not saved yet
             } else {
@@ -2266,28 +2267,43 @@ function updateAllUsersRoundPoints() {
             const userTeam = gameData.userTeams[username];
             let roundPoints = 0;
 
-            // احسب النقاط من لاعبي التشكيلة الأساسية فقط
-            Object.values(userTeam.players || {}).forEach(playerId => {
-                const player = gameData.players.find(p => p.id === playerId);
-                if (player) {
-                    let playerPoints = 0;
-                    // نقاط اللاعب في هذه الجولة فقط
-                    gameData.matches.forEach(match => {
-                        if (match.round === round.id && match.playerStats && match.playerStats[player.id]) {
-                            playerPoints += match.playerStats[player.id].points || 0;
-                        }
-                    });
+            // Bench Boost تحقق إذا مفعل في هذه الجولة
+            const activePowerUp = gameData.activePowerUps[username];
+            const benchBoostActive = activePowerUp && activePowerUp.benchBoost && activePowerUp.activeRound === round.id;
 
-                    // مضاعفة نقاط الكابتن حسب القوة المفعلة في هذه الجولة
-                    const activePowerUp = gameData.activePowerUps[username];
-                    if (userTeam.captain === playerId) {
-                        if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === round.id) {
-                            playerPoints *= 3;
-                        } else {
-                            playerPoints *= 2;
+            // حدد مراكز الأساسيين فقط حسب الفورميشن المحفوظ لكل مستخدم
+            const userFormation = userTeam.formation || gameData.currentFormation;
+            const formationDetails = gameData.formations[userFormation];
+            const starterPositions = [
+                'gk',
+                ...Array.from({ length: formationDetails.def }, (_, i) => `def${i + 1}`),
+                ...Array.from({ length: formationDetails.mid }, (_, i) => `mid${i + 1}`),
+                ...Array.from({ length: formationDetails.fwd }, (_, i) => `fwd${i + 1}`)
+            ];
+
+            Object.entries(userTeam.players || {}).forEach(([position, playerId]) => {
+                // احسب نقاط اللاعب فقط إذا كان أساسي أو Bench Boost مفعل
+                if (starterPositions.includes(position) || benchBoostActive) {
+                    const player = gameData.players.find(p => p.id === playerId);
+                    if (player) {
+                        let playerPoints = 0;
+                        // نقاط اللاعب في هذه الجولة فقط (يمكن أن تكون سالبة)
+                        gameData.matches.forEach(match => {
+                            if (match.round === round.id && match.playerStats && match.playerStats[player.id]) {
+                                playerPoints += match.playerStats[player.id].points || 0;
+                            }
+                        });
+
+                        // مضاعفة نقاط الكابتن حسب القوة المفعلة في هذه الجولة
+                        if (userTeam.captain === playerId) {
+                            if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === round.id) {
+                                playerPoints *= 3;
+                            } else {
+                                playerPoints *= 2;
+                            }
                         }
+                        roundPoints += playerPoints;
                     }
-                    roundPoints += playerPoints;
                 }
             });
 
@@ -2312,28 +2328,44 @@ function updateTeamStats() {
     let totalValue = 0;
     const activeRound = getCurrentActiveRound();
 
-    Object.values(effectivePlayers).forEach(playerId => {
+    // Bench Boost تحقق إذا مفعل في الجولة الحالية
+    const activePowerUp = gameData.activePowerUps[currentUser];
+    const benchBoostActive = activePowerUp && activePowerUp.benchBoost && activePowerUp.activeRound === (activeRound ? activeRound.id : null);
+
+    // حدد مراكز الأساسيين فقط
+    const userFormation = gameData.userTeams[currentUser]?.formation || gameData.currentFormation;
+    const formationDetails = gameData.formations[userFormation];
+    const starterPositions = [
+        'gk',
+        ...Array.from({ length: formationDetails.def }, (_, i) => `def${i + 1}`),
+        ...Array.from({ length: formationDetails.mid }, (_, i) => `mid${i + 1}`),
+        ...Array.from({ length: formationDetails.fwd }, (_, i) => `fwd${i + 1}`)
+    ];
+
+    Object.entries(effectivePlayers).forEach(([position, playerId]) => {
         const player = gameData.players.find(p => p.id === playerId);
         if (player) {
             totalValue += Number(player.price) || 0;
-            // استخدم نقاط الجولة الحالية فقط
-            let playerPoints = 0;
-            gameData.matches.forEach(match => {
-                if (activeRound && match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
-                    playerPoints += match.playerStats[player.id].points || 0;
-                }
-            });
 
-            // مضاعفة نقاط الكابتن بنفس منطق updateAllUsersRoundPoints
-            const activePowerUp = gameData.activePowerUps[currentUser];
-            if (userTeam.captain === playerId) {
-                if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
-                    playerPoints *= 3;
-                } else {
-                    playerPoints *= 2;
+            // احسب النقاط فقط إذا كان اللاعب أساسي أو Bench Boost مفعل
+            if (starterPositions.includes(position) || benchBoostActive) {
+                let playerPoints = 0;
+                gameData.matches.forEach(match => {
+                    if (activeRound && match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
+                        playerPoints += match.playerStats[player.id].points || 0; // يمكن أن تكون سالبة
+                    }
+                });
+
+                // مضاعفة نقاط الكابتن بنفس منطق updateAllUsersRoundPoints
+                if (userTeam.captain === playerId) {
+                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
+                        playerPoints *= 3;
+                    } else {
+                        playerPoints *= 2;
+                    }
                 }
+                currentPoints += playerPoints;
             }
-            currentPoints += playerPoints;
         }
     });
 
@@ -2392,7 +2424,8 @@ function updateFormation() {
         effectivePlayers[pos] = pid;
     });
 
-    const currentFormationDetails = gameData.formations[gameData.currentFormation];
+    const userFormation = gameData.userTeams[currentUser]?.formation || gameData.currentFormation;
+const currentFormationDetails = gameData.formations[userFormation];
     if (!currentFormationDetails) {
         console.error('Invalid formation selected:', gameData.currentFormation);
         return;
@@ -2550,12 +2583,18 @@ function updateFormation() {
             document.getElementById('formation-selection-modal').classList.remove('active');
         }
 
-        function selectFormation(formationName) {
-            gameData.currentFormation = formationName;
-            saveGameData();
-            updateFormation();
-            closeFormationSelectionModal();
-        }
+function selectFormation(formationName) {
+    const activeRound = getCurrentActiveRound();
+    if (activeRound) {
+        alert('لا يمكن تغيير نظام التشكيلة أثناء الجولة الجارية!');
+        return;
+    }
+    // احفظ الفورميشن في فريق المستخدم وليس في gameData العام
+    gameData.userTeams[currentUser].formation = formationName;
+    saveGameData();
+    updateFormation();
+    closeFormationSelectionModal();
+}
 
       function showCaptainModal() {
     const userTeam = gameData.userTeams[currentUser];
@@ -2805,6 +2844,7 @@ function updateFormation() {
 
         // Save team changes
        function saveTeamChanges() {
+        gameData.userTeams[currentUser].formation = gameData.currentFormation;
             const activeRound = getCurrentActiveRound();
     if (activeRound) {
         alert('لا يمكنك حفظ أو تعديل التشكيلة أثناء وجود جولة جارية!');
@@ -4101,8 +4141,7 @@ function updateStatistics() {
                     </div>
                     <div class="form-group">
                         <label>Manual Points (for this match):</label>
-                        <input type="number" class="form-control" data-player-id="${player.id}" data-stat="points" value="${playerMatchStats.points || 0}" min="0">
-                    </div>
+<input type="number" class="form-control" data-player-id="${player.id}" data-stat="points" value="${playerMatchStats.points || 0}">
                 `;
                 container.appendChild(playerDiv);
             });
