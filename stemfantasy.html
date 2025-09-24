@@ -1638,7 +1638,7 @@
                 { id: 'p40', name: 'Y.Ragab', team: 'Koom El-Zawany', position: 'goalkeeper', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 }
             ],
             rounds: [
-                { id: 1, name: '(دابل) الجولة الأولى', start: '2025-09-28T10:00', end: '2025-10-1T20:00', transfersAllowed: 1 }
+                { id: 1, name: '(دابل) الجولة الأولى', start: '2025-09-28T15:00', end: '2025-10-01T20:00', transfersAllowed: 1 }
             
             ],
             matches: [],
@@ -3749,7 +3749,7 @@ function selectPlayerForPosition(playerId) {
             loadMatchPlayerStats(matchId);
         }
 
-function addRound() {
+async function addRound() {
     const name = document.getElementById('round-name').value;
     const start = document.getElementById('round-start').value;
     const end = document.getElementById('round-end').value;
@@ -3769,13 +3769,11 @@ function addRound() {
     };
 
     gameData.rounds.push(newRound);
-    saveGameData();
-    // بعد الحفظ، أعد تحميل البيانات من السيرفر ثم حدث الفلاتر
-    loadGameDataFromServer().then(() => {
-        loadRoundsList();
-        populateAdminDropdowns();
-        populateMatchesFilters();
-    });
+    await saveGameDataToServer(); // حفظ في السيرفر
+    await loadGameDataFromServer(); // إعادة التحميل من السيرفر
+    loadRoundsList();
+    populateAdminDropdowns();
+    populateMatchesFilters();
 
     // Clear form
     document.getElementById('round-name').value = '';
