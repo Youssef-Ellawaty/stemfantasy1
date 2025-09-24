@@ -2017,18 +2017,19 @@ if (!authToken) {
         }
 
         // Update UI elements
-        function updateUI() {
-            updateTeamStats();
-            updateFormation();
-            updatePowerUps();
-            updateTransfersLeft();
-            loadAvailablePlayers();
-            loadCurrentTeam();
-            updateRankings();
-            updateMatches();
-            updatePlayersTab(); // Add this line
-            updateTeamManagementButtons();
-        }
+function updateUI() {
+    updatePlayersTotalPoints(); // أضف هذا السطر أولاً
+    updateTeamStats();
+    updateFormation();
+    updatePowerUps();
+    updateTransfersLeft();
+    loadAvailablePlayers();
+    loadCurrentTeam();
+    updateRankings();
+    updateMatches();
+    updatePlayersTab();
+    updateTeamManagementButtons();
+}
 
         // Update team management button states
         function updateTeamManagementButtons() {
@@ -2052,6 +2053,23 @@ if (!authToken) {
                 if (selectFormationBtn) selectFormationBtn.disabled = !canMakeTransfers();
             }
         }
+
+// تحديث نقاط كل لاعب من جميع المباريات
+function updatePlayersTotalPoints() {
+    gameData.players.forEach(player => {
+        player.points = 0;
+    });
+    gameData.matches.forEach(match => {
+        if (match.playerStats) {
+            Object.entries(match.playerStats).forEach(([playerId, stats]) => {
+                const player = gameData.players.find(p => p.id === playerId);
+                if (player && typeof stats.points === 'number') {
+                    player.points += stats.points;
+                }
+            });
+        }
+    });
+}
 
         // Update team statistics
         function updateTeamStats() {
