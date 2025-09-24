@@ -3748,7 +3748,7 @@ function selectPlayerForPosition(playerId) {
             loadMatchPlayerStats(matchId);
         }
 
-async function addRound() {
+function addRound() {
     const name = document.getElementById('round-name').value;
     const start = document.getElementById('round-start').value;
     const end = document.getElementById('round-end').value;
@@ -3768,15 +3768,14 @@ async function addRound() {
     };
 
     gameData.rounds.push(newRound);
+    saveGameData();
 
-    // احفظ البيانات في السيرفر أولاً
-    await saveGameDataToServer();
-
-    // بعد التأكد من الحفظ، أعد تحميل البيانات من السيرفر ثم حدث الفلاتر
-    await loadGameDataFromServer();
-    loadRoundsList();
-    populateAdminDropdowns();
-    populateMatchesFilters();
+    // بعد الحفظ، أعد تحميل البيانات من السيرفر ثم حدث الفلاتر
+    loadGameDataFromServer().then(() => {
+        loadRoundsList();
+        populateAdminDropdowns();
+        populateMatchesFilters(); // تحديث قائمة الجولات في المباريات
+    });
 
     // Clear form
     document.getElementById('round-name').value = '';
@@ -3786,7 +3785,8 @@ async function addRound() {
 
     alert('Round added successfully!');
 }
-        function addMatch() {
+
+function addMatch() {
             const round = document.getElementById('match-round').value;
             const team1 = document.getElementById('match-team1').value;
             const team2 = document.getElementById('match-team2').value;
