@@ -1638,7 +1638,7 @@
                 { id: 'p40', name: 'Y.Ragab', team: 'Koom El-Zawany', position: 'goalkeeper', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 }
             ],
             rounds: [
-                { id: 1, name: '(دابل) الجولة الاولى', start: '2025-09-28T15:00', end: '2025-10-1T20:00', transfersAllowed: 1 }
+                { id: 1, name: '(دابل) الجولة الاولى', start: '2025-09-28T10:00', end: '2025-10-1T20:00', transfersAllowed: 1 }
             
             ],
             matches: [],
@@ -3748,7 +3748,7 @@ function selectPlayerForPosition(playerId) {
             loadMatchPlayerStats(matchId);
         }
 
-async function addRound() {
+function addRound() {
     const name = document.getElementById('round-name').value;
     const start = document.getElementById('round-start').value;
     const end = document.getElementById('round-end').value;
@@ -3764,15 +3764,18 @@ async function addRound() {
         name,
         start,
         end,
-        transfersAllowed // تأكد أن الاسم هكذا بالضبط
+        transfersAllowed
     };
 
     gameData.rounds.push(newRound);
-    await saveGameDataToServer();
-    await loadGameDataFromServer();
-    loadRoundsList();
-    populateAdminDropdowns();
-    populateMatchesFilters();
+    saveGameData();
+
+    // بعد الحفظ، أعد تحميل البيانات من السيرفر ثم حدث الفلاتر
+    loadGameDataFromServer().then(() => {
+        loadRoundsList();
+        populateAdminDropdowns();
+        populateMatchesFilters(); // تحديث قائمة الجولات في المباريات
+    });
 
     // Clear form
     document.getElementById('round-name').value = '';
@@ -3782,7 +3785,7 @@ async function addRound() {
 
     alert('Round added successfully!');
 }
-// ...existing code...
+
 function addMatch() {
             const round = document.getElementById('match-round').value;
             const team1 = document.getElementById('match-team1').value;
@@ -3978,29 +3981,23 @@ async function deleteUser() {
         }
 
         // Load admin lists
-function loadRoundsList() {
-    const container = document.getElementById('rounds-list');
-    container.innerHTML = '<h4>الجولات الحالية:</h4>';
-
-    if (!gameData.rounds || gameData.rounds.length === 0) {
-        container.innerHTML += '<p>لا توجد جولات بعد.</p>';
-        return;
-    }
-
-    gameData.rounds.forEach(round => {
-        const roundDiv = document.createElement('div');
-        roundDiv.className = 'card';
-        roundDiv.innerHTML = `
-            <h5>${round.name}</h5>
-            <p>البداية: ${round.start ? new Date(round.start).toLocaleString() : '-'}</p>
-            <p>النهاية: ${round.end ? new Date(round.end).toLocaleString() : '-'}</p>
-            <p>التبديلات المسموحة: ${typeof round.transfersAllowed !== 'undefined' ? round.transfersAllowed : '-'}</p>
-            <button onclick="deleteRound(${round.id})" class="btn btn-danger">حذف</button>
-        `;
-        container.appendChild(roundDiv);
-    });
-}
-
+        function loadRoundsList() {
+            const container = document.getElementById('rounds-list');
+            container.innerHTML = '<h4>الجولات الحالية:</h4>';
+            
+            gameData.rounds.forEach(round => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'card';
+                roundDiv.innerHTML = `
+                    <h5>${round.name}</h5>
+                    <p>البداية: ${new Date(round.start).toLocaleString('en-US')}</p>
+                    <p>النهاية: ${new Date(round.end).toLocaleString('en-US')}</p>
+                    <p>التبديلات المسموحة: ${round.transfersAllowed}</p>
+                    <button class="btn btn-danger" onclick="deleteRound(${round.id})">حذف</button>
+                `;
+                container.appendChild(roundDiv);
+            });
+        }
 
         function loadMatchesList() {
             const container = document.getElementById('matches-list');
