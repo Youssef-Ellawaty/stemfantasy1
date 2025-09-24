@@ -2021,54 +2021,14 @@ if (!authToken) {
         captain: null,
         viceCaptain: null,
         budget: TOTAL_BUDGET,
-        roundPoints: {} // <-- أضف هذا السطر
+        roundPoints: {} // أضف هذا السطر هنا
     };
 }
-}
-
-function updateAllUsersRoundPoints() {
-    const activeRound = getCurrentActiveRound();
-    if (!activeRound) return;
-
-    Object.keys(gameData.userTeams).forEach(username => {
-        const userTeam = gameData.userTeams[username];
-        let roundPoints = 0;
-
-        // احسب النقاط من لاعبي التشكيلة الأساسية فقط
-        Object.values(userTeam.players || {}).forEach(playerId => {
-            const player = gameData.players.find(p => p.id === playerId);
-            if (player) {
-                let playerPoints = 0;
-                // نقاط اللاعب في الجولة الحالية فقط
-                gameData.matches.forEach(match => {
-                    if (match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
-                        playerPoints += match.playerStats[player.id].points || 0;
-                    }
-                });
-
-                // مضاعفة نقاط الكابتن
-                if (userTeam.captain === playerId) {
-                    const activePowerUp = gameData.activePowerUps[username];
-                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
-                        playerPoints *= 3;
-                    } else {
-                        playerPoints *= 2;
-                    }
-                }
-                roundPoints += playerPoints;
-            }
-        });
-
-        // احفظ النقاط في خاصية roundPoints
-        if (!userTeam.roundPoints) userTeam.roundPoints = {};
-        userTeam.roundPoints[activeRound.id] = roundPoints;
-    });
-}
-
+}    
         // Update UI elements
 function updateUI() {
-    updatePlayersTotalPoints(); // أضف هذا السطر أولاً
-    updateAllUsersRoundPoints();
+    updateAllUsersRoundPoints(); // أضف هذا السطر أولاً
+    updatePlayersTotalPoints();  
     updateTeamStats();
     updateFormation();
     updatePowerUps();
@@ -2121,6 +2081,45 @@ function updatePlayersTotalPoints() {
     });
 }
 
+function updateAllUsersRoundPoints() {
+    const activeRound = getCurrentActiveRound();
+    if (!activeRound) return;
+
+    Object.keys(gameData.userTeams).forEach(username => {
+        const userTeam = gameData.userTeams[username];
+        let roundPoints = 0;
+
+        // احسب النقاط من لاعبي التشكيلة الأساسية فقط
+        Object.values(userTeam.players || {}).forEach(playerId => {
+            const player = gameData.players.find(p => p.id === playerId);
+            if (player) {
+                let playerPoints = 0;
+                // نقاط اللاعب في الجولة الحالية فقط
+                gameData.matches.forEach(match => {
+                    if (match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
+                        playerPoints += match.playerStats[player.id].points || 0;
+                    }
+                });
+
+                // مضاعفة نقاط الكابتن
+                if (userTeam.captain === playerId) {
+                    const activePowerUp = gameData.activePowerUps[username];
+                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
+                        playerPoints *= 3;
+                    } else {
+                        playerPoints *= 2;
+                    }
+                }
+                roundPoints += playerPoints;
+            }
+        });
+
+        // احفظ النقاط في خاصية roundPoints
+        if (!userTeam.roundPoints) userTeam.roundPoints = {};
+        userTeam.roundPoints[activeRound.id] = roundPoints;
+    });
+}
+
         // Update team statistics
 function updateTeamStats() {
     const userTeam = gameData.userTeams[currentUser];
@@ -2137,14 +2136,12 @@ function updateTeamStats() {
         const player = gameData.players.find(p => p.id === playerId);
         if (player) {
             totalValue += Number(player.price) || 0;
-            // استخدم نقاط الجولة الحالية فقط
-            let playerPoints = getPlayerPointsByCurrentRound(player.id);
+            let playerPoints = Number(player.points) || 0;
 
             // مضاعفة نقاط الكابتن
             if (userTeam.captain === playerId) {
                 const activePowerUp = gameData.activePowerUps[currentUser];
-                const activeRound = getCurrentActiveRound();
-                if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === (activeRound ? activeRound.id : null)) {
+                if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
                     playerPoints *= 3;
                 } else {
                     playerPoints *= 2;
@@ -2193,23 +2190,6 @@ function getPlayerPointsByCurrentRound(playerId) {
 
         // Update formation display
 function updateFormation() {
-const roundNameDiv = document.getElementById('current-round-name');
-const activeRound = getCurrentActiveRound();
-roundNameDiv.textContent = activeRound ? activeRound.name : 'No Active Round';
-
-// ...داخل حلقة allPositions.forEach...
-if (player) {
-    // احسب نقاط اللاعب في الجولة الحالية فقط
-    let points = getPlayerPointsByCurrentRound(player.id);
-
-    // مضاعفة نقاط الكابتن
-    if (userTeam.captain === playerId) {
-        if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === (activeRound ? activeRound.id : null)) {
-            points *= 3;
-        } else {
-            points *= 2;
-        }
-    }}
     const userTeam = gameData.userTeams[currentUser];
     const activePowerUp = gameData.activePowerUps[currentUser];
     const formationField = document.getElementById('formation');
@@ -3343,12 +3323,13 @@ function updateRankings() {
         // نقاط الجولة الحالية فقط
         const roundPoints = activeRoundId ? (userTeam.roundPoints?.[activeRoundId] || 0) : 0;
         return { username, totalPoints, roundPoints };
-    }).sort((a, b) => b.roundPoints - a.roundPoints);
+    });
 
     // ترتيب الجولة الحالية
+    const roundRankings = [...userRankings].sort((a, b) => b.roundPoints - a.roundPoints);
     const roundContainer = document.getElementById('round-rankings');
     roundContainer.innerHTML = '';
-    userRankings.forEach((user, index) => {
+    roundRankings.forEach((user, index) => {
         const rankingItem = document.createElement('div');
         rankingItem.className = 'ranking-item';
         rankingItem.innerHTML = `
