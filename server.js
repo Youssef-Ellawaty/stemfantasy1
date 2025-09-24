@@ -77,7 +77,7 @@ async function initializeData() {
                     { id: 'p40', name: 'Y.Ragab', team: 'Koom El-Zawany', position: 'goalkeeper', price: 4.5, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 }
                 ],
                 rounds: [
-                    { id: 1, name: 'الجولة الأولى', start: '2025-09-16T18:00', end: '2025-09-23T23:59' }
+                    { id: 1, name: 'الجولة الأولى (الدابل)', start: '2025-09-28T15:00', end: '2025-10-1T22:00' }
                 ],
                 matches: [],
                 currentRound: 1,
