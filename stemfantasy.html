@@ -2072,32 +2072,43 @@ function updatePlayersTotalPoints() {
 }
 
         // Update team statistics
-        function updateTeamStats() {
-            const userTeam = gameData.userTeams[currentUser];
-            let currentPoints = 0;
+function updateTeamStats() {
+    const userTeam = gameData.userTeams[currentUser];
+    let currentPoints = 0;
 
-            // Build effective players map including pending changes for live preview
-            const effectivePlayers = { ...(userTeam.players || {}) };
-            Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
-                effectivePlayers[pos] = pid;
-            });
+    // Build effective players map including pending changes for live preview
+    const effectivePlayers = { ...(userTeam.players || {}) };
+    Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
+        effectivePlayers[pos] = pid;
+    });
 
-            let totalValue = 0;
-            Object.values(effectivePlayers).forEach(playerId => {
-                const player = gameData.players.find(p => p.id === playerId);
-                if (player) {
-                    totalValue += Number(player.price) || 0;
-                    currentPoints += Number(player.points) || 0;
+    let totalValue = 0;
+    Object.values(effectivePlayers).forEach(playerId => {
+        const player = gameData.players.find(p => p.id === playerId);
+        if (player) {
+            totalValue += Number(player.price) || 0;
+            let playerPoints = Number(player.points) || 0;
+
+            // مضاعفة نقاط الكابتن
+            if (userTeam.captain === playerId) {
+                const activePowerUp = gameData.activePowerUps[currentUser];
+                if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
+                    playerPoints *= 3;
+                } else {
+                    playerPoints *= 2;
                 }
-            });
-
-            const bankPreview = Math.max(0, TOTAL_BUDGET - totalValue);
-
-            document.getElementById('current-points').textContent = currentPoints;
-            const bankEl = document.getElementById('bank-value');
-            if (bankEl) bankEl.textContent = bankPreview.toFixed(1);
-            document.getElementById('team-value').textContent = totalValue.toFixed(1);
+            }
+            currentPoints += playerPoints;
         }
+    });
+
+    const bankPreview = Math.max(0, TOTAL_BUDGET - totalValue);
+
+    document.getElementById('current-points').textContent = currentPoints;
+    const bankEl = document.getElementById('bank-value');
+    if (bankEl) bankEl.textContent = bankPreview.toFixed(1);
+    document.getElementById('team-value').textContent = totalValue.toFixed(1);
+}
 
         // Update formation display
         function updateFormation() {
