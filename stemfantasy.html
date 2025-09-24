@@ -1063,22 +1063,24 @@
         <div id="my-team" class="tab-content active">
             <div class="team-layout">
                 <!-- Left Panel: Transfers, Power-ups, Management Buttons -->
-                <div class="team-controls-panel">
-                    <div class="team-stats-cards">
-                        <div id="current-round-name" style="text-align:center; font-size:1.2rem; font-weight:bold; margin-bottom:10px;"></div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="current-points">0</div>
-                            <div class="stat-label">Current Points</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="bank-value">45.0</div>
-                            <div class="stat-label">Bank (M)</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="team-value">0.0</div>
-                            <div class="stat-label">Team Value (M)</div>
-                        </div>
-                    </div>
+<div class="team-controls-panel">
+    <!-- اسم الجولة في صف منفصل بعرض كامل -->
+    <div id="current-round-name" style="text-align:center; font-size:1.2rem; font-weight:bold; margin-bottom:10px; grid-column: 1 / -1;"></div>
+    <!-- البطاقات الثلاثة في صف واحد -->
+    <div class="team-stats-cards" style="margin-bottom: 1rem;">
+        <div class="stat-card">
+            <div class="stat-value" id="current-points">0</div>
+            <div class="stat-label">Current Points</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="bank-value">45.0</div>
+            <div class="stat-label">Bank (M)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="team-value">0.0</div>
+            <div class="stat-label">Team Value (M)</div>
+        </div>
+    </div>
                     
                     <div class="power-ups-panel">
                         <div class="transfers-left-display">
