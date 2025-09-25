@@ -2185,9 +2185,13 @@ if (!authToken) {
 
         // Save game data to localStorage
         function saveGameData() {
-            localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
-            // Also try to save to server
-            saveGameDataToServer();
+            if (authToken) {
+                // إذا كان المستخدم مسجلاً، احفظ مباشرة في السيرفر
+                saveGameDataToServer();
+            } else {
+                // إذا لم يكن مسجلاً، احفظ محلي فقط
+                localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
+            }
         }
 
         // Initialize user team if not exists
