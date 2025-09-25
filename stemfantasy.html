@@ -1184,9 +1184,6 @@
     </div>
                     
                     <div class="power-ups-panel">
-                        <div class="transfers-left-display">
-                            Transfers Remaining: <span id="transfers-count">2</span>
-                        </div>
                         
                         <div class="power-ups-grid">
                             <div class="power-up-card triple-captain" id="triple-captain-btn" onclick="showPowerUpConfirmation('triple-captain')">
@@ -1569,8 +1566,10 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Transfers Allowed:</label>
-                    <input type="number" class="form-control" id="round-transfers-allowed" value="2" min="0">
+                </div>
+                <div class="form-group">
+                    <label>عدد اللاعبين المسموح من كل فريق:</label>
+                    <input type="number" class="form-control" id="round-max-from-team" value="2" min="1" max="7">
                 </div>
                 <button class="btn btn-success" onclick="addRound()">Add New Round</button>
                 
@@ -2188,7 +2187,7 @@ if (!authToken) {
                     captain: null,
                     viceCaptain: null,
                     budget: TOTAL_BUDGET,
-                    formation: '1-2-1' // تعيين افتراضي
+                    formation: gameData.currentFormation
                 };
                 isTeamSaved = false; // New team, not saved yet
             } else {
@@ -2292,7 +2291,7 @@ function updateAllUsersRoundPoints() {
             const benchBoostActive = activePowerUp && activePowerUp.benchBoost && activePowerUp.activeRound === round.id;
 
             // حدد مراكز الأساسيين فقط حسب الفورميشن المحفوظ لكل مستخدم
-            const userFormation = userTeam.formation;
+            const userFormation = userTeam.formation || gameData.currentFormation;
             const formationDetails = gameData.formations[userFormation];
             const starterPositions = [
                 'gk',
@@ -2353,7 +2352,7 @@ function updateTeamStats() {
     const benchBoostActive = activePowerUp && activePowerUp.benchBoost && activePowerUp.activeRound === (activeRound ? activeRound.id : null);
 
     // حدد مراكز الأساسيين فقط
-    const userFormation = userTeam.formation;
+    const userFormation = gameData.userTeams[currentUser]?.formation || gameData.currentFormation;
     const formationDetails = gameData.formations[userFormation];
     const starterPositions = [
         'gk',
@@ -2445,7 +2444,7 @@ function updateFormation() {
         effectivePlayers[pos] = pid;
     });
 
-    const userFormation = userTeam.formation;
+    const userFormation = userTeam.formation || gameData.currentFormation;
     const currentFormationDetails = gameData.formations[userFormation];
     if (!currentFormationDetails) {
         console.error('Invalid formation selected:', userFormation);
@@ -2628,8 +2627,7 @@ function selectFormation(formationName) {
     const container = document.getElementById('captain-players');
     container.innerHTML = '';
 
-    const userFormation = userTeam.formation;
-    const currentFormationDetails = gameData.formations[userFormation];
+    const currentFormationDetails = gameData.formations[gameData.currentFormation];
     let starterPositions = ['gk'];
     for (let i = 1; i <= currentFormationDetails.def; i++) starterPositions.push(`def${i}`);
     for (let i = 1; i <= currentFormationDetails.mid; i++) starterPositions.push(`mid${i}`);
@@ -2866,7 +2864,7 @@ function selectFormation(formationName) {
 
         // Save team changes
        function saveTeamChanges() {
-    // لا تقم بتغيير formation هنا بناءً على gameData.currentFormation
+        gameData.userTeams[currentUser].formation = gameData.currentFormation;
             const activeRound = getCurrentActiveRound();
     if (activeRound) {
         alert('لا يمكنك حفظ أو تعديل التشكيلة أثناء وجود جولة جارية!');
@@ -2875,9 +2873,11 @@ function selectFormation(formationName) {
     const userTeam = gameData.userTeams[currentUser];
     // Combine original team and pending changes:
     const pendingPlayers = { ...(userTeam.players || {}), ...teamChanges };
-    const exceededTeam = validateTeamLimit(pendingPlayers, 2);
+    let round = getCurrentActiveRound();
+    let maxFromTeam = (round && round.maxFromTeam) ? round.maxFromTeam : 2;
+    const exceededTeam = validateTeamLimit(pendingPlayers, maxFromTeam);
     if (exceededTeam) {
-        alert('لا يمكنك حفظ التشكيلة مع أكثر من لاعبين من نفس الفريق: ' + exceededTeam);
+        alert('لا يمكنك حفظ التشكيلة مع أكثر من ' + maxFromTeam + ' من نفس الفريق: ' + exceededTeam);
         return;
     }
 
@@ -3050,34 +3050,9 @@ function moveBenchToStarter(benchPos, starterPos) {
         alert('تم نقل اللاعب وتغيير التشكيلة تلقائياً!');
         return;
     }
-    // نفذ التبديل
+    // نفذ التبديل بدون تغيير التشكيلة
     userTeam.players[starterPos] = benchPlayerId;
     userTeam.players[benchPos] = starterPlayerId;
-
-    // --- تحديث التشكيلة تلقائياً بناءً على نوع اللاعب الفعلي ---
-    // احسب توزيع الأساسيين الجديد حسب نوع اللاعب الموجود فعلياً في كل خانة
-    const formationKeys = {def: 0, mid: 0, fwd: 0};
-    Object.entries(userTeam.players).forEach(([pos, pid]) => {
-        if (!pid) return;
-        if (pos === 'gk') return; // الحارس ثابت
-        // احضر نوع اللاعب الفعلي
-        const player = gameData.players.find(p => p.id === pid);
-        if (!player) return;
-        if (player.position === 'defender') formationKeys.def++;
-        if (player.position === 'midfielder') formationKeys.mid++;
-        if (player.position === 'forward') formationKeys.fwd++;
-    });
-    // ابحث عن formation مطابق
-    let foundFormation = null;
-    for (const [formName, formObj] of Object.entries(gameData.formations)) {
-        if (formObj.def === formationKeys.def && formObj.mid === formationKeys.mid && formObj.fwd === formationKeys.fwd) {
-            foundFormation = formName;
-            break;
-        }
-    }
-    if (foundFormation) {
-        userTeam.formation = foundFormation;
-    }
     saveGameData();
     updateFormation();
     alert('تم نقل اللاعب من الدكة إلى الأساسي بنجاح!');
@@ -3575,20 +3550,45 @@ function loadModalPlayers() {
     });
 
     let filteredPlayers = gameData.players.filter(player => {
-        // Filter by position
+        // فلترة حسب الفلاتر العادية
         if (positionFilter !== 'all' && player.position !== positionFilter) return false;
-
-        // Filter by team
         if (teamFilter !== 'all' && player.team !== teamFilter) return false;
 
-        // Don't show players already in user's effective team (except current position)
+        // لا تظهر اللاعبين المختارين بالفعل كأساسي أو احتياطي (إلا إذا كان في نفس الخانة)
         const currentPlayerInPosition = teamChanges[selectedPosition] || userTeam.players[selectedPosition];
         if (Object.values(effectivePlayers).includes(player.id) && player.id !== currentPlayerInPosition) return false;
 
-        // Enforce compatibility with the selected slot
+        // منطق خاص للاحتياطي: sub1, sub2
+        if (selectedPosition && selectedPosition.startsWith('sub')) {
+            // توزيع الفريق: gk, def1, mid1, fwd1, sub1, sub2
+            // sub1: مدافع أو وسط أو هجوم (حسب ما لم يتم اختياره احتياطي)
+            // sub2: مدافع أو وسط أو هجوم (حسب ما لم يتم اختياره احتياطي)
+            // لكن يجب أن يكون هناك فقط حارس واحد أساسي (gk)
+            // سنجعل sub1 يقبل فقط مدافع/وسط/هجوم غير موجود بالفعل في الاحتياط
+            // نحدد نوع المركز المطلوب بناءً على ما تم اختياره في الأساسي والاحتياطي
+            // إذا كان اللاعب حارس مرمى، لا يظهر إلا إذا لم يوجد حارس أساسي
+            if (player.position === 'goalkeeper') {
+                // لا يمكن اختيار حارس احتياطي، فقط أساسي
+                return false;
+            }
+            // لا يمكن اختيار أكثر من مدافع/وسط/هجوم احتياطي
+            // احسب كم لاعب احتياطي من نفس المركز موجود بالفعل
+            let subPositions = ['sub1', 'sub2'];
+            let sameTypeOnBench = subPositions.filter(pos => {
+                const pid = effectivePlayers[pos];
+                if (!pid) return false;
+                const p = gameData.players.find(pl => pl.id === pid);
+                return p && p.position === player.position;
+            }).length;
+            if (sameTypeOnBench >= 1) return false;
+            // لا يمكن اختيار لاعب من مركز غير متاح (يجب أن يكون هناك فقط 1 احتياطي لكل مركز)
+            // إذا كان جميع المراكز الأخرى ممتلئة، اسمح بالاختيار
+        }
+
+        // تحقق من التوافق مع الخانة
         if (selectedPosition && !isPositionCompatible(player.position, selectedPosition)) return false;
 
-        return true; // If all filters pass, include player
+        return true;
     });
 
     container.innerHTML = ''; // Clear previous players
@@ -3628,7 +3628,18 @@ function countPlayersFromTeam(effectivePlayers, teamName) {
 }
 
 // Add this helper for validating the full team before saving
-function validateTeamLimit(playersObj, limit = 2) {
+function validateTeamLimit(playersObj, limit) {
+    // إذا لم يتم تمرير limit، استخدم من الجولة الحالية
+    if (typeof limit === 'undefined') {
+        let round = getCurrentActiveRound();
+        if (!round) {
+            // إذا لا يوجد جولة نشطة، استخدم آخر جولة أو 2
+            if (gameData.rounds && gameData.rounds.length > 0) {
+                round = gameData.rounds[gameData.rounds.length - 1];
+            }
+        }
+        limit = (round && round.maxFromTeam) ? round.maxFromTeam : 2;
+    }
     const teamCounts = {};
     Object.values(playersObj).forEach(pid => {
         const p = gameData.players.find(pl => pl.id === pid);
@@ -4314,6 +4325,7 @@ async function addRound() {
     const start = document.getElementById('round-start').value;
     const end = document.getElementById('round-end').value;
     const transfersAllowed = parseInt(document.getElementById('round-transfers-allowed').value) || 0;
+    const maxFromTeam = parseInt(document.getElementById('round-max-from-team').value) || 2;
 
     if (!name || !start || !end) {
         alert('All fields must be filled!');
@@ -4325,7 +4337,8 @@ async function addRound() {
         name,
         start,
         end,
-        transfersAllowed
+        transfersAllowed,
+        maxFromTeam
     };
 
     gameData.rounds.push(newRound);
@@ -4340,6 +4353,7 @@ async function addRound() {
     document.getElementById('round-start').value = '';
     document.getElementById('round-end').value = '';
     document.getElementById('round-transfers-allowed').value = '2';
+    document.getElementById('round-max-from-team').value = '2';
 
     alert('Round added successfully!');
 }
@@ -4913,7 +4927,7 @@ function showBenchSwapModal() {
     });
 
     // مراكز الأساسيين
-    const userFormation = userTeam.formation;
+    const userFormation = userTeam.formation || gameData.currentFormation;
     const formationDetails = gameData.formations[userFormation];
     const starterPositions = [
         'gk',
@@ -4964,27 +4978,26 @@ function confirmBenchSwap() {
         return;
     }
 
-    // إذا المركزين من نوعين مختلفين (مثلاً مهاجم ↔ وسط)، أعد توزيع اللاعبين حسب نوعهم في التشكيلة الجديدة
+    // إذا المركزين من نوعين مختلفين (مثلاً مهاجم ↔ وسط)، تحقق من التوزيع الجديد
     if (benchPlayer && (!starterPlayer || benchPlayer.position !== starterPlayer.position)) {
-        // نفذ التبديل مؤقتاً
+        // عد اللاعبين حسب المراكز بعد التبديل
         const tempPlayers = { ...userTeam.players };
         tempPlayers[starterPos] = benchPlayerId;
         tempPlayers[benchPos] = starterPlayerId;
-        // اجمع كل اللاعبين الحاليين (بما فيهم الاحتياط)
-        const allPids = Object.values(tempPlayers).filter(Boolean);
-        const allPlayers = allPids.map(pid => {
+        let def = 0, mid = 0, fwd = 0, gk = 0;
+        Object.entries(tempPlayers).forEach(([pos, pid]) => {
+            if (!pid) return;
             const p = gameData.players.find(pl => pl.id === pid);
-            return p ? { pid, type: p.position } : null;
-        }).filter(Boolean);
-        // صنفهم حسب النوع
-        const gks = allPlayers.filter(s => s.type === 'goalkeeper').map(s => s.pid);
-        const defs = allPlayers.filter(s => s.type === 'defender').map(s => s.pid);
-        const mids = allPlayers.filter(s => s.type === 'midfielder').map(s => s.pid);
-        const fwds = allPlayers.filter(s => s.type === 'forward').map(s => s.pid);
-        // ابحث عن formation يطابق التوزيع الحالي تماماً
+            if (!p) return;
+            if (pos.startsWith('def')) def++;
+            if (pos.startsWith('mid')) mid++;
+            if (pos.startsWith('fwd')) fwd++;
+            if (pos === 'gk') gk++;
+        });
+        // ابحث عن formation مطابق
         let foundFormation = null;
         for (const [formationName, details] of Object.entries(gameData.formations)) {
-            if (gks.length === 1 && defs.length === details.def && mids.length === details.mid && fwds.length === details.fwd) {
+            if (details.def === def && details.mid === mid && details.fwd === fwd && gk === 1) {
                 foundFormation = formationName;
                 break;
             }
@@ -4993,25 +5006,9 @@ function confirmBenchSwap() {
             alert('لا يوجد نظام تشكيل متوافق مع هذا التبديل!');
             return;
         }
-        // وزع اللاعبين الأساسيين حسب formation المختار
-        const formation = gameData.formations[foundFormation];
-        const newPlayers = {};
-        newPlayers['gk'] = gks[0] || null;
-        for (let i = 0; i < formation.def; i++) {
-            newPlayers[`def${i+1}`] = defs[i] || null;
-        }
-        for (let i = 0; i < formation.mid; i++) {
-            newPlayers[`mid${i+1}`] = mids[i] || null;
-        }
-        for (let i = 0; i < formation.fwd; i++) {
-            newPlayers[`fwd${i+1}`] = fwds[i] || null;
-        }
-        // الاحتياط: أي لاعب لم يتم وضعه كأساسي
-        const usedIds = [gks[0], ...defs.slice(0,formation.def), ...mids.slice(0,formation.mid), ...fwds.slice(0,formation.fwd)].filter(Boolean);
-        const bench = allPids.filter(pid => !usedIds.includes(pid));
-        newPlayers['sub1'] = bench[0] || null;
-        newPlayers['sub2'] = bench[1] || null;
-        userTeam.players = newPlayers;
+        // نفذ التبديل فعلياً مع تغيير التشكيلة
+        userTeam.players[starterPos] = benchPlayerId;
+        userTeam.players[benchPos] = starterPlayerId;
         userTeam.formation = foundFormation;
         saveGameData();
         updateFormation();
@@ -5019,93 +5016,13 @@ function confirmBenchSwap() {
         alert('تم النقل وتغيير التشكيلة تلقائياً!');
         return;
     }
-    // نفذ التبديل
+    // نفذ التبديل بدون تغيير التشكيلة
     userTeam.players[starterPos] = benchPlayerId;
     userTeam.players[benchPos] = starterPlayerId;
-
-    // إعادة بناء التشكيلة بالكامل بعد التبديل
-    // اجمع كل اللاعبين الحاليين (بما فيهم الاحتياط)
-    const allPids = Object.values(userTeam.players).filter(Boolean);
-    const allPlayers = allPids.map(pid => {
-        const p = gameData.players.find(pl => pl.id === pid);
-        return p ? { pid, type: p.position } : null;
-    }).filter(Boolean);
-
-    // صنفهم حسب النوع
-    const gks = allPlayers.filter(s => s.type === 'goalkeeper').map(s => s.pid);
-    const defs = allPlayers.filter(s => s.type === 'defender').map(s => s.pid);
-    const mids = allPlayers.filter(s => s.type === 'midfielder').map(s => s.pid);
-    const fwds = allPlayers.filter(s => s.type === 'forward').map(s => s.pid);
-
-    // ابحث عن formation يطابق التوزيع الحالي تماماً، وإن لم يوجد اختر أقرب formation ممكن
-    let foundFormation = null;
-    let maxMatch = -1;
-    let bestFormation = null;
-    let bestFormationName = null;
-    for (const [formationName, details] of Object.entries(gameData.formations)) {
-        if (
-            gks.length === 1 &&
-            defs.length === details.def &&
-            mids.length === details.mid &&
-            fwds.length === details.fwd
-        ) {
-            foundFormation = formationName;
-            break;
-        }
-        // إذا لم يوجد مطابق تماماً، احسب كم لاعب يمكن وضعه كأساسي في هذا formation
-        if (gks.length >= 1) {
-            let matchCount = 1;
-            matchCount += Math.min(defs.length, details.def);
-            matchCount += Math.min(mids.length, details.mid);
-            matchCount += Math.min(fwds.length, details.fwd);
-            if (matchCount > maxMatch) {
-                maxMatch = matchCount;
-                bestFormation = details;
-                bestFormationName = formationName;
-            }
-        }
-    }
-    let formation, formationNameToUse;
-    if (foundFormation) {
-        formation = gameData.formations[foundFormation];
-        formationNameToUse = foundFormation;
-    } else if (bestFormation) {
-        formation = bestFormation;
-        formationNameToUse = bestFormationName;
-    } else {
-        alert('لا يوجد نظام تشكيل متوافق مع هذا التوزيع!');
-        return;
-    }
-    userTeam.formation = formationNameToUse;
-
-    // وزع اللاعبين الأساسيين حسب formation المختار
-    const newPlayers = {};
-    // الحارس
-    newPlayers['gk'] = gks[0] || null;
-    // المدافعين
-    for (let i = 0; i < formation.def; i++) {
-        newPlayers[`def${i+1}`] = defs[i] || null;
-    }
-    // الوسط
-    for (let i = 0; i < formation.mid; i++) {
-        newPlayers[`mid${i+1}`] = mids[i] || null;
-    }
-    // المهاجمين
-    for (let i = 0; i < formation.fwd; i++) {
-        newPlayers[`fwd${i+1}`] = fwds[i] || null;
-    }
-    // الاحتياط: أي لاعب لم يتم وضعه كأساسي
-    const usedIds = [gks[0], ...defs.slice(0,formation.def), ...mids.slice(0,formation.mid), ...fwds.slice(0,formation.fwd)].filter(Boolean);
-    const bench = allPids.filter(pid => !usedIds.includes(pid));
-    newPlayers['sub1'] = bench[0] || null;
-    newPlayers['sub2'] = bench[1] || null;
-    userTeam.players = newPlayers;
-    console.log('تم تحديث التشكيلة إلى:', formationNameToUse);
-
     saveGameData();
     updateFormation();
     closeBenchSwapModal();
-    alert('تم النقل وتحديث التشكيلة تلقائياً!');
+    alert('تم النقل بنجاح!');
 }
 
     </script>
