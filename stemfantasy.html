@@ -1943,21 +1943,6 @@
             setInterval(updateCurrentRoundAndTransfers, 60000);
         }
 
-function isTransferWindowOpen() {
-    const now = new Date();
-    const rounds = gameData.rounds;
-    for (let i = 0; i < rounds.length; i++) {
-        const start = new Date(rounds[i].start);
-        const nextStart = (i < rounds.length - 1) ? new Date(rounds[i + 1].start) : null;
-        if (now >= start && (!nextStart || now < nextStart)) {
-            // الآن داخل فترة جولة
-            return false;
-        }
-    }
-    // الآن خارج كل فترات الجولات (أي بعد نهاية جولة وقبل بداية التالية)
-    return true;
-}
-
         // Check authentication status
         function checkAuthStatus() {
             if (authToken) {
@@ -2185,21 +2170,13 @@ if (!authToken) {
 
         // Save game data to localStorage
         function saveGameData() {
-            if (authToken) {
-                // إذا كان المستخدم مسجلاً، احفظ مباشرة في السيرفر
-                saveGameDataToServer();
-            } else {
-                // إذا لم يكن مسجلاً، احفظ محلي فقط
-                localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
-            }
+            localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
+            // Also try to save to server
+            saveGameDataToServer();
         }
 
         // Initialize user team if not exists
         function initializeUserTeam() {
-            if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
             const activeRound = getCurrentActiveRound();
             if (activeRound) {
         alert('لا يمكنك إنشاء أو تعديل التشكيلة أثناء وجود جولة جارية!');
@@ -2629,10 +2606,6 @@ const currentFormationDetails = gameData.formations[userFormation];
         }
 
 function selectFormation(formationName) {
-    if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
     const activeRound = getCurrentActiveRound();
     if (activeRound) {
         alert('لا يمكن تغيير نظام التشكيلة أثناء الجولة الجارية!');
@@ -2692,10 +2665,6 @@ function selectFormation(formationName) {
         }
 
         function setCaptain(playerId) {
-            if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
                 const activeRound = getCurrentActiveRound();
     if (activeRound) {
         alert('لا يمكنك تغيير الكابتن أثناء وجود جولة جارية!');
@@ -2897,10 +2866,6 @@ function selectFormation(formationName) {
 
         // Save team changes
        function saveTeamChanges() {
-        if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
         gameData.userTeams[currentUser].formation = gameData.currentFormation;
             const activeRound = getCurrentActiveRound();
     if (activeRound) {
@@ -3021,10 +2986,6 @@ function selectFormation(formationName) {
 
 // يمكنك وضعها قرب دوال التشكيلة أو في نهاية ملف السكريبت
 function moveBenchToStarter(benchPos, starterPos) {
-    if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
     const activeRound = getCurrentActiveRound();
     if (activeRound) {
         alert('لا يمكنك النقل أثناء وجود جولة جارية!');
@@ -3122,10 +3083,6 @@ function moveBenchToStarter(benchPos, starterPos) {
 
         // Activate power-up
 function activatePowerUp(type) {
-    if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
         const activeRound = getCurrentActiveRound();
     if (activeRound) {
         alert('لا يمكنك تفعيل القوى أثناء وجود جولة جارية!');
@@ -4867,14 +4824,14 @@ function showBenchSwapModal() {
     // لاعبو الدكة
     const benchOptions = Object.entries(userTeam.players)
         .filter(([pos, pid]) => pos.startsWith('sub') && pid)
-        .map(([pos, pid]) => {
-            const player = gameData.players.find(p => p.id === pid);
-            return { pos, pid, name: player ? player.name : '', position: player ? player.position : '', team: player ? player.team : '' };
-        });
+        .map(([pos, pid]) => ({ pos, pid }));
     const benchSelect = document.getElementById('bench-player-select');
     benchSelect.innerHTML = '';
-    benchOptions.forEach(({ pos, pid, name, position, team }) => {
-        benchSelect.innerHTML += `<option value="${pid}">${name} (${getPositionNameArabic(position)}) - ${team}</option>`;
+    benchOptions.forEach(({ pos, pid }) => {
+        const player = gameData.players.find(p => p.id === pid);
+        if (player) {
+            benchSelect.innerHTML += `<option value="${pos}">${player.name} (${getPositionName(pos)})</option>`;
+        }
     });
 
     // مراكز الأساسيين
@@ -4889,11 +4846,13 @@ function showBenchSwapModal() {
     const starterSelect = document.getElementById('starter-position-select');
     starterSelect.innerHTML = '';
     starterPositions.forEach(pos => {
-        const pid = userTeam.players[pos];
-        if (pid) {
-            const player = gameData.players.find(p => p.id === pid);
-            starterSelect.innerHTML += `<option value="${pid}">${player ? player.name : ''} (${player ? getPositionNameArabic(player.position) : ''}) - ${player ? player.team : ''}</option>`;
+        const playerId = userTeam.players[pos];
+        let label = getPositionName(pos);
+        if (playerId) {
+            const p = gameData.players.find(pl => pl.id === playerId);
+            label += ` - ${p ? p.name : ''}`;
         }
+        starterSelect.innerHTML += `<option value="${pos}">${label}</option>`;
     });
 
     document.getElementById('bench-swap-modal').classList.add('active');
@@ -4904,78 +4863,69 @@ function closeBenchSwapModal() {
 }
 
 function confirmBenchSwap() {
-    if (!isTransferWindowOpen()) {
-    alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-    return;
-}
-    const benchPlayerId = document.getElementById('bench-player-select').value;
-    const starterPlayerId = document.getElementById('starter-position-select').value;
-    if (!benchPlayerId || !starterPlayerId) {
-        alert('يجب اختيار لاعب من الاحتياط ولاعب من الأساسي.');
+    const benchPos = document.getElementById('bench-player-select').value;
+    const starterPos = document.getElementById('starter-position-select').value;
+    if (!benchPos || !starterPos) {
+        alert('اختر لاعب دكة ومركز أساسي!');
         return;
     }
     const userTeam = gameData.userTeams[currentUser];
-    // ابحث عن مراكز اللاعبين
-    let benchPos = null, starterPos = null;
-    for (const [pos, pid] of Object.entries(userTeam.players)) {
-        if (pid === benchPlayerId) benchPos = pos;
-        if (pid === starterPlayerId) starterPos = pos;
-    }
-    if (!benchPos || !starterPos) {
-        alert('تعذر تحديد مراكز اللاعبين المختارين.');
-        return;
-    }
+    const benchPlayerId = userTeam.players[benchPos];
+    const starterPlayerId = userTeam.players[starterPos];
+
     const benchPlayer = gameData.players.find(p => p.id === benchPlayerId);
-    const starterPlayer = gameData.players.find(p => p.id === starterPlayerId);
+    const starterPlayer = starterPlayerId ? gameData.players.find(p => p.id === starterPlayerId) : null;
 
-    // إذا نفس المركز (مثلاً مدافع ↔ مدافع)
-    if (benchPlayer.position === starterPlayer.position) {
-        userTeam.players[starterPos] = benchPlayerId;
-        userTeam.players[benchPos] = starterPlayerId;
-        saveGameData();
-        updateFormation();
-        closeBenchSwapModal();
-        alert('تم النقل بنجاح!');
+    // لا يمكن نقل حارس إلا مكان حارس
+    if (benchPlayer.position === 'goalkeeper' && !starterPos.startsWith('gk')) {
+        alert('لا يمكن نقل حارس إلا مكان حارس آخر!');
+        return;
+    }
+    if (starterPos.startsWith('gk') && benchPlayer.position !== 'goalkeeper') {
+        alert('لا يمكن وضع لاعب غير الحارس في مركز الحارس!');
         return;
     }
 
-    // إذا المراكز مختلفة، تحقق من صلاحية التشكيلة بعد التبديل
-    // جرب تبديل اللاعبين مؤقتاً
-    const tempPlayers = { ...userTeam.players };
-    tempPlayers[starterPos] = benchPlayerId;
-    tempPlayers[benchPos] = starterPlayerId;
-
-    // احسب عدد كل مركز بعد التبديل
-    const posCount = { goalkeeper: 0, defender: 0, midfielder: 0, forward: 0 };
-    Object.values(tempPlayers).forEach(pid => {
-        const p = gameData.players.find(pl => pl.id === pid);
-        if (p) posCount[p.position]++;
-    });
-
-    // تحقق هل يوجد formation متوافق مع هذا التوزيع
-    let validFormation = null;
-    for (const [formationName, f] of Object.entries(gameData.formations)) {
-        if (
-            posCount.goalkeeper === 1 &&
-            posCount.defender === f.def &&
-            posCount.midfielder === f.mid &&
-            posCount.forward === f.fwd
-        ) {
-            validFormation = formationName;
-            break;
+    // إذا المركزين من نوعين مختلفين (مثلاً مهاجم ↔ وسط)، حاول تغيير الفورميشن تلقائيًا
+    if (benchPlayer && (!starterPlayer || benchPlayer.position !== starterPlayer.position)) {
+        // ابحث عن فورميشن متاح يحقق هذا التبديل
+        let foundFormation = null;
+        for (const [formationName, details] of Object.entries(gameData.formations)) {
+            // عد اللاعبين حسب المراكز بعد التبديل
+            const tempPlayers = { ...userTeam.players };
+            tempPlayers[starterPos] = benchPlayerId;
+            tempPlayers[benchPos] = starterPlayerId;
+            let def = 0, mid = 0, fwd = 0, gk = 0;
+            Object.entries(tempPlayers).forEach(([pos, pid]) => {
+                if (!pid) return;
+                const p = gameData.players.find(pl => pl.id === pid);
+                if (!p) return;
+                if (pos.startsWith('def')) def++;
+                if (pos.startsWith('mid')) mid++;
+                if (pos.startsWith('fwd')) fwd++;
+                if (pos === 'gk') gk++;
+            });
+            if (details.def === def && details.mid === mid && details.fwd === fwd && gk === 1) {
+                foundFormation = formationName;
+                break;
+            }
+        }
+        if (foundFormation) {
+            userTeam.formation = foundFormation;
+            alert('تم تغيير نظام التشكيلة تلقائيًا إلى: ' + foundFormation);
+        } else {
+            alert('لا يوجد نظام تشكيل متوافق مع هذا التبديل!');
+            return;
         }
     }
-    if (validFormation) {
-        userTeam.players[starterPos] = benchPlayerId;
-        userTeam.players[benchPos] = starterPlayerId;
-        userTeam.formation = validFormation;
-        saveGameData();
-        updateFormation();
-        closeBenchSwapModal();
-        alert('تم النقل بنجاح!\nتم تغيير التشكيلة تلقائياً إلى: ' + validFormation);
-    } else {
-        alert('لا يمكن تنفيذ التبديل لأن التشكيلة الناتجة غير متوافقة مع أي formation متاح.');
-    }
+
+    // نفذ التبديل
+    userTeam.players[starterPos] = benchPlayerId;
+    userTeam.players[benchPos] = starterPlayerId;
+    saveGameData();
+    updateFormation();
+    closeBenchSwapModal();
+    alert('تم النقل بنجاح!');
 }
 
     </script>
