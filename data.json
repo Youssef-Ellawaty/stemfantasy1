@@ -1,13 +1,6 @@
 {
   "users": [
     {
-      "id": "1758717139922",
-      "username": "7enkesh09",
-      "password": "$2b$10$0CVTtCHsIa91fHmloXFt1.opRL1akqYP9qciZe5ULTN8azw.2PZs2",
-      "email": "",
-      "createdAt": "2025-09-24T12:32:19.922Z"
-    },
-    {
       "id": "1758748655081",
       "username": "Citizen Zooma",
       "password": "$2b$10$I1GBR/VSMEjSstRUXmkdmOqNvaql6aO4Bbtl6qCXtKCX2AuU5Kakq",
@@ -36,11 +29,11 @@
       "createdAt": "2025-09-25T11:14:04.283Z"
     },
     {
-      "id": "1758801842280",
-      "username": "test",
-      "password": "$2b$10$EixwPIdxnziRr.qVUkY8p.Zkh6Ix/OPsHVMTc9GvWM9PySBrEDLZG",
+      "id": "1758802514336",
+      "username": "7enkesh09",
+      "password": "$2b$10$OmU6p4MidAEPyfsRvmksO.LY13PspB3DyW4xQa4LYqfP4LLenoODq",
       "email": "",
-      "createdAt": "2025-09-25T12:04:02.280Z"
+      "createdAt": "2025-09-25T12:15:14.336Z"
     }
   ],
   "gameData": {
@@ -617,58 +610,49 @@
         "redCards": 0
       }
     ],
-    "rounds": [
-      {
-        "id": 1,
-        "name": "test 1",
-        "start": "2025-09-25T15:10",
-        "end": "2025-09-25T15:20",
-        "transfersAllowed": 2
-      }
-    ],
+    "rounds": [],
     "matches": [],
-    "currentRound": 2,
+    "currentRound": 1,
     "userTeams": {
       "7enkesh09": {
         "players": {
           "fwd1": "p1",
-          "mid2": "p17",
-          "mid1": "p2",
+          "mid2": "p2",
+          "mid1": "p34",
           "def1": "p8",
-          "sub1": "p39",
-          "sub2": "p34",
-          "gk": "p15"
+          "gk": "p15",
+          "sub2": "p17",
+          "sub1": "p39"
         },
-        "captain": "p8",
+        "captain": "p1",
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 14,
-          "2": 0,
-          "3": 20,
-          "4": 0
+          "1": 45,
+          "2": 0
         },
         "formation": "1-2-1"
       },
       "vosk": {
         "players": {
-          "fwd1": "p1",
-          "mid1": "p2",
-          "mid2": "p12",
-          "def1": "p8",
+          "fwd1": "p27",
+          "mid1": "p6",
+          "mid2": "p34",
+          "def1": "p23",
           "gk": "p30",
-          "sub2": "p39",
-          "sub1": "p34"
+          "sub2": "p9",
+          "sub1": "p32"
         },
         "captain": null,
         "viceCaptain": null,
-        "budget": 0,
+        "budget": 0.5,
         "roundPoints": {
-          "1": 7,
+          "1": 15,
           "2": 0,
           "3": 20,
           "4": 0
-        }
+        },
+        "formation": "1-2-1"
       },
       "Citizen Zooma66": {
         "players": {
@@ -685,7 +669,7 @@
         "budget": 0,
         "formation": "1-1-2",
         "roundPoints": {
-          "1": 7,
+          "1": 0,
           "2": 0
         }
       },
@@ -704,24 +688,9 @@
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 14,
+          "1": 15,
           "2": 0
         },
-        "formation": "1-2-1"
-      },
-      "test": {
-        "players": {
-          "gk": "p15",
-          "def1": "p8",
-          "mid1": "p33",
-          "mid2": "p22",
-          "fwd1": "p1",
-          "sub1": "p18",
-          "sub2": "p40"
-        },
-        "captain": "p1",
-        "viceCaptain": null,
-        "budget": 0.5,
         "formation": "1-2-1"
       }
     },
@@ -729,8 +698,7 @@
       "7enkesh09": 0,
       "vosk": 0,
       "Citizen Zooma66": 0,
-      "Ellawaty 3amk": 0,
-      "test": 0
+      "Ellawaty 3amk": 0
     },
     "powerUpsUsed": {
       "7enkesh09": {
@@ -748,17 +716,13 @@
       "Ellawaty 3amk": {
         "tripleCaptain": true,
         "benchBoost": true
-      },
-      "test": {
-        "tripleCaptain": true,
-        "benchBoost": false
       }
     },
     "activePowerUps": {
       "7enkesh09": {
         "tripleCaptain": true,
         "benchBoost": false,
-        "activeRound": 2
+        "activeRound": 1
       },
       "vosk": {
         "tripleCaptain": false,
@@ -771,11 +735,6 @@
         "activeRound": null
       },
       "Ellawaty 3amk": {
-        "tripleCaptain": true,
-        "benchBoost": false,
-        "activeRound": 2
-      },
-      "test": {
         "tripleCaptain": true,
         "benchBoost": false,
         "activeRound": 2
