@@ -1876,25 +1876,15 @@
         function initApp() {
             // localStorage.clear(); // Removed: This was for temporary development and caused data loss
             checkAuthStatus();
+            loadGameData();
+            initializeUserTeam();
+            updateCurrentRoundAndTransfers();
+
             // Always attempt to load game data from server on init if authenticated
             if (authToken) {
-                loadGameDataFromServer().then(() => {
-                    initializeUserTeam();
-                    updateCurrentRoundAndTransfers();
-                    handlePostLoadUI();
-                });
-            } else {
-                loadGameData();
-                initializeUserTeam();
-                updateCurrentRoundAndTransfers();
-                handlePostLoadUI();
+                loadGameDataFromServer();
             }
-            // Periodically check round status to reset transfers when a new round starts
-            setInterval(updateCurrentRoundAndTransfers, 60000);
-        }
 
-        // دالة مساعدة لتحديث الواجهة بعد تحميل البيانات
-        function handlePostLoadUI() {
             // Check if a round is active on app load
             const activeRound = gameData.rounds.find(r => {
                 const now = new Date();
@@ -1908,7 +1898,7 @@
                 const initialBtn = document.getElementById('initial-formation-btn');
                 const transfersBtn = document.getElementById('transfers-mode-btn');
                 const captainBtn = document.getElementById('captain-mode-btn');
-                const selectFormationBtn = document.getElementById('select-formation-btn');
+                const selectFormationBtn = document.getElementById('select-formation-btn'); // Get the new button
                 const tripleCaptainBtn = document.getElementById('triple-captain-btn');
                 const benchBoostBtn = document.getElementById('bench-boost-btn');
                 const saveBtn = document.getElementById('save-team-btn');
@@ -1917,7 +1907,7 @@
                 if (initialBtn) initialBtn.disabled = true;
                 if (transfersBtn) transfersBtn.disabled = true;
                 if (captainBtn) captainBtn.disabled = true;
-                if (selectFormationBtn) selectFormationBtn.disabled = true;
+                if (selectFormationBtn) selectFormationBtn.disabled = true; // Disable select formation button
                 if (tripleCaptainBtn) tripleCaptainBtn.style.opacity = '0.5';
                 if (benchBoostBtn) benchBoostBtn.style.opacity = '0.5';
                 if (saveBtn) saveBtn.classList.add('hidden');
@@ -1925,9 +1915,9 @@
 
                 // For new users without a saved team, show a message
                 const userTeam = gameData.userTeams[currentUser];
-                const hasPlayers = userTeam && Object.values(userTeam.players).some(playerId => playerId);
+                const hasPlayers = Object.values(userTeam.players).some(playerId => playerId);
 
-                if (currentUser !== 'guest' && (!userTeam || !hasPlayers)) {
+                if (currentUser !== 'guest' && !hasPlayers) {
                     alert('يرجى انتظار بدء جولة جديدة لإنشاء تشكيلة!');
                 }
             } else {
@@ -1949,6 +1939,8 @@
             populateFilters();
             populateMatchesFilters();
             updateStatistics();
+            // Periodically check round status to reset transfers when a new round starts
+            setInterval(updateCurrentRoundAndTransfers, 60000);
         }
 
 function isTransferWindowOpen() {
@@ -4828,26 +4820,19 @@ matchDiv.innerHTML = `
         }
 
         // ...existing code...
-    // إذا لم يوجد فريق للمستخدم، أنشئه دائماً حتى لو هناك جولة نشطة
-    if (!gameData.userTeams[currentUser]) {
-        gameData.userTeams[currentUser] = {
-            players: {},
-            formation: gameData.currentFormation,
-            captain: null,
-            viceCaptain: null
-        };
+async function loadUsersList() {
+    const container = document.getElementById('users-list');
+    container.innerHTML = '<h4>المستخدمون المسجلون:</h4>';
+
+    if (!authToken) {
+        container.innerHTML += '<p>يجب تسجيل الدخول كأدمن لعرض المستخدمين.</p>';
         return;
     }
-    // إذا كان الفريق موجوداً، امنع التعديل أثناء وجود جولة نشطة فقط
-    if (!isTransferWindowOpen()) {
-        alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
-        return;
-    }
-    const activeRound = getCurrentActiveRound();
-    if (activeRound) {
-        alert('لا يمكنك إنشاء أو تعديل التشكيلة أثناء وجود جولة جارية!');
-        return;
+
     try {
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
         if (response.ok) {
             const users = await response.json();
             users.forEach(user => {
