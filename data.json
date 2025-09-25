@@ -34,6 +34,13 @@
       "password": "$2b$10$1WATBZpQw3HLMzGE1/wlVO.eMKW3W8nXj8flQAyWjsro2EYStyqF6",
       "email": "",
       "createdAt": "2025-09-25T00:16:27.442Z"
+    },
+    {
+      "id": "1758798844283",
+      "username": "Ellawaty 3amk",
+      "password": "$2b$10$RCFKVep3QtB2M4iANhd.XuSjP.U4PWp3XgL7ru/sPqaoIoFIrGPFO",
+      "email": "",
+      "createdAt": "2025-09-25T11:14:04.283Z"
     }
   ],
   "gameData": {
@@ -610,8 +617,144 @@
         "redCards": 0
       }
     ],
-    "rounds": [],
-    "matches": [],
+    "rounds": [
+      {
+        "id": 1,
+        "name": "خخخخخخخخخخخخخخ 1",
+        "start": "2025-09-25T14:35",
+        "end": "2025-09-25T14:42",
+        "transfersAllowed": 2
+      },
+      {
+        "id": 2,
+        "name": "خخخخخخخخخخخخخخ 2",
+        "start": "2025-09-25T14:47",
+        "end": "2025-09-25T15:00",
+        "transfersAllowed": 2
+      }
+    ],
+    "matches": [
+      {
+        "id": 1758799867750,
+        "round": 1,
+        "team1": "7enkesh FC",
+        "team2": "Uncle Bahgat",
+        "datetime": "2025-09-25T14:35",
+        "matchType": "group",
+        "leg": null,
+        "score": null,
+        "events": {},
+        "isFinished": false,
+        "playerStats": {}
+      },
+      {
+        "id": 1758800234931,
+        "round": 1,
+        "team1": "ZD Manga United",
+        "team2": "5altak El-Ray2a",
+        "datetime": "2025-09-25T14:37",
+        "matchType": "group",
+        "leg": null,
+        "score": {
+          "team1": 0,
+          "team2": 0
+        },
+        "events": {},
+        "isFinished": true,
+        "playerStats": {
+          "p6": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p7": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p8": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 7
+          },
+          "p9": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p10": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p21": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p22": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p23": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p24": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          },
+          "p25": {
+            "goals": 0,
+            "assists": 0,
+            "yellowCards": 0,
+            "redCards": 0,
+            "cleanSheets": 0,
+            "saves": 0,
+            "points": 0
+          }
+        }
+      }
+    ],
     "currentRound": 1,
     "userTeams": {
       "aaaaaa": {
@@ -628,7 +771,7 @@
         "viceCaptain": null,
         "budget": 1,
         "roundPoints": {
-          "1": 48,
+          "1": 0,
           "2": 0,
           "3": 27,
           "4": 0
@@ -644,11 +787,11 @@
           "sub2": "p34",
           "gk": "p15"
         },
-        "captain": "p1",
+        "captain": "p8",
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 36,
+          "1": 0,
           "2": 0,
           "3": 20,
           "4": 0
@@ -669,7 +812,7 @@
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 23,
+          "1": 0,
           "2": 0,
           "3": 20,
           "4": 0
@@ -690,15 +833,37 @@
         "budget": 0,
         "formation": "1-1-2",
         "roundPoints": {
-          "1": 15
+          "1": 0,
+          "2": 0
         }
+      },
+      "Ellawaty 3amk": {
+        "players": {
+          "fwd1": "p1",
+          "mid1": "p13",
+          "def2": "p3",
+          "mid2": "p18",
+          "def1": "p8",
+          "gk": "p15",
+          "sub1": "p30",
+          "sub2": "p19"
+        },
+        "captain": "p8",
+        "viceCaptain": null,
+        "budget": 0,
+        "roundPoints": {
+          "1": 0,
+          "2": 0
+        },
+        "formation": "1-2-1"
       }
     },
     "transfersUsed": {
       "aaaaaa": 0,
       "7enkesh09": 0,
       "vosk": 0,
-      "Citizen Zooma66": 0
+      "Citizen Zooma66": 0,
+      "Ellawaty 3amk": 0
     },
     "powerUpsUsed": {
       "aaaaaa": {
@@ -706,7 +871,7 @@
         "benchBoost": false
       },
       "7enkesh09": {
-        "tripleCaptain": false,
+        "tripleCaptain": true,
         "benchBoost": false
       },
       "vosk": {
@@ -716,6 +881,10 @@
       "Citizen Zooma66": {
         "tripleCaptain": false,
         "benchBoost": false
+      },
+      "Ellawaty 3amk": {
+        "tripleCaptain": true,
+        "benchBoost": true
       }
     },
     "activePowerUps": {
@@ -725,9 +894,9 @@
         "activeRound": 1
       },
       "7enkesh09": {
-        "tripleCaptain": false,
+        "tripleCaptain": true,
         "benchBoost": false,
-        "activeRound": null
+        "activeRound": 2
       },
       "vosk": {
         "tripleCaptain": false,
@@ -738,6 +907,11 @@
         "tripleCaptain": false,
         "benchBoost": false,
         "activeRound": null
+      },
+      "Ellawaty 3amk": {
+        "tripleCaptain": true,
+        "benchBoost": false,
+        "activeRound": 2
       }
     },
     "formations": {

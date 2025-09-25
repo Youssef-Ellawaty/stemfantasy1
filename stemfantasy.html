@@ -1873,75 +1873,23 @@
 
 
         // Initialize the application
-        function initApp() {
-            // localStorage.clear(); // Removed: This was for temporary development and caused data loss
-            checkAuthStatus();
-            loadGameData();
-            initializeUserTeam();
-            updateCurrentRoundAndTransfers();
+async function initApp() {
+    checkAuthStatus();
 
-            // Always attempt to load game data from server on init if authenticated
-            if (authToken) {
-                loadGameDataFromServer();
-            }
+    if (authToken) {
+        await loadGameDataFromServer();
+    } else {
+        loadGameData();
+    }
 
-            // Check if a round is active on app load
-            const activeRound = gameData.rounds.find(r => {
-                const now = new Date();
-                const start = new Date(r.start);
-                const end = new Date(r.end);
-                return now >= start && now <= end;
-            });
-
-            if (activeRound) {
-                // Disable team management and power-ups during an active round
-                const initialBtn = document.getElementById('initial-formation-btn');
-                const transfersBtn = document.getElementById('transfers-mode-btn');
-                const captainBtn = document.getElementById('captain-mode-btn');
-                const selectFormationBtn = document.getElementById('select-formation-btn'); // Get the new button
-                const tripleCaptainBtn = document.getElementById('triple-captain-btn');
-                const benchBoostBtn = document.getElementById('bench-boost-btn');
-                const saveBtn = document.getElementById('save-team-btn');
-                const cancelBtn = document.getElementById('cancel-changes-btn');
-
-                if (initialBtn) initialBtn.disabled = true;
-                if (transfersBtn) transfersBtn.disabled = true;
-                if (captainBtn) captainBtn.disabled = true;
-                if (selectFormationBtn) selectFormationBtn.disabled = true; // Disable select formation button
-                if (tripleCaptainBtn) tripleCaptainBtn.style.opacity = '0.5';
-                if (benchBoostBtn) benchBoostBtn.style.opacity = '0.5';
-                if (saveBtn) saveBtn.classList.add('hidden');
-                if (cancelBtn) cancelBtn.classList.add('hidden');
-
-                // For new users without a saved team, show a message
-                const userTeam = gameData.userTeams[currentUser];
-                const hasPlayers = Object.values(userTeam.players).some(playerId => playerId);
-
-                if (currentUser !== 'guest' && !hasPlayers) {
-                    alert('يرجى انتظار بدء جولة جديدة لإنشاء تشكيلة!');
-                }
-            } else {
-                // Ensure buttons are enabled if no active round
-                const initialBtn = document.getElementById('initial-formation-btn');
-                const transfersBtn = document.getElementById('transfers-mode-btn');
-                const captainBtn = document.getElementById('captain-mode-btn');
-                const tripleCaptainBtn = document.getElementById('triple-captain-btn');
-                const benchBoostBtn = document.getElementById('bench-boost-btn');
-
-                if (initialBtn) initialBtn.disabled = false;
-                if (transfersBtn) transfersBtn.disabled = false;
-                if (captainBtn) captainBtn.disabled = false;
-                if (tripleCaptainBtn) tripleCaptainBtn.style.opacity = '1';
-                if (benchBoostBtn) benchBoostBtn.style.opacity = '1';
-            }
-
-            updateUI();
-            populateFilters();
-            populateMatchesFilters();
-            updateStatistics();
-            // Periodically check round status to reset transfers when a new round starts
-            setInterval(updateCurrentRoundAndTransfers, 60000);
-        }
+    initializeUserTeam();
+    updateCurrentRoundAndTransfers();
+    updateUI();
+    populateFilters();
+    populateMatchesFilters();
+    updateStatistics();
+    setInterval(updateCurrentRoundAndTransfers, 60000);
+}
 
         // Check authentication status
         function checkAuthStatus() {
@@ -2112,18 +2060,15 @@ if (response.ok) {
 async function loadGameDataFromServer() {
     if (!authToken) return;
     try {
-        // احذف بيانات LocalStorage القديمة أولاً
-        localStorage.removeItem('gameData');
-
         const response = await fetch(`${API_BASE_URL}/game-data`, {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
         if (response.ok) {
             const serverData = await response.json();
-            // استبدل بيانات gameData بالكامل
             gameData = serverData;
-            saveGameData();
-            updateUI(); // أو أي دالة تحدث الصفحة
+            // بعد تحميل بيانات السيرفر، حدث التشكيلة والواجهة
+            initializeUserTeam();
+            updateUI();
         }
     } catch (error) {
         console.error('Error loading game data from server:', error);
