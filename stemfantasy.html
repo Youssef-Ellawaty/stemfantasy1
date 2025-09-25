@@ -1877,16 +1877,12 @@
             // localStorage.clear(); // Removed: This was for temporary development and caused data loss
             checkAuthStatus();
             loadGameData();
+            initializeUserTeam();
             updateCurrentRoundAndTransfers();
 
+            // Always attempt to load game data from server on init if authenticated
             if (authToken) {
-                // إذا كان هناك توكن، انتظر تحميل بيانات السيرفر ثم أنشئ فريق المستخدم إذا لم يوجد
-                loadGameDataFromServer().then(() => {
-                    initializeUserTeam();
-                });
-            } else {
-                // إذا لم يوجد توكن، أنشئ فريق المستخدم مباشرة
-                initializeUserTeam();
+                loadGameDataFromServer();
             }
 
             // Check if a round is active on app load
