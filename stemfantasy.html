@@ -1742,10 +1742,37 @@
 
     <script>
 
-window.localStorage.setItem = function() {};
-window.localStorage.getItem = function() { return null; };
-window.localStorage.removeItem = function() {};
-window.localStorage.clear = function() {};
+// السماح فقط بتخزين authToken وfantasyUser في localStorage
+(function() {
+    const allowedKeys = ['authToken', 'fantasyUser'];
+    const realSetItem = window.localStorage.setItem.bind(window.localStorage);
+    const realGetItem = window.localStorage.getItem.bind(window.localStorage);
+    const realRemoveItem = window.localStorage.removeItem.bind(window.localStorage);
+    const realClear = window.localStorage.clear.bind(window.localStorage);
+
+    window.localStorage.setItem = function(key, value) {
+        if (allowedKeys.includes(key)) {
+            realSetItem(key, value);
+        }
+        // تجاهل أي محاولة لحفظ بيانات أخرى
+    };
+    window.localStorage.getItem = function(key) {
+        if (allowedKeys.includes(key)) {
+            return realGetItem(key);
+        }
+        return null;
+    };
+    window.localStorage.removeItem = function(key) {
+        if (allowedKeys.includes(key)) {
+            realRemoveItem(key);
+        }
+        // تجاهل حذف أي بيانات أخرى
+    };
+    window.localStorage.clear = function() {
+        // فقط احذف مفاتيح الدخول
+        allowedKeys.forEach(key => realRemoveItem(key));
+    };
+})();
 
    // Global variables
         let gameData = {
@@ -1915,7 +1942,6 @@ window.localStorage.clear = function() {};
             // Periodically check round status to reset transfers when a new round starts
             setInterval(updateCurrentRoundAndTransfers, 60000);
         }
- 
 
         // Check authentication status
         function checkAuthStatus() {
@@ -4808,7 +4834,7 @@ function showBenchSwapModal() {
         }
     });
 
-    // لاعبو الأساسيين (بالاسم)
+    // مراكز الأساسيين
     const userFormation = userTeam.formation || gameData.currentFormation;
     const formationDetails = gameData.formations[userFormation];
     const starterPositions = [
@@ -4821,14 +4847,17 @@ function showBenchSwapModal() {
     starterSelect.innerHTML = '';
     starterPositions.forEach(pos => {
         const playerId = userTeam.players[pos];
+        let label = getPositionName(pos);
         if (playerId) {
             const p = gameData.players.find(pl => pl.id === playerId);
-            starterSelect.innerHTML += `<option value="${pos}">${p ? p.name : ''} (${getPositionName(pos)})</option>`;
+            label += ` - ${p ? p.name : ''}`;
         }
+        starterSelect.innerHTML += `<option value="${pos}">${label}</option>`;
     });
 
     document.getElementById('bench-swap-modal').classList.add('active');
 }
+ 
 
 function closeBenchSwapModal() {
     document.getElementById('bench-swap-modal').classList.remove('active');
@@ -4838,12 +4867,7 @@ function confirmBenchSwap() {
     const benchPos = document.getElementById('bench-player-select').value;
     const starterPos = document.getElementById('starter-player-select').value;
     if (!benchPos || !starterPos) {
-        alert('اختر لاعب دكة ولاعب أساسي!');
-        return;
-    }
-    const activeRound = getCurrentActiveRound();
-    if (activeRound) {
-        alert('لا يمكنك النقل أثناء وجود جولة جارية!');
+        alert('اختر لاعب دكة ومركز أساسي!');
         return;
     }
     const userTeam = gameData.userTeams[currentUser];

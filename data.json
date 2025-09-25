@@ -1,13 +1,6 @@
 {
   "users": [
     {
-      "id": "1758716961854",
-      "username": "aaaaaa",
-      "password": "$2b$10$VI1V29eAzWeLE2CM8rNQB.pfyMUoCHKWNMu5r55K1Ca8gsK2GptLi",
-      "email": "",
-      "createdAt": "2025-09-24T12:29:21.854Z"
-    },
-    {
       "id": "1758717139922",
       "username": "7enkesh09",
       "password": "$2b$10$0CVTtCHsIa91fHmloXFt1.opRL1akqYP9qciZe5ULTN8azw.2PZs2",
@@ -41,6 +34,13 @@
       "password": "$2b$10$RCFKVep3QtB2M4iANhd.XuSjP.U4PWp3XgL7ru/sPqaoIoFIrGPFO",
       "email": "",
       "createdAt": "2025-09-25T11:14:04.283Z"
+    },
+    {
+      "id": "1758801842280",
+      "username": "test",
+      "password": "$2b$10$EixwPIdxnziRr.qVUkY8p.Zkh6Ix/OPsHVMTc9GvWM9PySBrEDLZG",
+      "email": "",
+      "createdAt": "2025-09-25T12:04:02.280Z"
     }
   ],
   "gameData": {
@@ -620,163 +620,15 @@
     "rounds": [
       {
         "id": 1,
-        "name": "خخخخخخخخخخخخخخ 1",
-        "start": "2025-09-25T14:35",
-        "end": "2025-09-25T14:42",
-        "transfersAllowed": 2
-      },
-      {
-        "id": 2,
-        "name": "خخخخخخخخخخخخخخ 2",
-        "start": "2025-09-25T14:47",
-        "end": "2025-09-25T15:00",
+        "name": "test 1",
+        "start": "2025-09-25T15:10",
+        "end": "2025-09-25T15:20",
         "transfersAllowed": 2
       }
     ],
-    "matches": [
-      {
-        "id": 1758799867750,
-        "round": 1,
-        "team1": "7enkesh FC",
-        "team2": "Uncle Bahgat",
-        "datetime": "2025-09-25T14:35",
-        "matchType": "group",
-        "leg": null,
-        "score": null,
-        "events": {},
-        "isFinished": false,
-        "playerStats": {}
-      },
-      {
-        "id": 1758800234931,
-        "round": 1,
-        "team1": "ZD Manga United",
-        "team2": "5altak El-Ray2a",
-        "datetime": "2025-09-25T14:37",
-        "matchType": "group",
-        "leg": null,
-        "score": {
-          "team1": 0,
-          "team2": 0
-        },
-        "events": {},
-        "isFinished": true,
-        "playerStats": {
-          "p6": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p7": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p8": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 7
-          },
-          "p9": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p10": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p21": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p22": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p23": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p24": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          },
-          "p25": {
-            "goals": 0,
-            "assists": 0,
-            "yellowCards": 0,
-            "redCards": 0,
-            "cleanSheets": 0,
-            "saves": 0,
-            "points": 0
-          }
-        }
-      }
-    ],
-    "currentRound": 1,
+    "matches": [],
+    "currentRound": 2,
     "userTeams": {
-      "aaaaaa": {
-        "players": {
-          "fwd1": "p1",
-          "mid1": "p2",
-          "mid2": "p28",
-          "def1": "p8",
-          "gk": "p40",
-          "sub1": "p35",
-          "sub2": "p38"
-        },
-        "captain": "p1",
-        "viceCaptain": null,
-        "budget": 1,
-        "roundPoints": {
-          "1": 0,
-          "2": 0,
-          "3": 27,
-          "4": 0
-        }
-      },
       "7enkesh09": {
         "players": {
           "fwd1": "p1",
@@ -791,7 +643,7 @@
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 0,
+          "1": 14,
           "2": 0,
           "3": 20,
           "4": 0
@@ -812,7 +664,7 @@
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 0,
+          "1": 7,
           "2": 0,
           "3": 20,
           "4": 0
@@ -833,7 +685,7 @@
         "budget": 0,
         "formation": "1-1-2",
         "roundPoints": {
-          "1": 0,
+          "1": 7,
           "2": 0
         }
       },
@@ -852,24 +704,35 @@
         "viceCaptain": null,
         "budget": 0,
         "roundPoints": {
-          "1": 0,
+          "1": 14,
           "2": 0
         },
+        "formation": "1-2-1"
+      },
+      "test": {
+        "players": {
+          "gk": "p15",
+          "def1": "p8",
+          "mid1": "p33",
+          "mid2": "p22",
+          "fwd1": "p1",
+          "sub1": "p18",
+          "sub2": "p40"
+        },
+        "captain": "p1",
+        "viceCaptain": null,
+        "budget": 0.5,
         "formation": "1-2-1"
       }
     },
     "transfersUsed": {
-      "aaaaaa": 0,
       "7enkesh09": 0,
       "vosk": 0,
       "Citizen Zooma66": 0,
-      "Ellawaty 3amk": 0
+      "Ellawaty 3amk": 0,
+      "test": 0
     },
     "powerUpsUsed": {
-      "aaaaaa": {
-        "tripleCaptain": true,
-        "benchBoost": false
-      },
       "7enkesh09": {
         "tripleCaptain": true,
         "benchBoost": false
@@ -885,14 +748,13 @@
       "Ellawaty 3amk": {
         "tripleCaptain": true,
         "benchBoost": true
+      },
+      "test": {
+        "tripleCaptain": true,
+        "benchBoost": false
       }
     },
     "activePowerUps": {
-      "aaaaaa": {
-        "tripleCaptain": true,
-        "benchBoost": false,
-        "activeRound": 1
-      },
       "7enkesh09": {
         "tripleCaptain": true,
         "benchBoost": false,
@@ -909,6 +771,11 @@
         "activeRound": null
       },
       "Ellawaty 3amk": {
+        "tripleCaptain": true,
+        "benchBoost": false,
+        "activeRound": 2
+      },
+      "test": {
         "tripleCaptain": true,
         "benchBoost": false,
         "activeRound": 2
