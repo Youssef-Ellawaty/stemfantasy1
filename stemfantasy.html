@@ -2404,9 +2404,8 @@ function getCurrentActiveRound() {
         const round = gameData.rounds[i];
         const start = new Date(round.start);
         const end = new Date(round.end);
-
-        // إذا الآن >= بداية الجولة && الآن < بداية الجولة التالية (أو نهاية الجولة الحالية)
-        if (now >= start && (i === gameData.rounds.length - 1 || now < new Date(gameData.rounds[i + 1].start))) {
+        // الجولة نشطة فقط إذا كان الآن بين البداية والنهاية لنفس الجولة
+        if (now >= start && now < end) {
             activeRound = round;
             break;
         }
@@ -4913,6 +4912,7 @@ function confirmBenchSwap() {
         if (foundFormation) {
             userTeam.formation = foundFormation;
             alert('تم تغيير نظام التشكيلة تلقائيًا إلى: ' + foundFormation);
+            updateFormation(); // تحديث الملعب مباشرة بعد تغيير الفورميشن
         } else {
             alert('لا يوجد نظام تشكيل متوافق مع هذا التبديل!');
             return;
