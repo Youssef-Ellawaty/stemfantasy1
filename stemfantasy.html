@@ -4863,14 +4863,14 @@ function showBenchSwapModal() {
     // لاعبو الدكة
     const benchOptions = Object.entries(userTeam.players)
         .filter(([pos, pid]) => pos.startsWith('sub') && pid)
-        .map(([pos, pid]) => ({ pos, pid }));
+        .map(([pos, pid]) => {
+            const player = gameData.players.find(p => p.id === pid);
+            return { pos, pid, name: player ? player.name : '', position: player ? player.position : '', team: player ? player.team : '' };
+        });
     const benchSelect = document.getElementById('bench-player-select');
     benchSelect.innerHTML = '';
-    benchOptions.forEach(({ pos, pid }) => {
-        const player = gameData.players.find(p => p.id === pid);
-        if (player) {
-            benchSelect.innerHTML += `<option value="${pos}">${player.name} (${getPositionName(pos)})</option>`;
-        }
+    benchOptions.forEach(({ pos, pid, name, position, team }) => {
+        benchSelect.innerHTML += `<option value="${pid}">${name} (${getPositionNameArabic(position)}) - ${team}</option>`;
     });
 
     // مراكز الأساسيين
@@ -4885,13 +4885,11 @@ function showBenchSwapModal() {
     const starterSelect = document.getElementById('starter-position-select');
     starterSelect.innerHTML = '';
     starterPositions.forEach(pos => {
-        const playerId = userTeam.players[pos];
-        let label = getPositionName(pos);
-        if (playerId) {
-            const p = gameData.players.find(pl => pl.id === playerId);
-            label += ` - ${p ? p.name : ''}`;
+        const pid = userTeam.players[pos];
+        if (pid) {
+            const player = gameData.players.find(p => p.id === pid);
+            starterSelect.innerHTML += `<option value="${pid}">${player ? player.name : ''} (${player ? getPositionNameArabic(player.position) : ''}) - ${player ? player.team : ''}</option>`;
         }
-        starterSelect.innerHTML += `<option value="${pos}">${label}</option>`;
     });
 
     document.getElementById('bench-swap-modal').classList.add('active');
@@ -4906,110 +4904,74 @@ function confirmBenchSwap() {
     alert('لا يمكنك إجراء تبديلات أو تغييرات أثناء وجود جولة جارية!');
     return;
 }
-    const benchPos = document.getElementById('bench-player-select').value;
-    const starterPos = document.getElementById('starter-position-select').value;
-    if (!benchPos || !starterPos) {
-        alert('اختر لاعب دكة ومركز أساسي!');
+    const benchPlayerId = document.getElementById('bench-player-select').value;
+    const starterPlayerId = document.getElementById('starter-position-select').value;
+    if (!benchPlayerId || !starterPlayerId) {
+        alert('يجب اختيار لاعب من الاحتياط ولاعب من الأساسي.');
         return;
     }
     const userTeam = gameData.userTeams[currentUser];
-    const benchPlayerId = userTeam.players[benchPos];
-    const starterPlayerId = userTeam.players[starterPos];
-
+    // ابحث عن مراكز اللاعبين
+    let benchPos = null, starterPos = null;
+    for (const [pos, pid] of Object.entries(userTeam.players)) {
+        if (pid === benchPlayerId) benchPos = pos;
+        if (pid === starterPlayerId) starterPos = pos;
+    }
+    if (!benchPos || !starterPos) {
+        alert('تعذر تحديد مراكز اللاعبين المختارين.');
+        return;
+    }
     const benchPlayer = gameData.players.find(p => p.id === benchPlayerId);
-    const starterPlayer = starterPlayerId ? gameData.players.find(p => p.id === starterPlayerId) : null;
+    const starterPlayer = gameData.players.find(p => p.id === starterPlayerId);
 
-    // لا يمكن نقل حارس إلا مكان حارس
-    if (benchPlayer.position === 'goalkeeper' && !starterPos.startsWith('gk')) {
-        alert('لا يمكن نقل حارس إلا مكان حارس آخر!');
+    // إذا نفس المركز (مثلاً مدافع ↔ مدافع)
+    if (benchPlayer.position === starterPlayer.position) {
+        userTeam.players[starterPos] = benchPlayerId;
+        userTeam.players[benchPos] = starterPlayerId;
+        saveGameData();
+        updateFormation();
+        closeBenchSwapModal();
+        alert('تم النقل بنجاح!');
         return;
     }
-    if (starterPos.startsWith('gk') && benchPlayer.position !== 'goalkeeper') {
-        alert('لا يمكن وضع لاعب غير الحارس في مركز الحارس!');
-        return;
-    }
 
+    // إذا المراكز مختلفة، تحقق من صلاحية التشكيلة بعد التبديل
+    // جرب تبديل اللاعبين مؤقتاً
+    const tempPlayers = { ...userTeam.players };
+    tempPlayers[starterPos] = benchPlayerId;
+    tempPlayers[benchPos] = starterPlayerId;
 
-    // إذا المركزين من نوعين مختلفين (مثلاً مهاجم ↔ وسط)، حاول تغيير الفورميشن تلقائيًا بشرط منطقية المراكز وحد أقصى 2 من كل مركز
-    if (benchPlayer && (!starterPlayer || benchPlayer.position !== starterPlayer.position)) {
-        // ابحث عن فورميشن متاح يحقق هذا التبديل
-        let foundFormation = null;
-        for (const [formationName, details] of Object.entries(gameData.formations)) {
-            // عد اللاعبين حسب المراكز بعد التبديل
-            const tempPlayers = { ...userTeam.players };
-            tempPlayers[starterPos] = benchPlayerId;
-            tempPlayers[benchPos] = starterPlayerId;
-            // احسب عدد اللاعبين من كل مركز في الأساسيين
-            let count = { forward: 0, midfielder: 0, defender: 0, goalkeeper: 0 };
-            let valid = true;
-            // GK
-            const gkId = tempPlayers['gk'];
-            if (gkId) {
-                const p = gameData.players.find(pl => pl.id === gkId);
-                if (!p || p.position !== 'goalkeeper') valid = false;
-                else count.goalkeeper++;
-            } else {
-                valid = false;
-            }
-            // DEF
-            for (let j = 1; j <= details.def; j++) {
-                const pos = `def${j}`;
-                const pid = tempPlayers[pos];
-                if (pid) {
-                    const p = gameData.players.find(pl => pl.id === pid);
-                    if (!p || p.position !== 'defender') valid = false;
-                    else count.defender++;
-                } else {
-                    valid = false;
-                }
-            }
-            // MID
-            for (let j = 1; j <= details.mid; j++) {
-                const pos = `mid${j}`;
-                const pid = tempPlayers[pos];
-                if (pid) {
-                    const p = gameData.players.find(pl => pl.id === pid);
-                    if (!p || p.position !== 'midfielder') valid = false;
-                    else count.midfielder++;
-                } else {
-                    valid = false;
-                }
-            }
-            // FWD
-            for (let j = 1; j <= details.fwd; j++) {
-                const pos = `fwd${j}`;
-                const pid = tempPlayers[pos];
-                if (pid) {
-                    const p = gameData.players.find(pl => pl.id === pid);
-                    if (!p || p.position !== 'forward') valid = false;
-                    else count.forward++;
-                } else {
-                    valid = false;
-                }
-            }
-            // تحقق من الحد الأقصى (2 مهاجمين أو وسط أو مدافعين)
-            if (count.forward > 2 || count.midfielder > 2 || count.defender > 2) valid = false;
-            if (valid) {
-                foundFormation = formationName;
-                break;
-            }
-        }
-        if (foundFormation) {
-            userTeam.formation = foundFormation;
-            alert('تم تغيير نظام التشكيلة تلقائيًا إلى: ' + foundFormation);
-        } else {
-            alert('لا يوجد نظام تشكيل متوافق مع هذا التبديل! يجب ألا يزيد أي مركز عن 2 في الأساسيين وكل لاعب في مركزه.');
-            return;
+    // احسب عدد كل مركز بعد التبديل
+    const posCount = { goalkeeper: 0, defender: 0, midfielder: 0, forward: 0 };
+    Object.values(tempPlayers).forEach(pid => {
+        const p = gameData.players.find(pl => pl.id === pid);
+        if (p) posCount[p.position]++;
+    });
+
+    // تحقق هل يوجد formation متوافق مع هذا التوزيع
+    let validFormation = null;
+    for (const [formationName, f] of Object.entries(gameData.formations)) {
+        if (
+            posCount.goalkeeper === 1 &&
+            posCount.defender === f.def &&
+            posCount.midfielder === f.mid &&
+            posCount.forward === f.fwd
+        ) {
+            validFormation = formationName;
+            break;
         }
     }
-
-    // نفذ التبديل
-    userTeam.players[starterPos] = benchPlayerId;
-    userTeam.players[benchPos] = starterPlayerId;
-    saveGameData();
-    updateFormation();
-    closeBenchSwapModal();
-    alert('تم النقل بنجاح!');
+    if (validFormation) {
+        userTeam.players[starterPos] = benchPlayerId;
+        userTeam.players[benchPos] = starterPlayerId;
+        userTeam.formation = validFormation;
+        saveGameData();
+        updateFormation();
+        closeBenchSwapModal();
+        alert('تم النقل بنجاح!\nتم تغيير التشكيلة تلقائياً إلى: ' + validFormation);
+    } else {
+        alert('لا يمكن تنفيذ التبديل لأن التشكيلة الناتجة غير متوافقة مع أي formation متاح.');
+    }
 }
 
     </script>
