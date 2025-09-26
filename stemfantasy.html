@@ -2449,10 +2449,11 @@ function getPlayerPointsByCurrentRound(playerId) {
 
         // Update formation display
 function updateFormation() {
+
     const userTeam = gameData.userTeams[currentUser];
     const activePowerUp = gameData.activePowerUps[currentUser];
     const formationField = document.getElementById('formation');
-    formationField.innerHTML = ''; // Clear existing slots
+    formationField.innerHTML = '';
 
     // عرض اسم الجولة الحالية أعلى التشكيلة
     const roundNameDiv = document.getElementById('current-round-name');
@@ -2460,10 +2461,26 @@ function updateFormation() {
     roundNameDiv.textContent = activeRound ? activeRound.name : 'No Active Round';
 
     // Reintroduce effectivePlayers for rendering
-    const effectivePlayers = { ...(userTeam.players || {}) };
+    let effectivePlayers = { ...(userTeam.players || {}) };
     Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
         effectivePlayers[pos] = pid;
     });
+
+    // إذا كان هناك Power Up نشط واختفت التشكيلة، أعد تحميلها من localStorage
+    if (
+        activePowerUp &&
+        (activePowerUp.tripleCaptain || activePowerUp.benchBoost) &&
+        Object.keys(effectivePlayers).length === 0
+    ) {
+        // حاول إعادة تحميل بيانات userTeams من localStorage
+        let localData = null;
+        try {
+            localData = JSON.parse(localStorage.getItem('fantasyGameData'));
+        } catch (e) {}
+        if (localData && localData.userTeams && localData.userTeams[currentUser] && localData.userTeams[currentUser].players) {
+            effectivePlayers = { ...localData.userTeams[currentUser].players };
+        }
+    }
 
     const userFormation = userTeam.formation || gameData.currentFormation;
     const currentFormationDetails = gameData.formations[userFormation];
