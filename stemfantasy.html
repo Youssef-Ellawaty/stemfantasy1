@@ -2533,6 +2533,12 @@ function updateFormation() {
     const roundNameDiv = document.getElementById('current-round-name');
     const activeRound = getCurrentActiveRound();
     roundNameDiv.textContent = activeRound ? activeRound.name : 'No Active Round';
+    
+    // استخدام الكابتن المحدد للجولة الحالية
+    const currentRoundCaptain = userTeam.captainsByRound && userTeam.captainsByRound[gameData.currentRound];
+    if (currentRoundCaptain) {
+        userTeam.captain = currentRoundCaptain;
+    }
 
     // Reintroduce effectivePlayers for rendering
     const effectivePlayers = { ...(userTeam.players || {}) };
@@ -2785,7 +2791,16 @@ function selectFormation(formationName) {
         return;
     }
             const userTeam = gameData.userTeams[currentUser];
+            
+            // تهيئة مصفوفة الكابتن لكل جولة إذا لم تكن موجودة
+            if (!userTeam.captainsByRound) {
+                userTeam.captainsByRound = {};
+            }
+            
+            // حفظ الكابتن للجولة الحالية
+            userTeam.captainsByRound[gameData.currentRound] = playerId;
             userTeam.captain = playerId;
+
             // Ensure vice captain doesn't duplicate captain
             if (userTeam.viceCaptain === playerId) {
                 userTeam.viceCaptain = null;
@@ -3293,7 +3308,8 @@ function activatePowerUp(type) {
         gameData.activePowerUps[currentUser] = {
             tripleCaptain: false,
             benchBoost: false,
-            activeRound: null
+            tripleCaptainRound: null,
+            benchBoostRound: null
         };
         activePowerUp = gameData.activePowerUps[currentUser];
     }
@@ -3304,25 +3320,24 @@ function activatePowerUp(type) {
         return;
     }
 
-    // Check if another power-up is active this round
-    if (activePowerUp.activeRound === gameData.currentRound &&
-        ((type === 'triple-captain' && activePowerUp.benchBoost) ||
-         (type === 'bench-boost' && activePowerUp.tripleCaptain))) {
-        alert('لا يمكن استعمال أكثر من قوة واحدة في نفس الجولة!');
+    // تحقق من عدم وجود قوة أخرى مفعلة في نفس الجولة
+    if (type === 'triple-captain' && activePowerUp.benchBoostRound === gameData.currentRound) {
+        alert('لا يمكن تفعيل التريبل كابتن لأن البينش بوست مفعل في هذه الجولة!');
+        return;
+    } else if (type === 'bench-boost' && activePowerUp.tripleCaptainRound === gameData.currentRound) {
+        alert('لا يمكن تفعيل البينش بوست لأن التريبل كابتن مفعل في هذه الجولة!');
         return;
     }
 
     // Activate power-up
     if (type === 'triple-captain') {
         activePowerUp.tripleCaptain = true;
-        activePowerUp.benchBoost = false;
         powerUpsUsed.tripleCaptain = true;
-        activePowerUp.activeRound = gameData.currentRound;  // تأكد من تعيين الجولة النشطة
+        activePowerUp.tripleCaptainRound = gameData.currentRound;
     } else {
         activePowerUp.benchBoost = true;
-        activePowerUp.tripleCaptain = false;
         powerUpsUsed.benchBoost = true;
-        activePowerUp.activeRound = gameData.currentRound;  // تأكد من تعيين الجولة النشطة
+        activePowerUp.benchBoostRound = gameData.currentRound;
     }
 
     saveGameData(); // سيتم حفظها في السيرفر تلقائياً
