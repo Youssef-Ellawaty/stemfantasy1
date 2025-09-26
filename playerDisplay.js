@@ -10,25 +10,25 @@ function fillSlotWithPlayer(slot, player, position) {
     let points = 0;
     if (activeRound) {
         points = getPlayerPointsByCurrentRound(player.id);
+        // مضاعفة نقاط الكابتن حسب القوة المفعلة
+        const userTeam = gameData.userTeams[currentUser];
+        const activePowerUp = gameData.activePowerUps[currentUser];
+        if (userTeam && userTeam.captain === player.id) {
+            if (activePowerUp && activePowerUp.tripleCaptainRound === activeRound.id) {
+                points *= 3;
+            } else {
+                points *= 2;
+            }
+        }
     }
-    
-    // Check if player is captain or vice-captain
     const userTeam = gameData.userTeams[currentUser];
     const isCaptain = userTeam && userTeam.captain === player.id;
     const isViceCaptain = userTeam && userTeam.viceCaptain === player.id;
-    
-    // Check for triple captain
     const activePowerUp = gameData.activePowerUps[currentUser];
-    const isTripleCaptain = isCaptain && activePowerUp && 
-                           activePowerUp.tripleCaptain && 
-                           activePowerUp.activeRound === (activeRound ? activeRound.id : null);
-    
-    // Add appropriate classes
+    const isTripleCaptain = isCaptain && activePowerUp && activePowerUp.tripleCaptainRound === (activeRound ? activeRound.id : null);
     if (isCaptain) slot.classList.add('captain');
     if (isViceCaptain) slot.classList.add('vice-captain');
     if (isTripleCaptain) slot.classList.add('triple-captain');
-    
-    // Update slot content
     slot.innerHTML = `
         <div class="player-name">${player.name}</div>
         <div class="player-team">${player.team}</div>
@@ -36,8 +36,6 @@ function fillSlotWithPlayer(slot, player, position) {
         <div class="player-points">${points}</div>
         ${position.startsWith('sub') ? '' : `<button class="delete-player-btn" onclick="handleDeletePlayer('${position}')">🗑️</button>`}
     `;
-    
-    // Add debug information
     console.log(`Filled slot for ${player.name} in position ${position}`);
     console.log(`Captain: ${isCaptain}, Vice: ${isViceCaptain}, Triple: ${isTripleCaptain}`);
 }

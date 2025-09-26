@@ -2475,7 +2475,7 @@ function updateTeamStats() {
 
                 // مضاعفة نقاط الكابتن بنفس منطق updateAllUsersRoundPoints
                 if (userTeam.captain === playerId) {
-                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === activeRound.id) {
+                    if (activePowerUp && activePowerUp.tripleCaptainRound === activeRound.id) {
                         playerPoints *= 3;
                     } else {
                         playerPoints *= 2;
@@ -2617,7 +2617,7 @@ function updateFormation() {
 
                 // مضاعفة نقاط الكابتن في الملعب
                 if (userTeam.captain === playerId) {
-                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === (activeRound ? activeRound.id : null)) {
+                    if (activePowerUp && activePowerUp.tripleCaptainRound === (activeRound ? activeRound.id : null)) {
                         points *= 3;
                     } else {
                         points *= 2;
@@ -2629,7 +2629,7 @@ function updateFormation() {
 
                 slot.classList.remove('captain', 'vice-captain', 'triple-captain');
                 if (userTeam.captain === playerId) {
-                    if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === (activeRound ? activeRound.id : null)) {
+                    if (activePowerUp && activePowerUp.tripleCaptainRound === (activeRound ? activeRound.id : null)) {
                         slot.classList.add('triple-captain');
                     } else {
                         slot.classList.add('captain');
