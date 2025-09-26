@@ -2246,7 +2246,23 @@ if (!authToken) {
 }    
         // Update UI elements
 function updateUI() {
-    updateAllUsersRoundPoints(); // أضف هذا السطر أولاً
+    // حماية: إذا كانت التشكيلة فارغة مع وجود Power Up نشط، استرجعها من localStorage
+    const userTeam = gameData.userTeams[currentUser];
+    const activePowerUp = gameData.activePowerUps[currentUser];
+    if (
+        userTeam && activePowerUp &&
+        (activePowerUp.tripleCaptain || activePowerUp.benchBoost) &&
+        (!userTeam.players || Object.keys(userTeam.players).length === 0)
+    ) {
+        let localData = null;
+        try {
+            localData = JSON.parse(localStorage.getItem('fantasyGameData'));
+        } catch (e) {}
+        if (localData && localData.userTeams && localData.userTeams[currentUser] && localData.userTeams[currentUser].players) {
+            gameData.userTeams[currentUser].players = { ...localData.userTeams[currentUser].players };
+        }
+    }
+    updateAllUsersRoundPoints();
     updatePlayersTotalPoints();  
     updateTeamStats();
     updateFormation();
