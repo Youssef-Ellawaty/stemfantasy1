@@ -2170,10 +2170,21 @@ async function loadGameDataFromServer() {
 
 // Save game data to server
         async function saveGameDataToServer() {
-if (!authToken) {
-    localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
-    return;
-}
+
+    if (!authToken) {
+        localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
+        return;
+    }
+
+    // حماية: تأكد دومًا من وجود جميع الحقول الأساسية لفريق المستخدم قبل الإرسال
+    if (currentUser && gameData.userTeams && gameData.userTeams[currentUser]) {
+        const userTeam = gameData.userTeams[currentUser];
+        if (!userTeam.players) userTeam.players = {};
+        if (typeof userTeam.captain === 'undefined') userTeam.captain = null;
+        if (typeof userTeam.viceCaptain === 'undefined') userTeam.viceCaptain = null;
+        if (typeof userTeam.formation === 'undefined') userTeam.formation = gameData.currentFormation || null;
+        if (typeof userTeam.budget === 'undefined') userTeam.budget = 100.0;
+    }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/game-data`, {
