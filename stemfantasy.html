@@ -2408,7 +2408,8 @@ function updateAllUsersRoundPoints() {
                         });
 
                         // مضاعفة نقاط الكابتن حسب القوة المفعلة
-                        if (userTeam.captain === playerId) {
+                        const roundCaptain = userTeam.captainsByRound && userTeam.captainsByRound[round.id];
+                        if (roundCaptain === playerId) {
                             if (activePowerUp && activePowerUp.tripleCaptainRound === round.id) {
                                 // مضاعفة النقاط ×3 فقط في الجولة التي تم فيها تفعيل التريبل كابتن
                                 playerPoints *= 3;
@@ -3314,14 +3315,11 @@ function activatePowerUp(type) {
     const activePowerUp = gameData.activePowerUps[currentUser];
     
     // تأكد من تهيئة activePowerUp إذا لم يكن موجوداً
-    if (!activePowerUp) {
+    if (!gameData.activePowerUps[currentUser]) {
         gameData.activePowerUps[currentUser] = {
-            tripleCaptain: false,
-            benchBoost: false,
             tripleCaptainRound: null,
             benchBoostRound: null
         };
-        activePowerUp = gameData.activePowerUps[currentUser];
     }
 
     // Check if already used
@@ -3332,10 +3330,11 @@ function activatePowerUp(type) {
 
     // Activate power-up and track round number
     if (type === 'triple-captain') {
-        activePowerUp.tripleCaptainRound = gameData.currentRound;
+        gameData.activePowerUps[currentUser].tripleCaptainRound = gameData.currentRound;
         powerUpsUsed.tripleCaptain = true;
+        console.log('Triple Captain activated for round:', gameData.currentRound); // للتأكد من التفعيل
     } else {
-        activePowerUp.benchBoostRound = gameData.currentRound;
+        gameData.activePowerUps[currentUser].benchBoostRound = gameData.currentRound;
         powerUpsUsed.benchBoost = true;
     }
 
