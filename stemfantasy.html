@@ -2409,7 +2409,7 @@ function updateAllUsersRoundPoints() {
 
                         // مضاعفة نقاط الكابتن حسب القوة المفعلة
                         if (userTeam.captain === playerId) {
-                            if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === round.id) {
+                            if (activePowerUp && activePowerUp.tripleCaptainRound === round.id) {
                                 // مضاعفة النقاط ×3 فقط في الجولة التي تم فيها تفعيل التريبل كابتن
                                 playerPoints *= 3;
                             } else {
@@ -2828,26 +2828,35 @@ function selectFormation(formationName) {
         function updatePowerUps() {
             const powerUpsUsed = gameData.powerUpsUsed[currentUser];
             const activePowerUp = gameData.activePowerUps[currentUser];
+            const currentRound = gameData.currentRound;
             
             const tripleCaptainBtn = document.getElementById('triple-captain-btn');
             const benchBoostBtn = document.getElementById('bench-boost-btn');
             
+            // Reset classes first
+            tripleCaptainBtn.classList.remove('used', 'active');
+            benchBoostBtn.classList.remove('used', 'active');
+            
             // Triple Captain
-            if (powerUpsUsed.tripleCaptain) {
+            if (activePowerUp?.tripleCaptainRound === currentRound) {
+                tripleCaptainBtn.classList.add('active');
+                tripleCaptainBtn.innerHTML = '<div>🔥 Triple Captain</div><small>Activated</small>';
+            } else if (activePowerUp?.tripleCaptainRound && activePowerUp.tripleCaptainRound < currentRound) {
                 tripleCaptainBtn.classList.add('used');
                 tripleCaptainBtn.innerHTML = '<div>🔥 Triple Captain</div><small>Used</small>';
-            } else if (activePowerUp.tripleCaptain && activePowerUp.activeRound === gameData.currentRound) {
-                tripleCaptainBtn.classList.add('active');
-                tripleCaptainBtn.innerHTML = '<div>🔥 Triple Captain</div><small>Active</small>';
+            } else {
+                tripleCaptainBtn.innerHTML = '<div>🔥 Triple Captain</div>';
             }
             
             // Bench Boost
-            if (powerUpsUsed.benchBoost) {
+            if (activePowerUp?.benchBoostRound === currentRound) {
+                benchBoostBtn.classList.add('active');
+                benchBoostBtn.innerHTML = '<div>⚡ Bench Boost</div><small>Activated</small>';
+            } else if (activePowerUp?.benchBoostRound && activePowerUp.benchBoostRound < currentRound) {
                 benchBoostBtn.classList.add('used');
                 benchBoostBtn.innerHTML = '<div>⚡ Bench Boost</div><small>Used</small>';
-            } else if (activePowerUp.benchBoost && activePowerUp.activeRound === gameData.currentRound) {
-                benchBoostBtn.classList.add('active');
-                benchBoostBtn.innerHTML = '<div>⚡ Bench Boost</div><small>Active</small>';
+            } else {
+                benchBoostBtn.innerHTML = '<div>⚡ Bench Boost</div>';
             }
         }
 
@@ -3323,13 +3332,11 @@ function activatePowerUp(type) {
 
     // Activate power-up and track round number
     if (type === 'triple-captain') {
-        activePowerUp.tripleCaptain = true;
-        powerUpsUsed.tripleCaptain = true;
         activePowerUp.tripleCaptainRound = gameData.currentRound;
+        powerUpsUsed.tripleCaptain = true;
     } else {
-        activePowerUp.benchBoost = true;
-        powerUpsUsed.benchBoost = true;
         activePowerUp.benchBoostRound = gameData.currentRound;
+        powerUpsUsed.benchBoost = true;
     }
 
     saveGameData(); // سيتم حفظها في السيرفر تلقائياً
