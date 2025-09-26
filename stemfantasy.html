@@ -11,7 +11,6 @@
     <script src="serverApi.js"></script>
     <script src="gameDataManager.js"></script>
     <script src="dataSync.js"></script>
-    <script src="adminHelpers.js"></script>
 
     <style>
         /* Team Limits Modal Styles */
@@ -1593,12 +1592,12 @@
             </div>
             
             <div class="admin-tabs">
-                <button class="admin-tab active" onclick="debouncedSwitchAdminTab('rounds', event)">📅 Rounds</button>
-                <button class="admin-tab" onclick="debouncedSwitchAdminTab('matches', event)">⚽ Matches</button>
-                <button class="admin-tab" onclick="debouncedSwitchAdminTab('teams', event)">🏟️ Teams</button>
-                <button class="admin-tab" onclick="debouncedSwitchAdminTab('players', event)">👤 Players</button>
-                <button class="admin-tab" onclick="debouncedSwitchAdminTab('users', event)">👥 Users</button>
-                <button class="admin-tab" onclick="debouncedSwitchAdminTab('points', event)">🎯 Points</button>
+                <button class="admin-tab active" onclick="showAdminTab('rounds')">📅 Rounds</button>
+                <button class="admin-tab" onclick="showAdminTab('matches')">⚽ Matches</button>
+                <button class="admin-tab" onclick="showAdminTab('teams')">🏟️ Teams</button>
+                <button class="admin-tab" onclick="showAdminTab('players')">👤 Players</button>
+                <button class="admin-tab" onclick="showAdminTab('users')">👥 Users</button>
+                <button class="admin-tab" onclick="showAdminTab('points')">🎯 Points</button>
             </div>
 
             <!-- Rounds Management -->
@@ -2466,22 +2465,27 @@ function updateTeamStats() {
 
             // احسب النقاط لجميع اللاعبين
             let playerPoints = 0;
-            if (starterPositions.includes(position) || // اللاعب في التشكيلة الأساسية
-                (benchBoostActive && !starterPositions.includes(position))) { // اللاعب في الاحتياط والبينش بوست مفعل
+            // تحقق مما إذا كان يجب حساب نقاط هذا اللاعب
+            let shouldCountPoints = starterPositions.includes(position) || // اللاعب في التشكيلة الأساسية
+                                  (benchBoostActive && !starterPositions.includes(position)); // اللاعب في الاحتياط والبينش بوست مفعل
+            
+            if (shouldCountPoints) {
                 gameData.matches.forEach(match => {
                     if (activeRound && match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
-                        playerPoints += match.playerStats[player.id].points || 0; // يمكن أن تكون سالبة
+                        playerPoints += match.playerStats[player.id].points || 0;
                     }
                 });
 
-                // مضاعفة نقاط الكابتن بنفس منطق updateAllUsersRoundPoints
+                // تطبيق مضاعف الكابتن بعد حساب النقاط الأساسية
                 if (userTeam.captain === playerId) {
+                    // تطبيق مضاعف التريبل كابتن إذا كان مفعلاً في الجولة الحالية
                     if (activePowerUp && activePowerUp.tripleCaptainRound === activeRound.id) {
-                        playerPoints *= 3;
+                        playerPoints *= 3; // مضاعفة النقاط 3 مرات للتريبل كابتن
                     } else {
-                        playerPoints *= 2;
+                        playerPoints *= 2; // مضاعفة عادية للكابتن
                     }
                 }
+
                 currentPoints += playerPoints;
             }
         }
