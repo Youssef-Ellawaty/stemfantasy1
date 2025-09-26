@@ -3281,6 +3281,10 @@ function activatePowerUp(type) {
     saveGameData(); // سيتم حفظها في السيرفر تلقائياً
     updatePowerUps();
     updateFormation();
+    // حفظ نسخة احتياطية من التشكيلة بعد التفعيل مباشرة
+    try {
+        localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
+    } catch (e) {}
 
     alert(type === 'triple-captain' ? 'تم تفعيل التريبل كابتن!' : 'تم تفعيل البينش بوست!');
 }
