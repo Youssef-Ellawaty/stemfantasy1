@@ -11,6 +11,7 @@
     <script src="serverApi.js"></script>
     <script src="gameDataManager.js"></script>
     <script src="dataSync.js"></script>
+    <script src="adminHelpers.js"></script>
 
     <style>
         /* Team Limits Modal Styles */
@@ -1592,12 +1593,12 @@
             </div>
             
             <div class="admin-tabs">
-                <button class="admin-tab active" onclick="showAdminTab('rounds')">📅 Rounds</button>
-                <button class="admin-tab" onclick="showAdminTab('matches')">⚽ Matches</button>
-                <button class="admin-tab" onclick="showAdminTab('teams')">🏟️ Teams</button>
-                <button class="admin-tab" onclick="showAdminTab('players')">👤 Players</button>
-                <button class="admin-tab" onclick="showAdminTab('users')">👥 Users</button>
-                <button class="admin-tab" onclick="showAdminTab('points')">🎯 Points</button>
+                <button class="admin-tab active" onclick="debouncedSwitchAdminTab('rounds', event)">📅 Rounds</button>
+                <button class="admin-tab" onclick="debouncedSwitchAdminTab('matches', event)">⚽ Matches</button>
+                <button class="admin-tab" onclick="debouncedSwitchAdminTab('teams', event)">🏟️ Teams</button>
+                <button class="admin-tab" onclick="debouncedSwitchAdminTab('players', event)">👤 Players</button>
+                <button class="admin-tab" onclick="debouncedSwitchAdminTab('users', event)">👥 Users</button>
+                <button class="admin-tab" onclick="debouncedSwitchAdminTab('points', event)">🎯 Points</button>
             </div>
 
             <!-- Rounds Management -->
@@ -2434,14 +2435,6 @@ function updateAllUsersRoundPoints() {
 function updateTeamStats() {
     const userTeam = gameData.userTeams[currentUser];
     let currentPoints = 0;
-
-    // تأكد من تهيئة قوى الفريق
-    if (!gameData.activePowerUps[currentUser]) {
-        gameData.activePowerUps[currentUser] = {
-            tripleCaptainRound: null,
-            benchBoostRound: null
-        };
-    }
 
     // Build effective players map including pending changes for live preview
     const effectivePlayers = { ...(userTeam.players || {}) };
@@ -3324,15 +3317,10 @@ function activatePowerUp(type) {
     
     // تأكد من تهيئة activePowerUp إذا لم يكن موجوداً
     if (!gameData.activePowerUps[currentUser]) {
-        gameData.activePowerUps[currentUser] = {};
-    }
-
-    // تهيئة كل قوة إذا لم تكن موجودة
-    if (!gameData.activePowerUps[currentUser].hasOwnProperty('tripleCaptainRound')) {
-        gameData.activePowerUps[currentUser].tripleCaptainRound = null;
-    }
-    if (!gameData.activePowerUps[currentUser].hasOwnProperty('benchBoostRound')) {
-        gameData.activePowerUps[currentUser].benchBoostRound = null;
+        gameData.activePowerUps[currentUser] = {
+            tripleCaptainRound: null,
+            benchBoostRound: null
+        };
     }
 
     // Check if already used
@@ -4569,7 +4557,7 @@ loadGameDataFromServer().then(() => {
     populateMatchesFilters();
 });
 
-async function addMatch() {
+function addMatch() {
     const round = document.getElementById('match-round').value;
     const team1 = document.getElementById('match-team1').value;
     const team2 = document.getElementById('match-team2').value;
@@ -4604,8 +4592,7 @@ async function addMatch() {
     };
 
     gameData.matches.push(newMatch);
-    await saveGameDataToServer();
-    await loadGameDataFromServer();
+    saveGameData();
     loadMatchesList();
 
     // Clear form
@@ -4619,30 +4606,30 @@ async function addMatch() {
     alert('Match added successfully!');
 }
 
-async function addTeam() {
-    const name = document.getElementById('team-name').value.trim();
+        function addTeam() {
+            const name = document.getElementById('team-name').value.trim();
+            
+            if (!name) {
+                alert('Team name is required!');
+                return;
+            }
+            
+            if (gameData.teams.includes(name)) {
+                alert('Team already exists!');
+                return;
+            }
+            
+            gameData.teams.push(name);
+            saveGameData();
+            loadTeamsList();
+            populateAdminDropdowns();
+            populateFilters();
+            
+            document.getElementById('team-name').value = '';
+            alert('Team added successfully!');
+        }
 
-    if (!name) {
-        alert('Team name is required!');
-        return;
-    }
-
-    if (gameData.teams.includes(name)) {
-        alert('Team already exists!');
-        return;
-    }
-
-    gameData.teams.push(name);
-    await saveGameDataToServer();
-    await loadGameDataFromServer();
-    loadTeamsList();
-    populateAdminDropdowns();
-    populateFilters();
-    document.getElementById('team-name').value = '';
-    alert('Team added successfully!');
-}
-
-        async function addPlayer() {
+        function addPlayer() {
             const name = document.getElementById('player-name').value.trim();
             const team = document.getElementById('player-team').value;
             const position = document.getElementById('player-position').value;
@@ -4669,8 +4656,7 @@ async function addTeam() {
             };
             
             gameData.players.push(newPlayer);
-            await saveGameDataToServer();
-            await loadGameDataFromServer();
+            saveGameData();
             loadPlayersList();
             populateAdminDropdowns();
             
@@ -4886,33 +4872,30 @@ matchDiv.innerHTML = `
         }
 
         // Delete functions
-        async function deleteRound(roundId) {
+        function deleteRound(roundId) {
             if (confirm('هل أنت متأكد من حذف هذه الجولة؟')) {
                 gameData.rounds = gameData.rounds.filter(r => r.id !== roundId);
                 gameData.matches = gameData.matches.filter(m => m.round !== roundId);
-                await saveGameDataToServer();
-                await loadGameDataFromServer();
+                saveGameData();
                 loadRoundsList();
                 loadMatchesList();
                 populateAdminDropdowns();
             }
         }
 
-        async function deleteMatch(matchId) {
+        function deleteMatch(matchId) {
             if (confirm('هل أنت متأكد من حذف هذه المباراة؟')) {
                 gameData.matches = gameData.matches.filter(m => m.id !== matchId);
-                await saveGameDataToServer();
-                await loadGameDataFromServer();
+                saveGameData();
                 loadMatchesList();
             }
         }
 
-        async function deleteTeam(teamName) {
+        function deleteTeam(teamName) {
             if (confirm(`هل أنت متأكد من حذف فريق "${teamName}"؟`)) {
                 gameData.teams = gameData.teams.filter(t => t !== teamName);
                 gameData.players = gameData.players.filter(p => p.team !== teamName);
-                await saveGameDataToServer();
-                await loadGameDataFromServer();
+                saveGameData();
                 loadTeamsList();
                 loadPlayersList();
                 populateAdminDropdowns();
@@ -4920,7 +4903,7 @@ matchDiv.innerHTML = `
             }
         }
 
-        async function deletePlayer(playerId) {
+        function deletePlayer(playerId) {
             if (confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
                 gameData.players = gameData.players.filter(p => p.id !== playerId);
                 
@@ -4938,8 +4921,7 @@ matchDiv.innerHTML = `
                     if (userTeam.viceCaptain === playerId) userTeam.viceCaptain = null;
                 });
                 
-                await saveGameDataToServer();
-                await loadGameDataFromServer();
+                saveGameData();
                 loadPlayersList();
                 populateAdminDropdowns();
                 updateUI();
