@@ -5,8 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STEM Fantasy Football League</title>
     <script src="teamValidation.js"></script>
+    <script src="adminControls.js"></script>
+    <script src="playerDisplay.js"></script>
+    <script src="gameState.js"></script>
+    <script src="serverApi.js"></script>
+    <script src="gameDataManager.js"></script>
+    <script src="dataSync.js"></script>
 
     <style>
+        /* Team Limits Modal Styles */
+        #team-limits-modal .modal-content {
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        #team-limits-form .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #team-limits-form input[type="number"] {
+            width: 80px;
+            text-align: center;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -2132,27 +2162,54 @@ if (response.ok) {
         // Load game data from server
 async function loadGameDataFromServer() {
     if (!authToken) return;
-    try {
-        // احذف بيانات LocalStorage القديمة أولاً
-        localStorage.removeItem('gameData');
-
-        const response = await fetch(`${API_BASE_URL}/game-data`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        if (response.ok) {
-            const serverData = await response.json();
-            // استبدل بيانات gameData بالكامل
-            gameData = serverData;
-            saveGameData();
-            updateUI(); // أو أي دالة تحدث الصفحة
-        }
-    } catch (error) {
-        console.error('Error loading game data from server:', error);
+    
+    const data = await serverApi.loadGameData(authToken);
+    if (data) {
+        gameData = data;
+        updateUI();
+    } else {
+        // Try to restore from local backup
+        restoreTeamState();
     }
-}
+        const gameDataResponse = await fetch('/api/game-data', {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        try {
+            console.log('Loading game data from server...');
+            const response = await fetch(`${API_BASE_URL}/game-data`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Game data loaded successfully:', data);
+                gameData = data;
+                updateUI();
+            } else {
+                console.error('Failed to load game data:', response.status);
+                // Try to restore from local backup
+                restoreTeamState();
+            }
 
-// Save game data to server
-        async function saveGameDataToServer() {
+            // Clear old LocalStorage data
+            localStorage.removeItem('gameData');
+            
+            // Save the current state
+            saveGameData();
+        } catch (error) {
+            console.error('Error loading game data from server:', error);
+            // Try to restore from local backup
+            restoreTeamState();
+        }
+    }
+
+    // Save game data to server
+    async function saveGameDataToServer() {
 if (!authToken) {
     localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
     return;

@@ -12,13 +12,18 @@ function checkTeamLimits(playerId, gameData, username) {
     });
 
     const maxAllowed = gameData.maxPlayersPerTeam[player.team] || 3;
-    return teamPlayers.length < maxAllowed;
+    // Check if adding this player would exceed the limit
+    const currentCount = teamPlayers.length;
+    console.log(`Current players from ${player.team}: ${currentCount}, Max allowed: ${maxAllowed}`);
+    return currentCount < maxAllowed;
 }
 
 // Function to get current team count for a specific team
 function getTeamPlayerCount(teamName, gameData, username) {
     const userTeam = gameData.userTeams[username];
     if (!userTeam) return 0;
+    
+    console.log(`Checking team count for ${teamName}`);
 
     return Object.values(userTeam.players).filter(p => {
         const playerData = gameData.players.find(gp => gp.id === p.id);
