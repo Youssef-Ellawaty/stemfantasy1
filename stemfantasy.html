@@ -2179,20 +2179,35 @@ if (!authToken) {
 
         // Load game data from localStorage
         function loadGameData() {
-            // Only load from localStorage if not authenticated (server data will override later)
-            if (!authToken) {
+            // دائماً قم بتحميل البيانات من التخزين المحلي، ثم اتركها تُحدث من السيرفر لاحقاً إذا كان المستخدم مسجل الدخول
             const saved = localStorage.getItem('fantasyGameData');
             if (saved) {
-                gameData = { ...gameData, ...JSON.parse(saved) };
-                }
+                const savedData = JSON.parse(saved);
+                // تحديث البيانات مع الحفاظ على البيانات الأساسية
+                gameData = {
+                    ...gameData,
+                    ...savedData,
+                    userTeams: {
+                        ...gameData.userTeams,
+                        ...savedData.userTeams
+                    }
+                };
             }
         }
 
-        // Save game data to localStorage
+        // Save game data to localStorage and server
         function saveGameData() {
-            localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
-            // Also try to save to server
-            saveGameDataToServer();
+            // دائماً احفظ في التخزين المحلي بغض النظر عن حالة تسجيل الدخول
+            try {
+                localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
+            } catch (e) {
+                console.error('Error saving to localStorage:', e);
+            }
+            
+            // حاول الحفظ في السيرفر إذا كان المستخدم مسجل الدخول
+            if (authToken) {
+                saveGameDataToServer();
+            }
         }
 
         // Initialize user team if not exists
@@ -2334,11 +2349,13 @@ function updateAllUsersRoundPoints() {
                             }
                         });
 
-                        // مضاعفة نقاط الكابتن حسب القوة المفعلة في هذه الجولة
+                        // مضاعفة نقاط الكابتن حسب القوة المفعلة
                         if (userTeam.captain === playerId) {
                             if (activePowerUp && activePowerUp.tripleCaptain && activePowerUp.activeRound === round.id) {
+                                // مضاعفة النقاط ×3 فقط في الجولة التي تم فيها تفعيل التريبل كابتن
                                 playerPoints *= 3;
                             } else {
+                                // في باقي الجولات، مضاعفة عادية ×2
                                 playerPoints *= 2;
                             }
                         }
@@ -3048,17 +3065,30 @@ function moveBenchToStarter(benchPos, starterPos) {
     const benchPlayer = gameData.players.find(p => p.id === benchPlayerId);
     const starterPlayer = starterPlayerId ? gameData.players.find(p => p.id === starterPlayerId) : null;
     if (!benchPlayer) return;
-    // لا يمكن نقل حارس إلا مكان حارس
-    if (benchPlayer.position === 'goalkeeper' && !starterPos.startsWith('gk')) {
-        alert('لا يمكن نقل حارس إلا إلى مركز حارس.');
-        return;
+
+    // تحديد المركز المطلوب من اسم المركز
+    function getRequiredPosition(posName) {
+        if (posName.startsWith('gk')) return 'goalkeeper';
+        if (posName.startsWith('def')) return 'defender';
+        if (posName.startsWith('mid')) return 'midfielder';
+        if (posName.startsWith('fwd')) return 'forward';
+        return null;
     }
-    if (starterPos.startsWith('gk') && benchPlayer.position !== 'goalkeeper') {
-        alert('لا يمكن وضع لاعب غير حارس في مركز الحارس.');
-        return;
+
+    // إذا كان هناك لاعب أساسي، يجب أن يكون البديل من نفس المركز
+    if (starterPlayer) {
+        if (benchPlayer.position !== starterPlayer.position) {
+            alert('يجب أن يكون اللاعب البديل من نفس مركز اللاعب الأساسي!');
+            return;
+        }
+    } else {
+        // إذا كان المركز فارغاً، تحقق من توافق المركز مع المكان المطلوب
+        const requiredPosition = getRequiredPosition(starterPos);
+        if (requiredPosition && benchPlayer.position !== requiredPosition) {
+            alert(`يجب أن يكون اللاعب من مركز ${requiredPosition}!`);
+            return;
+        }
     }
-    // إذا المركزين من نوعين مختلفين (مثلاً مهاجم ↔ وسط)، تحقق من التوزيع الجديد
-    if (benchPlayer && (!starterPlayer || benchPlayer.position !== starterPlayer.position)) {
         // عد اللاعبين حسب المراكز بعد التبديل
         const tempPlayers = { ...userTeam.players };
         tempPlayers[starterPos] = benchPlayerId;
@@ -3093,14 +3123,14 @@ function moveBenchToStarter(benchPos, starterPos) {
         updateFormation();
         alert('تم نقل اللاعب وتغيير التشكيلة تلقائياً!');
         return;
-    }
+
     // نفذ التبديل بدون تغيير التشكيلة
     userTeam.players[starterPos] = benchPlayerId;
     userTeam.players[benchPos] = starterPlayerId;
     saveGameData();
     updateFormation();
     alert('تم نقل اللاعب من الدكة إلى الأساسي بنجاح!');
-}
+    }
 
 function handleDeletePlayer(positionName) {
     const userTeam = gameData.userTeams[currentUser];
