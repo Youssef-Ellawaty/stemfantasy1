@@ -2445,7 +2445,7 @@ function updateTeamStats() {
 
     // Bench Boost تحقق إذا مفعل في الجولة الحالية
     const activePowerUp = gameData.activePowerUps[currentUser];
-    const benchBoostActive = activePowerUp && activePowerUp.benchBoost && activePowerUp.activeRound === (activeRound ? activeRound.id : null);
+    const benchBoostActive = activePowerUp && activePowerUp.benchBoostRound === gameData.currentRound;
 
     // حدد مراكز الأساسيين فقط
     const userFormation = gameData.userTeams[currentUser]?.formation || gameData.currentFormation;
@@ -2462,9 +2462,10 @@ function updateTeamStats() {
         if (player) {
             totalValue += Number(player.price) || 0;
 
-            // احسب النقاط فقط إذا كان اللاعب أساسي أو Bench Boost مفعل
-            if (starterPositions.includes(position) || benchBoostActive) {
-                let playerPoints = 0;
+            // احسب النقاط لجميع اللاعبين
+            let playerPoints = 0;
+            if (starterPositions.includes(position) || // اللاعب في التشكيلة الأساسية
+                (benchBoostActive && !starterPositions.includes(position))) { // اللاعب في الاحتياط والبينش بوست مفعل
                 gameData.matches.forEach(match => {
                     if (activeRound && match.round === activeRound.id && match.playerStats && match.playerStats[player.id]) {
                         playerPoints += match.playerStats[player.id].points || 0; // يمكن أن تكون سالبة
@@ -3320,16 +3321,7 @@ function activatePowerUp(type) {
         return;
     }
 
-    // تحقق من عدم وجود قوة أخرى مفعلة في نفس الجولة
-    if (type === 'triple-captain' && activePowerUp.benchBoostRound === gameData.currentRound) {
-        alert('لا يمكن تفعيل التريبل كابتن لأن البينش بوست مفعل في هذه الجولة!');
-        return;
-    } else if (type === 'bench-boost' && activePowerUp.tripleCaptainRound === gameData.currentRound) {
-        alert('لا يمكن تفعيل البينش بوست لأن التريبل كابتن مفعل في هذه الجولة!');
-        return;
-    }
-
-    // Activate power-up
+    // Activate power-up and track round number
     if (type === 'triple-captain') {
         activePowerUp.tripleCaptain = true;
         powerUpsUsed.tripleCaptain = true;
