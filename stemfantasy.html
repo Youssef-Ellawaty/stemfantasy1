@@ -2142,24 +2142,6 @@ async function loadGameDataFromServer() {
             const serverData = await response.json();
             // استبدل بيانات gameData بالكامل
             gameData = serverData;
-
-            // إصلاح التشكيلة إذا كانت فارغة مع وجود Power Up نشط
-            const userTeam = gameData.userTeams && gameData.userTeams[currentUser];
-            const activePowerUp = gameData.activePowerUps && gameData.activePowerUps[currentUser];
-            if (
-                userTeam && activePowerUp &&
-                (activePowerUp.tripleCaptain || activePowerUp.benchBoost) &&
-                (!userTeam.players || Object.keys(userTeam.players).length === 0)
-            ) {
-                let localData = null;
-                try {
-                    localData = JSON.parse(localStorage.getItem('fantasyGameData'));
-                } catch (e) {}
-                if (localData && localData.userTeams && localData.userTeams[currentUser] && localData.userTeams[currentUser].players) {
-                    gameData.userTeams[currentUser].players = { ...localData.userTeams[currentUser].players };
-                }
-            }
-
             saveGameData();
             updateUI(); // أو أي دالة تحدث الصفحة
         }
@@ -2170,21 +2152,10 @@ async function loadGameDataFromServer() {
 
 // Save game data to server
         async function saveGameDataToServer() {
-
-    if (!authToken) {
-        localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
-        return;
-    }
-
-    // حماية: تأكد دومًا من وجود جميع الحقول الأساسية لفريق المستخدم قبل الإرسال
-    if (currentUser && gameData.userTeams && gameData.userTeams[currentUser]) {
-        const userTeam = gameData.userTeams[currentUser];
-        if (!userTeam.players) userTeam.players = {};
-        if (typeof userTeam.captain === 'undefined') userTeam.captain = null;
-        if (typeof userTeam.viceCaptain === 'undefined') userTeam.viceCaptain = null;
-        if (typeof userTeam.formation === 'undefined') userTeam.formation = gameData.currentFormation || null;
-        if (typeof userTeam.budget === 'undefined') userTeam.budget = 100.0;
-    }
+if (!authToken) {
+    localStorage.setItem('fantasyGameData', JSON.stringify(gameData)); // Fallback to localStorage ONLY!
+    return;
+}
 
             try {
                 const response = await fetch(`${API_BASE_URL}/game-data`, {
@@ -2275,23 +2246,7 @@ async function loadGameDataFromServer() {
 }    
         // Update UI elements
 function updateUI() {
-    // حماية: إذا كانت التشكيلة فارغة مع وجود Power Up نشط، استرجعها من localStorage
-    const userTeam = gameData.userTeams[currentUser];
-    const activePowerUp = gameData.activePowerUps[currentUser];
-    if (
-        userTeam && activePowerUp &&
-        (activePowerUp.tripleCaptain || activePowerUp.benchBoost) &&
-        (!userTeam.players || Object.keys(userTeam.players).length === 0)
-    ) {
-        let localData = null;
-        try {
-            localData = JSON.parse(localStorage.getItem('fantasyGameData'));
-        } catch (e) {}
-        if (localData && localData.userTeams && localData.userTeams[currentUser] && localData.userTeams[currentUser].players) {
-            gameData.userTeams[currentUser].players = { ...localData.userTeams[currentUser].players };
-        }
-    }
-    updateAllUsersRoundPoints();
+    updateAllUsersRoundPoints(); // أضف هذا السطر أولاً
     updatePlayersTotalPoints();  
     updateTeamStats();
     updateFormation();
@@ -2494,11 +2449,10 @@ function getPlayerPointsByCurrentRound(playerId) {
 
         // Update formation display
 function updateFormation() {
-
     const userTeam = gameData.userTeams[currentUser];
     const activePowerUp = gameData.activePowerUps[currentUser];
     const formationField = document.getElementById('formation');
-    formationField.innerHTML = '';
+    formationField.innerHTML = ''; // Clear existing slots
 
     // عرض اسم الجولة الحالية أعلى التشكيلة
     const roundNameDiv = document.getElementById('current-round-name');
@@ -2506,26 +2460,10 @@ function updateFormation() {
     roundNameDiv.textContent = activeRound ? activeRound.name : 'No Active Round';
 
     // Reintroduce effectivePlayers for rendering
-    let effectivePlayers = { ...(userTeam.players || {}) };
+    const effectivePlayers = { ...(userTeam.players || {}) };
     Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
         effectivePlayers[pos] = pid;
     });
-
-    // إذا كان هناك Power Up نشط واختفت التشكيلة، أعد تحميلها من localStorage
-    if (
-        activePowerUp &&
-        (activePowerUp.tripleCaptain || activePowerUp.benchBoost) &&
-        Object.keys(effectivePlayers).length === 0
-    ) {
-        // حاول إعادة تحميل بيانات userTeams من localStorage
-        let localData = null;
-        try {
-            localData = JSON.parse(localStorage.getItem('fantasyGameData'));
-        } catch (e) {}
-        if (localData && localData.userTeams && localData.userTeams[currentUser] && localData.userTeams[currentUser].players) {
-            effectivePlayers = { ...localData.userTeams[currentUser].players };
-        }
-    }
 
     const userFormation = userTeam.formation || gameData.currentFormation;
     const currentFormationDetails = gameData.formations[userFormation];
@@ -3292,10 +3230,6 @@ function activatePowerUp(type) {
     saveGameData(); // سيتم حفظها في السيرفر تلقائياً
     updatePowerUps();
     updateFormation();
-    // حفظ نسخة احتياطية من التشكيلة بعد التفعيل مباشرة
-    try {
-        localStorage.setItem('fantasyGameData', JSON.stringify(gameData));
-    } catch (e) {}
 
     alert(type === 'triple-captain' ? 'تم تفعيل التريبل كابتن!' : 'تم تفعيل البينش بوست!');
 }
@@ -5022,22 +4956,35 @@ matchDiv.innerHTML = `
         // ...existing code...
 async function loadUsersList() {
     const container = document.getElementById('users-list');
-    if (!container) return;
-    if (!gameData || !gameData.userTeams) {
-        container.innerHTML = '<p>No users found.</p>';
+    container.innerHTML = '<h4>المستخدمون المسجلون:</h4>';
+
+    if (!authToken) {
+        container.innerHTML += '<p>يجب تسجيل الدخول كأدمن لعرض المستخدمين.</p>';
         return;
     }
-    const usernames = Object.keys(gameData.userTeams);
-    if (usernames.length === 0) {
-        container.innerHTML = '<p>No users found.</p>';
-        return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (response.ok) {
+            const users = await response.json();
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'card';
+                userDiv.innerHTML = `
+                    <h5>${user.username}</h5>
+                    <p>البريد: ${user.email || '-'}</p>
+                    <p>تاريخ الإنشاء: ${user.createdAt ? new Date(user.createdAt).toLocaleString() : '-'}</p>
+                `;
+                container.appendChild(userDiv);
+            });
+        } else {
+            container.innerHTML += '<p>فشل في جلب المستخدمين من السيرفر.</p>';
+        }
+    } catch (error) {
+        container.innerHTML += '<p>خطأ في الاتصال بالسيرفر.</p>';
     }
-    let html = '<ul style="list-style:none;padding:0;">';
-    usernames.forEach(username => {
-        html += `<li style="padding:6px 0;border-bottom:1px solid #333;">${username}</li>`;
-    });
-    html += '</ul>';
-    container.innerHTML = html;
 }
 
 function showBenchSwapModal() {
