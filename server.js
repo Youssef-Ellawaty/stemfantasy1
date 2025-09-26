@@ -280,6 +280,18 @@ app.post('/api/game-data', authenticateToken, async (req, res) => {
             return res.status(500).json({ error: 'Server error' });
         }
 
+        // دمج بيانات userTeams بدلاً من الاستبدال الكامل
+        if (data.gameData && data.gameData.userTeams && gameData.userTeams) {
+            for (const username of Object.keys(data.gameData.userTeams)) {
+                // إذا لم تُرسل تشكيلة جديدة من الواجهة، احتفظ بالقديمة
+                if (
+                    gameData.userTeams[username] &&
+                    (!gameData.userTeams[username].players || Object.keys(gameData.userTeams[username].players || {}).length === 0)
+                ) {
+                    gameData.userTeams[username].players = data.gameData.userTeams[username].players;
+                }
+            }
+        }
         data.gameData = gameData;
         await writeData(data);
 
