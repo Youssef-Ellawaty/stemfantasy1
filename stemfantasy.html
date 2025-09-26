@@ -3199,6 +3199,16 @@ function activatePowerUp(type) {
     }
     const powerUpsUsed = gameData.powerUpsUsed[currentUser];
     const activePowerUp = gameData.activePowerUps[currentUser];
+    
+    // تأكد من تهيئة activePowerUp إذا لم يكن موجوداً
+    if (!activePowerUp) {
+        gameData.activePowerUps[currentUser] = {
+            tripleCaptain: false,
+            benchBoost: false,
+            activeRound: null
+        };
+        activePowerUp = gameData.activePowerUps[currentUser];
+    }
 
     // Check if already used
     if (powerUpsUsed[type === 'triple-captain' ? 'tripleCaptain' : 'benchBoost']) {
@@ -3218,14 +3228,14 @@ function activatePowerUp(type) {
     if (type === 'triple-captain') {
         activePowerUp.tripleCaptain = true;
         activePowerUp.benchBoost = false;
-        powerUpsUsed.tripleCaptain = true; // <-- سجل الاستعمال هنا
+        powerUpsUsed.tripleCaptain = true;
+        activePowerUp.activeRound = gameData.currentRound;  // تأكد من تعيين الجولة النشطة
     } else {
         activePowerUp.benchBoost = true;
         activePowerUp.tripleCaptain = false;
-        powerUpsUsed.benchBoost = true; // <-- سجل الاستعمال هنا
+        powerUpsUsed.benchBoost = true;
+        activePowerUp.activeRound = gameData.currentRound;  // تأكد من تعيين الجولة النشطة
     }
-
-    activePowerUp.activeRound = gameData.currentRound;
 
     saveGameData(); // سيتم حفظها في السيرفر تلقائياً
     updatePowerUps();
