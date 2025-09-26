@@ -2435,6 +2435,14 @@ function updateTeamStats() {
     const userTeam = gameData.userTeams[currentUser];
     let currentPoints = 0;
 
+    // تأكد من تهيئة قوى الفريق
+    if (!gameData.activePowerUps[currentUser]) {
+        gameData.activePowerUps[currentUser] = {
+            tripleCaptainRound: null,
+            benchBoostRound: null
+        };
+    }
+
     // Build effective players map including pending changes for live preview
     const effectivePlayers = { ...(userTeam.players || {}) };
     Object.entries(teamChanges || {}).forEach(([pos, pid]) => {
@@ -3316,10 +3324,15 @@ function activatePowerUp(type) {
     
     // تأكد من تهيئة activePowerUp إذا لم يكن موجوداً
     if (!gameData.activePowerUps[currentUser]) {
-        gameData.activePowerUps[currentUser] = {
-            tripleCaptainRound: null,
-            benchBoostRound: null
-        };
+        gameData.activePowerUps[currentUser] = {};
+    }
+
+    // تهيئة كل قوة إذا لم تكن موجودة
+    if (!gameData.activePowerUps[currentUser].hasOwnProperty('tripleCaptainRound')) {
+        gameData.activePowerUps[currentUser].tripleCaptainRound = null;
+    }
+    if (!gameData.activePowerUps[currentUser].hasOwnProperty('benchBoostRound')) {
+        gameData.activePowerUps[currentUser].benchBoostRound = null;
     }
 
     // Check if already used
@@ -4556,7 +4569,7 @@ loadGameDataFromServer().then(() => {
     populateMatchesFilters();
 });
 
-function addMatch() {
+async function addMatch() {
     const round = document.getElementById('match-round').value;
     const team1 = document.getElementById('match-team1').value;
     const team2 = document.getElementById('match-team2').value;
@@ -4591,7 +4604,8 @@ function addMatch() {
     };
 
     gameData.matches.push(newMatch);
-    saveGameData();
+    await saveGameDataToServer();
+    await loadGameDataFromServer();
     loadMatchesList();
 
     // Clear form
@@ -4605,30 +4619,30 @@ function addMatch() {
     alert('Match added successfully!');
 }
 
-        function addTeam() {
-            const name = document.getElementById('team-name').value.trim();
-            
-            if (!name) {
-                alert('Team name is required!');
-                return;
-            }
-            
-            if (gameData.teams.includes(name)) {
-                alert('Team already exists!');
-                return;
-            }
-            
-            gameData.teams.push(name);
-            saveGameData();
-            loadTeamsList();
-            populateAdminDropdowns();
-            populateFilters();
-            
-            document.getElementById('team-name').value = '';
-            alert('Team added successfully!');
-        }
+async function addTeam() {
+    const name = document.getElementById('team-name').value.trim();
 
-        function addPlayer() {
+    if (!name) {
+        alert('Team name is required!');
+        return;
+    }
+
+    if (gameData.teams.includes(name)) {
+        alert('Team already exists!');
+        return;
+    }
+
+    gameData.teams.push(name);
+    await saveGameDataToServer();
+    await loadGameDataFromServer();
+    loadTeamsList();
+    populateAdminDropdowns();
+    populateFilters();
+    document.getElementById('team-name').value = '';
+    alert('Team added successfully!');
+}
+
+        async function addPlayer() {
             const name = document.getElementById('player-name').value.trim();
             const team = document.getElementById('player-team').value;
             const position = document.getElementById('player-position').value;
@@ -4655,7 +4669,8 @@ function addMatch() {
             };
             
             gameData.players.push(newPlayer);
-            saveGameData();
+            await saveGameDataToServer();
+            await loadGameDataFromServer();
             loadPlayersList();
             populateAdminDropdowns();
             
@@ -4871,30 +4886,33 @@ matchDiv.innerHTML = `
         }
 
         // Delete functions
-        function deleteRound(roundId) {
+        async function deleteRound(roundId) {
             if (confirm('هل أنت متأكد من حذف هذه الجولة؟')) {
                 gameData.rounds = gameData.rounds.filter(r => r.id !== roundId);
                 gameData.matches = gameData.matches.filter(m => m.round !== roundId);
-                saveGameData();
+                await saveGameDataToServer();
+                await loadGameDataFromServer();
                 loadRoundsList();
                 loadMatchesList();
                 populateAdminDropdowns();
             }
         }
 
-        function deleteMatch(matchId) {
+        async function deleteMatch(matchId) {
             if (confirm('هل أنت متأكد من حذف هذه المباراة؟')) {
                 gameData.matches = gameData.matches.filter(m => m.id !== matchId);
-                saveGameData();
+                await saveGameDataToServer();
+                await loadGameDataFromServer();
                 loadMatchesList();
             }
         }
 
-        function deleteTeam(teamName) {
+        async function deleteTeam(teamName) {
             if (confirm(`هل أنت متأكد من حذف فريق "${teamName}"؟`)) {
                 gameData.teams = gameData.teams.filter(t => t !== teamName);
                 gameData.players = gameData.players.filter(p => p.team !== teamName);
-                saveGameData();
+                await saveGameDataToServer();
+                await loadGameDataFromServer();
                 loadTeamsList();
                 loadPlayersList();
                 populateAdminDropdowns();
@@ -4902,7 +4920,7 @@ matchDiv.innerHTML = `
             }
         }
 
-        function deletePlayer(playerId) {
+        async function deletePlayer(playerId) {
             if (confirm('هل أنت متأكد من حذف هذا اللاعب؟')) {
                 gameData.players = gameData.players.filter(p => p.id !== playerId);
                 
@@ -4920,7 +4938,8 @@ matchDiv.innerHTML = `
                     if (userTeam.viceCaptain === playerId) userTeam.viceCaptain = null;
                 });
                 
-                saveGameData();
+                await saveGameDataToServer();
+                await loadGameDataFromServer();
                 loadPlayersList();
                 populateAdminDropdowns();
                 updateUI();
