@@ -27,6 +27,16 @@ async function initializeData() {
             gameData: {
                 users: [],
                 teams: ['7enkesh FC', 'ZD Manga United', 'Settak El- 3ay2a', 'Uncle Bahgat', '5altak El-Ray2a', 'Goal Hunters', 'Goal poachers', 'Koom El-Zawany'],
+                maxPlayersPerTeam: {
+                    '7enkesh FC': 3,
+                    'ZD Manga United': 3,
+                    'Settak El- 3ay2a': 3,
+                    'Uncle Bahgat': 3,
+                    '5altak El-Ray2a': 3,
+                    'Goal Hunters': 3,
+                    'Goal poachers': 3,
+                    'Koom El-Zawany': 3
+                },
                 players: [
                     { id: 'p1', name: 'Ziad Abdelkarem', team: '7enkesh FC', position: 'forward', price: 10.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
                     { id: 'p2', name: 'M3z', team: '7enkesh FC', position: 'midfielder', price: 8.0, points: 0, goals: 0, assists: 0, saves: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 },
@@ -321,6 +331,48 @@ app.get('/', (req, res) => {
 
 // Serve static files
 app.use(express.static('.'));
+
+// Update maximum players per team (admin only)
+app.post('/api/admin/max-players', authenticateToken, async (req, res) => {
+    try {
+        const { maxPlayers } = req.body;
+        
+        if (!maxPlayers || typeof maxPlayers !== 'object') {
+            return res.status(400).json({ error: 'Invalid data format' });
+        }
+
+        const data = await readData();
+        if (!data) {
+            return res.status(500).json({ error: 'Server error' });
+        }
+
+        // Validate the team names
+        const validTeams = data.gameData.teams;
+        for (const team in maxPlayers) {
+            if (!validTeams.includes(team)) {
+                return res.status(400).json({ error: `Invalid team name: ${team}` });
+            }
+            if (typeof maxPlayers[team] !== 'number' || maxPlayers[team] < 0) {
+                return res.status(400).json({ error: `Invalid player count for team: ${team}` });
+            }
+        }
+
+        // Update maxPlayersPerTeam
+        data.gameData.maxPlayersPerTeam = {
+            ...data.gameData.maxPlayersPerTeam,
+            ...maxPlayers
+        };
+
+        await writeData(data);
+        res.json({ 
+            message: 'Maximum players per team updated successfully',
+            maxPlayersPerTeam: data.gameData.maxPlayersPerTeam
+        });
+    } catch (error) {
+        console.error('Update max players error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 // Delete user (admin only)
 app.delete('/api/users/:username', authenticateToken, async (req, res) => {
