@@ -280,16 +280,19 @@ app.post('/api/game-data', authenticateToken, async (req, res) => {
             return res.status(500).json({ error: 'Server error' });
         }
 
-        // دمج بيانات userTeams بشكل آمن
+        // دمج بيانات userTeams بشكل آمن لكل الحقول المهمة
         if (data.gameData && data.gameData.userTeams && gameData.userTeams) {
             for (const username of Object.keys(gameData.userTeams)) {
-                // إذا لم تُرسل تشكيلة جديدة أو أرسلت فارغة، احتفظ بالقديمة
-                if (
-                    (!gameData.userTeams[username].players || Object.keys(gameData.userTeams[username].players || {}).length === 0)
-                    && data.gameData.userTeams[username] && data.gameData.userTeams[username].players
-                ) {
-                    gameData.userTeams[username].players = data.gameData.userTeams[username].players;
-                }
+                const oldTeam = data.gameData.userTeams[username] || {};
+                const newTeam = gameData.userTeams[username] || {};
+                // دمج كل الحقول المهمة
+                gameData.userTeams[username] = {
+                    players: (newTeam.players && Object.keys(newTeam.players).length > 0) ? newTeam.players : oldTeam.players || {},
+                    captain: (typeof newTeam.captain !== 'undefined' && newTeam.captain !== null) ? newTeam.captain : oldTeam.captain || null,
+                    viceCaptain: (typeof newTeam.viceCaptain !== 'undefined' && newTeam.viceCaptain !== null) ? newTeam.viceCaptain : oldTeam.viceCaptain || null,
+                    formation: (typeof newTeam.formation !== 'undefined' && newTeam.formation !== null) ? newTeam.formation : oldTeam.formation || null,
+                    budget: (typeof newTeam.budget !== 'undefined' && newTeam.budget !== null) ? newTeam.budget : oldTeam.budget || 100.0
+                };
             }
             // أيضاً احتفظ بأي مستخدم قديم لم يُرسل من الواجهة
             for (const username of Object.keys(data.gameData.userTeams)) {
