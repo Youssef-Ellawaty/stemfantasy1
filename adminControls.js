@@ -33,22 +33,29 @@ async function saveTeamLimits() {
     });
 
     try {
-        const response = await fetch('/api/admin/max-players', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ maxPlayers: newLimits })
-        });
+        // تحديث حدود الفريق للجولة القادمة
+        let nextRound = null;
+        const now = new Date();
+        for (let i = 0; i < gameData.rounds.length; i++) {
+            const r = gameData.rounds[i];
+            if (!r.startTime || !r.endTime) continue;
+            const start = new Date(r.startTime);
+            if (now < start) {
+                nextRound = r;
+                break;
+            }
+        }
 
-        if (response.ok) {
-            const result = await response.json();
-            gameData.maxPlayersPerTeam = result.maxPlayersPerTeam;
-            alert('تم تحديث حدود الفرق بنجاح');
+        if (nextRound) {
+            // تحديث الحد الأقصى للجولة القادمة
+            nextRound.maxFromTeam = Math.max(...Object.values(newLimits));
+            // حفظ التغييرات في gameData
+            await saveGameData();
+            console.log(`Updated maxFromTeam for round ${nextRound.name} to: ${nextRound.maxFromTeam}`);
+            alert(`تم تحديث حد اللاعبين في الجولة ${nextRound.name} إلى ${nextRound.maxFromTeam}`);
             closeTeamLimitsModal();
         } else {
-            alert('حدث خطأ أثناء تحديث حدود الفرق');
+            alert('لم يتم العثور على جولة قادمة لتحديث الحدود');
         }
     } catch (error) {
         console.error('Error saving team limits:', error);

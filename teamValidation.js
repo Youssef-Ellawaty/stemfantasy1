@@ -6,15 +6,39 @@ function checkTeamLimits(playerId, gameData, username) {
     const userTeam = gameData.userTeams[username];
     if (!userTeam) return false;
 
+    // حساب عدد اللاعبين الحاليين من نفس الفريق
     const teamPlayers = Object.values(userTeam.players).filter(p => {
         const playerData = gameData.players.find(gp => gp.id === p.id);
         return playerData && playerData.team === player.team;
     });
 
-    const maxAllowed = gameData.maxPlayersPerTeam[player.team] || 3;
-    // Check if adding this player would exceed the limit
+    // البحث عن الجولة القادمة
+    let round;
+    for (let i = 0; i < gameData.rounds.length; i++) {
+        const r = gameData.rounds[i];
+        if (!r.startTime || !r.endTime) continue;
+        const now = new Date();
+        const start = new Date(r.startTime);
+        const end = new Date(r.endTime);
+        if (now < start) {
+            round = r;
+            break;
+        }
+    }
+
+    // استخدام حد الجولة القادمة أو القيمة الافتراضية (3)
+    const maxAllowed = round ? round.maxFromTeam : 3;
     const currentCount = teamPlayers.length;
-    console.log(`Current players from ${player.team}: ${currentCount}, Max allowed: ${maxAllowed}`);
+    
+    // تسجيل المعلومات للتصحيح
+    console.log(`
+        Team: ${player.team}
+        Current players: ${currentCount}
+        Max allowed: ${maxAllowed}
+        Round: ${round ? round.name : 'No upcoming round'}
+        Round maxFromTeam: ${round ? round.maxFromTeam : 'N/A'}
+    `);
+    
     return currentCount < maxAllowed;
 }
 

@@ -3020,8 +3020,21 @@ function selectFormation(formationName) {
     const userTeam = gameData.userTeams[currentUser];
     // Combine original team and pending changes:
     const pendingPlayers = { ...(userTeam.players || {}), ...teamChanges };
-    let round = getCurrentActiveRound();
-    let maxFromTeam = (round && round.maxFromTeam) ? round.maxFromTeam : 2;
+    
+    // Get next round's limit instead of current round
+    let nextRound = null;
+    const now = new Date();
+    for (let i = 0; i < gameData.rounds.length; i++) {
+        const r = gameData.rounds[i];
+        if (!r.startTime || !r.endTime) continue;
+        const start = new Date(r.startTime);
+        if (now < start) {
+            nextRound = r;
+            break;
+        }
+    }
+    
+    let maxFromTeam = (nextRound && nextRound.maxFromTeam) ? nextRound.maxFromTeam : 3;
     const exceededTeam = validateTeamLimit(pendingPlayers, maxFromTeam);
     if (exceededTeam) {
         alert('لا يمكنك حفظ التشكيلة مع أكثر من ' + maxFromTeam + ' من نفس الفريق: ' + exceededTeam);
