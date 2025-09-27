@@ -15,9 +15,9 @@ function fillSlotWithPlayer(slot, player, position) {
         const activePowerUp = gameData.activePowerUps[currentUser];
         if (userTeam && userTeam.captain === player.id) {
             if (activePowerUp && activePowerUp.tripleCaptainRound === activeRound.id) {
-                points *= 3;
+                points *= 3; // تفعيل التريبل كابتن يضاعف النقاط 3 مرات
             } else {
-                points *= 2;
+                points *= 2; // الكابتن العادي يضاعف النقاط مرتين
             }
         }
     }
