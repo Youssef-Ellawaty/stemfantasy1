@@ -14,10 +14,11 @@ function fillSlotWithPlayer(slot, player, position) {
         const userTeam = gameData.userTeams[currentUser];
         const activePowerUp = gameData.activePowerUps[currentUser];
         if (userTeam && userTeam.captain === player.id) {
-            if (activePowerUp && activePowerUp.tripleCaptainRound === activeRound.id) {
-                points *= 3; // تفعيل التريبل كابتن يضاعف النقاط 3 مرات
+            const isTripleCaptainActive = activePowerUp && activePowerUp.tripleCaptainRound === activeRound.id;
+            if (isTripleCaptainActive) {
+                points = points * 3; // تفعيل التريبل كابتن يضاعف النقاط 3 مرات في الجولة المفعل فيها
             } else {
-                points *= 2; // الكابتن العادي يضاعف النقاط مرتين
+                points = points * 2; // الكابتن العادي يضاعف النقاط مرتين
             }
         }
     }
